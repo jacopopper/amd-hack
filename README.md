@@ -1,5 +1,7 @@
 # Safe Home
 
+**First beta · 16 October 2026.** The verified beta uses CPU fixtures with a complete upload → review → Italian web/PDF release workflow. Live adapters are experimental; real capture, AMD validation and P1/P2 work remain later milestones.
+
 Staged-data prototype implementing [the implementation plan](safe-home-implementation-plan.md). The CPU path runs from upload through a persisted worker, evidence review, Italian HTML/PDF draft and restricted family release. **Current findings and point clouds are synthetic fixtures. No live Jev/Gemma/VGGT application inference or AMD result is claimed.** The historical [Jev evaluation](eval/jev/README.md) is preserved separately.
 
 ## Local setup
@@ -86,12 +88,14 @@ docker compose -f compose.yaml up --build
 # Dry-run retention, then explicit execution if desired:
 .venv/bin/python -m safe_home.cli cleanup --older-than-days 30
 .venv/bin/python -m safe_home.cli cleanup --older-than-days 30 --execute
+# Explicitly remove only a seeded synthetic development assessment:
+.venv/bin/python -m safe_home.cli reset --assessment ASSESSMENT_ID
 ```
 
-API restart preserves the queue. A worker holds one file lock; exclusive restart marks abandoned running jobs interrupted. Retry submits a new analyze request. Heartbeat age never authorizes a second worker. Local SQLite WAL and filesystem storage are intended for one host. Back up database and assets together before schema changes. No schema migration has been added yet.
+API restart preserves the queue. Stop the normal worker before running a case or benchmark against its shared worker/GPU lock. A worker holds one file lock; exclusive restart marks abandoned running jobs interrupted. Retry submits a new analyze request. Heartbeat age never authorizes a second worker. Local SQLite WAL and filesystem storage are intended for one host. Back up database and assets together before schema changes. No schema migration has been added yet.
 
-The API requires reviewer authentication for assessment/media/review routes, rejects cross-origin mutations, uses HttpOnly SameSite session cookies and marks private responses `no-store`. Bind loopback for local development. `SAFE_HOME_PORT` changes the Compose host port (default 8000). Before any hosted demo, use HTTPS, suppress/redact proxy access logs (family paths contain capabilities), keep worker/model services internal, add login abuse controls and complete the hosted-demo access audit. This prototype is not ready for real patient intake.
+The API requires reviewer authentication for assessment/media/review routes, rejects cross-origin mutations, uses HttpOnly SameSite session cookies and marks private responses `no-store`. Bind loopback for local development. `SAFE_HOME_PORT` changes the Compose host port (default 8000). Before any hosted demo, use HTTPS, suppress/redact proxy access logs (family paths contain capabilities), keep worker/model services internal, complete the hosted-demo access and deployment audit. This prototype is not ready for real patient intake.
 
 ## Remaining scope
 
-[Runtime readiness](docs/runtime.md) records exact tested CPU versions, blockers and pending gates. Real staged capture, live client/GPU execution, visually checked real anchors, calibration/measurements, full GPU smoke/co-residency checks, real benchmark/ablation/cost results, a checked real baseline and submission evidence remain unfinished. The GPU preflight and benchmark collector report missing prerequisites; they do not substitute fixture results. `compose.rocm.yaml` is an unvalidated recipe requiring explicit GPU image/revision inputs. P1/P2 extensions are pending. The full goal remains active.
+[Runtime readiness](docs/runtime.md) records exact tested CPU versions, blockers and pending gates. Real staged capture, live client/GPU execution, visually checked real anchors, calibration/measurements, full GPU smoke/co-residency checks, real benchmark/ablation/cost results, a checked real baseline and submission evidence remain unfinished. The GPU preflight and benchmark collector report missing prerequisites; they do not substitute fixture results. `compose.rocm.yaml` is an unvalidated recipe requiring explicit GPU image/revision inputs. P1/P2 extensions are deferred beyond this first beta.

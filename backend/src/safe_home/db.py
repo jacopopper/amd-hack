@@ -131,6 +131,7 @@ def accepted_snapshot(conn, row):
             accepted.append({"id": h["id"], **json.loads(review["effective"]), "reviewer": review["reviewer"], "reviewed_at": review["created_at"]})
         elif review["decision"] == "defer":
             deferred.append({"id": h["id"], "note": review["note"]})
+    accepted.sort(key=lambda h: ({"urgent": 0, "important": 1, "recommended": 2}[h["priority"]], h["id"]))
     result = json.loads(conn.execute("SELECT output FROM jobs WHERE id=?", (row["analysis_job_id"],)).fetchone()[0])
     return {"accepted": accepted, "deferred": deferred, "coverage": result.get("coverage", []),
             "follow_up_requests": result.get("follow_up_requests", []), "modes": result.get("modes", {}),

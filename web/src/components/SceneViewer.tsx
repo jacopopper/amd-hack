@@ -32,17 +32,18 @@ export default function SceneViewer({scene, hazards, selectedId, onSelect, onPic
         const buffer = await response.arrayBuffer();
         if (disposed) return;
         const geometry = new PLYLoader().parse(buffer); geometry.computeBoundingSphere();
+        const extent = Math.max(geometry.boundingSphere!.radius, 1e-6);
         renderer = new THREE.WebGLRenderer({antialias: true}); renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
         element.appendChild(renderer.domElement);
-        const points = new THREE.Points(geometry, new THREE.PointsMaterial({size: .026, vertexColors: true})); group.add(points);
+        const points = new THREE.Points(geometry, new THREE.PointsMaterial({size: extent * .009, vertexColors: true})); group.add(points);
         for (const position of scene.cameras ?? []) {
-          const cameraMarker = new THREE.Mesh(new THREE.SphereGeometry(.025, 8, 8), new THREE.MeshBasicMaterial({color: '#b4cbbb'}));
+          const cameraMarker = new THREE.Mesh(new THREE.SphereGeometry(extent * .009, 8, 8), new THREE.MeshBasicMaterial({color: '#b4cbbb'}));
           cameraMarker.position.fromArray(position); group.add(cameraMarker);
         }
         for (const h of hazards) {
           const anchor = h.review ? h.review.effective.anchor : h.anchor;
           if (anchor?.scene_id !== scene.id || h.review?.decision === 'reject') continue;
-          const marker = new THREE.Mesh(new THREE.SphereGeometry(.065, 12, 12), new THREE.MeshBasicMaterial({color: h.id === selectedId ? '#f4c47f' : '#ee895d'}));
+          const marker = new THREE.Mesh(new THREE.SphereGeometry(extent * .023, 12, 12), new THREE.MeshBasicMaterial({color: h.id === selectedId ? '#f4c47f' : '#ee895d'}));
           marker.position.fromArray(anchor.position_world); marker.userData.hazardId = h.id; group.add(marker); markers.push(marker);
         }
         world.updateMatrixWorld(true);
@@ -53,7 +54,7 @@ export default function SceneViewer({scene, hazards, selectedId, onSelect, onPic
         controls = new OrbitControls(camera, renderer.domElement); controls.target.copy(center); controls.enableDamping = true;
         const resize = () => { if (!renderer) return; const w = element.clientWidth, h = element.clientHeight; renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix(); };
         observer = new ResizeObserver(resize); observer.observe(element); resize();
-        const ray = new THREE.Raycaster(); ray.params.Points!.threshold = .08;
+        const ray = new THREE.Raycaster(); ray.params.Points!.threshold = extent * .028;
         renderer.domElement.addEventListener('click', event => {
           const rect = renderer!.domElement.getBoundingClientRect();
           ray.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1), camera);

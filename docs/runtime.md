@@ -21,12 +21,12 @@ The external boundary is explicit: Jev may receive prepared images only after as
 
 ## Tests already exercised
 
-- Twenty focused Python unittest checks passed on 16 October: fixture repeat/targeted reuse/corruption, deliberately failing expectation, finite boxes/presence gates, EXIF/padding/metadata checks, report meaning/ID rejection, input invalidation, review/release/deletion, stale writes, queue/auth/restart boundaries, bounded HTTP repair, pixel-only Jev payloads, real Gemma request shape via mocked transport, rotated camera math, configuration mismatch, concurrent review during rendering, baseline integrity, expired capabilities, escaped markup and blocked renderer fetches. No external inference was invoked by this suite.
+- Twenty-two focused Python unittest checks passed on 16 October: fixture repeat/targeted reuse/corruption, deliberately failing expectation, finite boxes/presence gates, EXIF/padding/metadata checks, report meaning/ID rejection, input invalidation, review/release/deletion, stale writes, queue/auth/restart boundaries, bounded HTTP repair, pixel-only Jev payloads, real Gemma request shape via mocked transport, rotated camera math, configuration mismatch, concurrent review during rendering, baseline integrity, expired capabilities, escaped markup and blocked renderer fetches. No external inference was invoked by this suite.
 - Production frontend typecheck/build passed with the npm lockfile. three.js is loaded on demand; its viewer bundle still exceeds Vite's 500 kB advisory threshold.
 - The existing Jev `self-check` passed; historical experiment files remain unchanged.
 - HTTP fixture smoke passed against a fresh local SQLite volume: create, upload, queued analysis, simulated decisions, deterministic draft/PDF, stale release rejection, new release and family/private-access checks.
-- Headless browser smoke passed at 1440 px and 390 px: login/intake, multi-photo upload, canonical photo box, synthetic PLY, keyboard approve/edit/reject/defer, refresh persistence, PDF retrieval and forced WebGL fallback. Screenshots are in gitignored `data/browser-smoke/`. These are synthetic UI checks, not a real pin-placement check.
-- Italian PDF rendering was inspected with Poppler; the orphan category label was corrected. Final verification artifacts are retained locally under `data/validation/` when generated. No real clinical approval is implied.
+- Headless browser smoke passed at 1440 px and 390 px: login/intake, multi-photo upload, canonical photo box, synthetic PLY, synthetic pin picking/pin-to-photo selection/pin removal, keyboard approve/edit/reject/defer, refresh persistence, PDF retrieval and forced WebGL fallback. Screenshots are in gitignored `data/browser-smoke/`. These are synthetic UI checks, not a real pin-placement check.
+- Italian PDF rendering was inspected with Poppler. An eight-page stress test covers 1,990-character observations/actions and a 600-character unbroken string; every page was inspected without clipping/overlap. Oversized headings and priority ordering were corrected. The draft is saved as `data/validation/long-text.pdf`, is unreleased and uses simulated fixture review. No real clinical approval is implied.
 
 Full CPU dependency versions are frozen in `requirements.lock`; exact JS versions are in `web/package-lock.json`. Main installed versions: FastAPI 0.143.3, Pydantic 2.14.1, NumPy 2.5.4, Pillow 12.3.0, requests 2.34.2, Jinja2 3.1.6, WeasyPrint 69.0, React 19.3.1, Vite 8.3.4, TypeScript 7.0.2, three.js 0.186.1. These are **CPU development** results, not validated GPU pins. Optional QA used Playwright 1.64.0 with an already installed isolated Chromium binary.
 
@@ -42,7 +42,7 @@ Fixture mode provisions no GPU. Live failures cannot silently become fixtures. K
 2. Validate the live clients and VGGT adapter in the exact AMD runtime. Inspect prepared transforms, actual images/JSON requests, camera/depth outputs and every final pin. Keep failed scenes/image-only evidence visible.
 3. Complete the GPU smoke script’s listed single-image/multi-image known-target, vLLM hardware-identity and co-resident memory gates. Current preflight reports blocked on this host. The ROCm recipe requires compatible externally supplied images; no successful image/commit has been invented.
 4. Complete benchmark ablations, reviewed labels, warm/cold and memory observations, independent measurement error evaluation and dated provider/provisioned-time cost accounting. `scripts/benchmark.py` currently collects actual attempt denominators/stage outputs and reports pending quality/cost gates; it is not the completed evaluation.
-5. Complete report long-text/page QA, actual pin correction/manual baseline inspection, hosted login abuse controls, deployment log/retention audit, and the recorded submission demo. P1 calibration/measurement endpoints and P2 extensions remain pending.
+5. Complete actual real-scene pin correction/manual baseline inspection, the hosted deployment log/retention audit, and the recorded submission demo. P1 calibration/measurement endpoints and P2 extensions remain pending.
 
 ## Verified CPU base images
 
@@ -50,3 +50,9 @@ Fixture mode provisions no GPU. Live failures cannot silently become fixtures. K
 - Node 22.22.3 Bookworm slim: `sha256:e21fc383b50d5347dc7a9f1cae45b8f4e2f0d39f7ade28e4eef7d2934522b752`.
 
 The CPU Compose build/fixture smoke used isolated project `safe-home-cpu-check`, loopback port 8012 and its own data volume. These CPU digests say nothing about ROCm compatibility. GPU smoke and benchmark collectors have saved blocked records under gitignored `data/gpu-smoke/` and `data/benchmarks/`; no benchmark accuracy or cost result exists.
+
+## First beta handoff
+
+The beta scope was frozen at the user’s request on 16 October: verified CPU workflow, review/release integrity, inspectable case tools and unvalidated live adapters. Real AMD execution, a captured room, a checked real baseline, full benchmark/ablation/cost results and submission evidence remain open. P1/P2 are deferred. This does not mark full P0 or the whole roadmap complete.
+
+A live native worker was observed holding the main `data/worker.lock`; the case command refused concurrent work with exit 3, as designed. That worker was preserved. Restart an already running API/worker to load beta source changes. Isolated container verification uses its own named volume and never resets the main assessment database.

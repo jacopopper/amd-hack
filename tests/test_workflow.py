@@ -72,6 +72,7 @@ class Workflow(unittest.TestCase):
             payload = {**self.revisions(aid), "decision": decision}
             if decision == "edit":
                 payload["suggested_action"] = "Azione modificata dal revisore simulato."
+                payload["priority"] = "urgent"
             if decision == "defer":
                 payload["note"] = "Richiedere una nuova foto."
             response = self.client.put(f"/api/assessments/{aid}/reviews/{h['id']}", json=payload)
@@ -93,6 +94,7 @@ class Workflow(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         report = self.report(aid)
         accepted = report["snapshot"]["accepted"]
+        self.assertEqual([h["priority"] for h in accepted], ["urgent", "important"])
         self.assertEqual({h["id"] for h in accepted}, {h["id"] for h in findings["hazards"][:2]})
         self.assertEqual(len(report["snapshot"]["deferred"]), 1)
         html = self.client.get(report["html_url"]).text
@@ -169,6 +171,25 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.get(aid)["status"], "review_ready")
         self.assertEqual(self.get(aid)["reports"], [])
 
+    def test_live_report_sends_reviewed_text_without_thumbnail_base64(self):
+        aid, _ = self.reviewed()
+        settings = replace(self.settings, gemma_backend="http", gemma_revision="mocked-contract-test")
+        rev = self.revisions(aid)
+        jid = db.enqueue(settings, aid, "report", rev["expected_input_revision"], rev["expected_review_revision"])
+
+        def draft(config, schema, prompt, content, validate, audit):
+            self.assertNotIn("data:image", content)
+            self.assertNotIn("position_world", content)
+            supplied = json.loads(content)
+            result = schema.model_validate({"title": "Piano d’azione per la casa", "items": [{"hazard_id": h["id"], **{key: h[key] for key in ("observation", "priority", "suggested_action")}} for h in supplied["accepted"]]})
+            validate(result)
+            return result, [{"status": "mocked_contract_test"}]
+
+        with patch("safe_home.pipeline.gemma.complete", side_effect=draft) as model:
+            worker.run(settings, once=True)
+        self.assertEqual(model.call_count, 1)
+        self.assertEqual(self.client.get(f"/api/jobs/{jid}").json()["status"], "succeeded")
+
     def test_upload_queue_auth_and_restart_boundaries(self):
         aid = self.create()
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("x.jpg", b"not an image")}).status_code, 422)
@@ -208,6 +229,9 @@ class Workflow(unittest.TestCase):
     def test_failed_upload_rolls_back_rows_and_partial_file(self):
         aid = self.create()
         content = picture()
+        with self.assertRaises(db.Missing):
+            ingest(self.settings, "../unknown-assessment", content, "room", "overview", 1)
+        self.assertFalse((self.settings.data / "unknown-assessment").exists())
         with patch.object(Image.Image, "save", side_effect=OSError("simulated disk failure")):
             with self.assertRaises(OSError):
                 ingest(self.settings, aid, content, "room", "overview", 1)

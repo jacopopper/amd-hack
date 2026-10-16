@@ -10,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import Field
 
 from safe_home import db
@@ -95,6 +96,10 @@ def create_app(settings=None):
     @app.exception_handler(db.Missing)
     async def missing(request, exc):
         return JSONResponse({"error": str(exc)}, status_code=404)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error(request, exc):
+        return JSONResponse({"error": exc.detail if isinstance(exc.detail, str) else "Invalid request"}, status_code=exc.status_code, headers=exc.headers)
 
     @app.exception_handler(db.Conflict)
     async def conflict(request, exc):

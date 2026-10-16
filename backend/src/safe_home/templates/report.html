@@ -22,8 +22,9 @@ img { width: 48%; height: auto; margin-right: 1%; vertical-align: top } a { colo
 <p class="notice">Dati dimostrativi e profilo fittizio. Origine bozza: {{ origins.get(snapshot.draft_provenance, snapshot.draft_provenance) }}. Il rilascio è registrato separatamente, dopo la verifica finale del revisore.</p>
 <h2>Azioni accettate dal revisore</h2>
 {% for hazard in snapshot.accepted %}
-<article><p class="eyebrow">{{ priorities.get(hazard.priority, hazard.priority) }} · {{ categories.get(hazard.category, hazard.category) }}</p>
-<h3>{{ hazard.observation }}</h3><p><strong>Azione:</strong> {{ hazard.suggested_action }}</p>
+<article><p class="eyebrow">{{ priorities.get(hazard.priority, hazard.priority) }}</p>
+<h3>{{ categories.get(hazard.category, hazard.category) }}</h3>
+<p><strong>Osservazione:</strong> {{ hazard.observation }}</p><p><strong>Azione:</strong> {{ hazard.suggested_action }}</p>
 <p>{{ hazard.profile_relevance }}</p><p><strong>Da verificare:</strong> {{ hazard.uncertainty }}</p>
 {% for image in hazard.evidence_thumbnails %}<img src="{{ image }}" alt="Evidenza fotografica approvata">{% endfor %}
 <p class="sources">Verifica: {{ hazard.reviewer }} · {{ hazard.reviewed_at[:10] }}<br>

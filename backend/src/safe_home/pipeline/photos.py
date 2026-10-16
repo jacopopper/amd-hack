@@ -61,7 +61,6 @@ def ingest(settings, aid, data, scene_label, role, expected_revision):
     image, metadata = decode(data, settings.max_pixels)
     photo_id, asset_id = db.uid(), db.uid()
     path = settings.data / "assessments" / aid / "uploads" / f"{asset_id}.jpg"
-    path.parent.mkdir(parents=True, exist_ok=True)
     metadata.update({"raw_sha256": db.digest(data), "width": image.width, "height": image.height})
     try:
         with db.connect(settings, write=True) as conn:
@@ -70,6 +69,7 @@ def ingest(settings, aid, data, scene_label, role, expected_revision):
             total = conn.execute("SELECT coalesce(sum(byte_size),0) FROM assets WHERE assessment_id=? AND scope='source'", (aid,)).fetchone()[0]
             if count >= settings.max_photos or total + len(data) > settings.max_assessment_bytes:
                 raise OverflowError("Assessment media limit reached")
+            path.parent.mkdir(parents=True, exist_ok=True)
             scene = conn.execute("SELECT id FROM scenes WHERE assessment_id=? AND label=?", (aid, scene_label)).fetchone()
             scene_id = scene[0] if scene else db.uid()
             if scene is None:

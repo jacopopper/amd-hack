@@ -2,6 +2,8 @@
 
 **Prepared:** 16 October 2026 · **Complexity:** High · **AMD access:** Not confirmed
 
+**First beta status — 16 October 2026:** CPU fixture workflow implemented and verified with 22 offline tests, production frontend build, CPU Compose HTTP smoke, desktop/phone browser checks and multipage PDF inspection. Live Jev/Gemma/VGGT adapters exist but have no validated service/AMD execution. The user requested convergence on this beta; real capture/GPU evidence, the inspected real baseline, full evaluation and P1/P2 remain open. Checkboxes below refer only to tasks whose applicable CPU acceptance was verified; they do not close the P0 hardware/quality gates. See [runtime evidence and remaining gates](docs/runtime.md).
+
 ## 1. Objective and scope
 
 Build a working assessment from overlapping home photos and a confirmed patient profile to evidenced findings, a 3D point cloud, professional review, and an approved Italian web/PDF action plan.
@@ -245,7 +247,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 **Goal:** Establish usable test data and identify whether the planned GPU stages can run. GPU tasks may remain explicitly blocked while CPU work continues.
 
-### [ ] 0.1 Record runtime choices and backend readiness — P0
+### [x] 0.1 Record runtime choices and backend readiness — P0
 
 - **Files:** `docs/runtime.md`, `.env.example`, later `backend/src/safe_home/config.py`.
 - **Work:** Document confirmed/unconfirmed GPU access, desired stage backends, model/checkpoint access, model licenses, available RAM/disk, and external image-processing boundary. Record environment variable names without values. Check actual AMD access for shell/container/device permissions versus a hosted API.
@@ -279,42 +281,42 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 **Goal:** A CPU-only browser workflow uploads data, processes a labelled fixture job, and reloads its results from disk/database.
 
-### [ ] 1.1 Create the minimal runnable services — P0
+### [x] 1.1 Create the minimal runnable services — P0
 
 - **Files:** `pyproject.toml`, `backend/src/safe_home/{config.py,api.py,cli.py}`, `web/package.json`, `web/src/App.tsx`, `.env.example`, `.gitignore`, `README.md`.
 - **Work:** Add package/runtime entry points, health endpoint, React/TypeScript Vite app, Tailwind plugin and Vite `/api` proxy. Configure the API to serve built frontend assets in deployment. Default to explicit fixture settings for local development; keep secrets server-side. Include `data/`, model caches and build outputs in ignore rules.
 - **Dependencies:** 0.1; CPU work can proceed before GPU checks.
 - **Accept/verify:** API health and a browser page run locally; frontend production build/typecheck passes. SPA fallback never turns `/api` errors into HTML. Startup reports execution mode without printing secrets.
 
-### [ ] 1.2 Implement records, validators and schema initialization — P0
+### [x] 1.2 Implement records, validators and schema initialization — P0
 
 - **Files:** `backend/src/safe_home/{models.py,db.py,schema.sql}`, `web/src/types.ts`, `tests/test_contracts.py`.
 - **Work:** Implement Section 3 records, JSON contracts, foreign keys, indexes and revision fields. Use a schema version and one initialization command; add versioned SQL migrations only when changes require them. Export or explicitly synchronize TypeScript API types. Keep model output strict and bounded.
 - **Dependencies:** 1.1.
 - **Accept/verify:** A fresh and existing database initialize safely; invalid boxes, non-finite coordinates, invalid enums and dangling references fail validation. Unknown profile fields and unassessable coverage round-trip without becoming false/safe.
 
-### [ ] 1.3 Implement protected assessment and asset storage — P0
+### [x] 1.3 Implement protected assessment and asset storage — P0
 
 - **Files:** `backend/src/safe_home/{api.py,db.py,config.py}`, `tests/test_api.py`.
 - **Work:** Create/get/edit assessments and store uploads under generated IDs with `Asset` records. Start with configurable limits of 20 MiB/file, 200 MiB/assessment, 40 photos and 40 megapixels/decoded image; these are chosen app limits. Validate decoded format, count and dimensions, reject traversal/caller-supplied paths, stream bounded uploads, clean partial files, and add a shared reviewer-auth guard. One configured reviewer can access demo assessments; this is not a multi-tenant ownership system. Require acknowledgement of external photo processing before Jev is enabled for an assessment.
 - **Dependencies:** 1.2.
 - **Accept/verify:** Upload and fetch a valid image; reject corrupt, oversized and non-image files. An unauthenticated request cannot fetch source photos, and another assessment's asset cannot be substituted as evidence. No raw filesystem path or credential is returned. Files and rows remain consistent after a simulated write failure.
 
-### [ ] 1.4 Implement the SQLite worker queue — P0
+### [x] 1.4 Implement the SQLite worker queue — P0
 
 - **Files:** `backend/src/safe_home/{worker.py,db.py,api.py}`, `tests/test_jobs.py`.
 - **Work:** Enqueue `analyze`/`report` jobs with revision snapshots. Claim queued work in a short `BEGIN IMMEDIATE` transaction; use a process-lifetime Linux file lock on the shared local volume to enforce one worker. Track stage completion, heartbeat, warnings and safe errors. Write attempt outputs to temporary paths and publish completed manifests atomically. At exclusive worker startup, mark abandoned running jobs interrupted; retry is an explicit new attempt.
 - **Dependencies:** 1.2, 1.3.
 - **Accept/verify:** API restart preserves queued work; worker restart identifies interrupted work; duplicate submissions do not launch duplicate active jobs. No database transaction stays open during HTTP/GPU computation. Repeated completion cannot duplicate hazards or report snapshots. A heartbeat timeout alone must not launch a second worker over a still-running GPU call.
 
-### [ ] 1.5 Add an explicitly labelled fixture pipeline — P0
+### [x] 1.5 Add an explicitly labelled fixture pipeline — P0
 
 - **Files:** `backend/src/safe_home/worker.py`, `demo/fixtures/`, `backend/src/safe_home/cli.py`.
 - **Work:** Read small fixture candidates/hazards/scene manifests through the same contracts and persist them through the worker. Add seed/reset commands restricted to the development dataset. Record provenance per artifact and return it through the API. Keep fixtures out of live-stage success paths.
 - **Dependencies:** 0.2, 1.4.
 - **Accept/verify:** A fixture assessment reaches `review_ready`, survives refresh, and visibly identifies generated fixture content. Live backend failure stays failed/degraded rather than returning fixture success.
 
-### [ ] 1.6 Build intake and progress screens — P0
+### [x] 1.6 Build intake and progress screens — P0
 
 - **Files:** `web/src/{App.tsx,api.ts}`, `web/src/components/{IntakeForm.tsx,PhotoUpload.tsx,JobProgress.tsx}`.
 - **Work:** Add patient description and confirmed fields, overview/detail roles, room labels, upload previews, external-processing disclosure, capture guidance, submit and processing states. Poll job status, show completed/failed stages and recoverable errors, and stop polling on completion/unmount. Use one assessment detail view or simple routes; avoid a broad dashboard.
@@ -334,14 +336,14 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 **Goal:** Replace fixture image findings with live Jev and Gemma outputs while retaining source evidence and an image-only review path.
 
-### [ ] 2.1 Prepare photos and record transforms — P0
+### [x] 2.1 Prepare photos and record transforms — P0
 
 - **Files:** `backend/src/safe_home/pipeline/photos.py`, `tests/test_photos.py`.
 - **Work:** Decode safely, rotate pixels upright with EXIF handling, preserve canonical upright coordinates, strip metadata from processed copies, hash normalized bytes, and flag exact duplicates/blur. Produce thumbnails, Jev-compatible copies and reconstruction inputs without overlays. Resize/pad deliberately and store transforms. Begin with JPEG/PNG uploads; explicitly reject HEIC until a tested decoder is added.
 - **Dependencies:** 1.2, 1.3.
 - **Accept/verify:** Portrait EXIF, padded panorama, duplicate, corrupt and small-image cases behave predictably. Map a known box through resize/padding and back within a pixel tolerance. Jev copies meet its 280–1568 pixel-per-side limits; quality flags never assert room safety. [TypeSafe image preparation](https://docs.typesafe.ai/images)
 
-### [ ] 2.2 Add a small versioned guidance checklist — P0
+### [x] 2.2 Add a small versioned guidance checklist — P0
 
 - **Files:** `guidance/checklist.json`, `backend/src/safe_home/models.py`, `tests/test_guidance.py`.
 - **Work:** Create a small set of hazard categories, observation/coverage questions, permitted suggested actions, source title/URL/date and applicability. Start with verified public material such as CDC STEADI's home checklist. Clearly mark regional applicability; do not convert general guidance into Italian building law. Add numeric thresholds only when a verified source supports the specific use. Select entries directly by category.
@@ -369,7 +371,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 - **Dependencies:** 2.3, 2.4; can use Jev-disabled mode deliberately.
 - **Accept/verify:** A finding outside Jev positives can reach review with evidence; two genuinely separate rugs are not merged just because their category matches. Missing coverage stays visible. Jev failure may continue with real Gemma inspection and a degraded-stage warning; Gemma failure cannot be reported as completed personalization.
 
-### [ ] 2.6 Build the evidence findings panel — P0
+### [x] 2.6 Build the evidence findings panel — P0
 
 - **Files:** `web/src/components/{FindingsPanel.tsx,EvidenceImage.tsx}`, `web/src/types.ts`.
 - **Work:** Show observation, profile relevance, priority, source photo boxes, producing stage, uncertainty and coverage. Map canonical boxes to the actual contained image rectangle, accounting for browser letterboxing. Keep observation distinct from proposed action and approval state.
@@ -451,14 +453,14 @@ Independent work becomes possible after the shared contracts exist: browser inta
 - **Dependencies:** 2.4, 4.1, 1.4.
 - **Accept/verify:** Only accepted IDs appear as actions, each accepted item is represented, rejected/deferred items do not become accepted actions, and supplied trusted measurements are unchanged. A model response inventing an ID or price is rejected. Deterministic fallback still requires final professional approval and does not masquerade as a successful Gemma call.
 
-### [ ] 4.4 Render web and PDF reports from the same snapshot — P0
+### [x] 4.4 Render web and PDF reports from the same snapshot — P0
 
 - **Files:** `backend/src/safe_home/pipeline/reports.py`, `backend/src/safe_home/templates/report.html`, `web/src/components/ReportPreview.tsx`, `Dockerfile.worker`.
 - **Work:** Render overview, prioritized actions, evidence thumbnails, verified measurements, guidance links, coverage limits, reviewer and date. Use Jinja2 autoescaping and fixed templates; the model never supplies executable HTML. Install/test WeasyPrint's Pango/font dependencies in the worker image. Restrict renderer asset fetching to known local report assets; forbid arbitrary network URLs and unrelated filesystem access. [WeasyPrint installation](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html)
 - **Dependencies:** 4.3.
 - **Accept/verify:** Italian accents, long text, multi-page lists, uncertainty labels, source links and images render correctly. Inspect generated pages at normal zoom; no clipped text or overlapping blocks. HTML/PDF share the same snapshot hash. Escaped HTML and an external image URL cannot inject markup or trigger unwanted fetches.
 
-### [ ] 4.5 Implement final release and family access — P0
+### [x] 4.5 Implement final release and family access — P0
 
 - **Files:** `backend/src/safe_home/{api.py,db.py}`, `web/src/components/ReportPreview.tsx`, `tests/test_reports.py`.
 - **Work:** Release the reviewed snapshot only after a final transaction checks current revisions, required decisions, references and generated artifact hashes. Create a high-entropy, revocable, expiring family capability; store its hash, not the plaintext token. Limit it to that released report and its approved report assets. Keep drafts and source assessment editing behind reviewer access.

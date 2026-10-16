@@ -65,13 +65,17 @@ def draft_report(context):
         from safe_home.pipeline.http import ExternalFailure
         prompt = (Path(__file__).resolve().parents[1] / "prompts/report.txt").read_text()
         try:
-            value, attempts = complete(settings, DraftOutput, prompt, db.dumps({"accepted": snapshot["accepted"], "profile": snapshot["profile"], "deferred": snapshot["deferred"]}), lambda value: validate_draft(value.model_dump(mode="json"), snapshot["accepted"]), context["directory"] / "stages/report/calls")
+            reviewed = [{key: hazard[key] for key in ("id", "observation", "priority", "suggested_action", "profile_relevance", "uncertainty", "guidance_ids", "measurement_ids")} for hazard in snapshot["accepted"]]
+            content = db.dumps({"accepted": reviewed, "profile": snapshot["profile"], "deferred": snapshot["deferred"]})
+            if len(content) > 12_000:
+                raise ExternalFailure("Reviewed text exceeds the bounded draft request; use the deterministic draft and inspect it")
+            value, attempts = complete(settings, DraftOutput, prompt, content, lambda value: validate_draft(value.model_dump(mode="json"), snapshot["accepted"]), context["directory"] / "stages/report/calls")
             draft = value.model_dump(mode="json")
             snapshot["model_calls"] = attempts
             provenance = "live_gemma"
-        except ExternalFailure:
+        except ExternalFailure as exc:
             provenance = "deterministic_fallback"
-            snapshot["draft_warning"] = "Gemma drafting failed; deterministic reviewed values require final approval. No successful Gemma call is claimed."
+            snapshot["draft_warning"] = str(exc) + ". Deterministic reviewed values require final approval. No successful Gemma call is claimed."
     snapshot["draft"] = draft
     snapshot["draft_provenance"] = provenance
     snapshot["limitations"] = ["Dati dimostrativi e profilo fittizio.", "Il ruolo del revisore è dichiarato da chi rilascia il rapporto.", "Scala metrica non validata; nessuna dimensione è disponibile."]
