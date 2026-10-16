@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+.aws
+.codex
+.agents
+.venv
+data
+model-cache
+web/node_modules
+web/dist
+**/__pycache__
+**/*.egg-info

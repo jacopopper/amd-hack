@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "provenance": "fixture",
+  "warning": "Synthetic contract controls. These are not predictions about uploaded images.",
+  "candidates": [
+    {"category": "rug", "presence": "present", "coverage": "visible", "box": [0.30, 0.64, 0.72, 0.86], "attachment": "unknown"},
+    {"category": "cable", "presence": "absent", "coverage": "visible", "box": [0.10, 0.20, 0.30, 0.40], "attachment": "loose"},
+    {"category": "path", "presence": "present", "coverage": "partial", "box": [0.08, 0.60, 0.23, 0.83], "attachment": "unknown"},
+    {"category": "lighting", "presence": "unknown", "coverage": "out_of_frame", "box": null, "attachment": "unknown"},
+    {"category": "bathroom", "presence": "unknown", "coverage": "out_of_frame", "box": null, "attachment": "unknown"}
+  ]
+}

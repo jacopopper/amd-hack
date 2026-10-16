@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "version": "2026-10-16.1",
+  "source": {
+    "title": "CDC STEADI — Check for Safety (2017)",
+    "url": "https://www.cdc.gov/steadi/pdf/steadi-brochure-checkforsafety-508.pdf",
+    "verified_on": "2026-10-16",
+    "applicability": "General US prevention guidance, translated summaries; not Italian building law or individual clinical advice."
+  },
+  "entries": [
+    {"id": "floor-rug", "category": "rug", "question": "a rug on the visible floor", "action": "Verificare il fissaggio del tappeto; valutare rimozione o supporto antiscivolo."},
+    {"id": "floor-cable", "category": "cable", "question": "a cable crossing the visible walking area", "action": "Sistemare i cavi lungo la parete e liberare il passaggio."},
+    {"id": "floor-path", "category": "path", "question": "objects obstructing the visible walking area", "action": "Liberare il percorso dagli oggetti e verificare il passaggio di persona."},
+    {"id": "night-light", "category": "lighting", "question": "a night light on the visible bedroom to bathroom route", "action": "Verificare di notte l’illuminazione del percorso e valutare una luce notturna."},
+    {"id": "bath-support", "category": "bathroom", "question": "a support grab bar beside a visible toilet or bath", "action": "Verificare con un professionista il bisogno di supporti in bagno e la loro installazione."},
+    {"id": "stair-handrail", "category": "stairs", "question": "a handrail beside visible stairs", "action": "Verificare la stabilità e la continuità dei corrimano con un professionista."},
+    {"id": "reach-items", "category": "reach", "question": "frequently used objects on a high shelf", "action": "Spostare gli oggetti di uso frequente in una posizione raggiungibile senza salire su sedie."}
+  ]
+}

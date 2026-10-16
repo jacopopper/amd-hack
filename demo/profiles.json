@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "profiles": [
+    {"id": "fictional-walker", "profile": {"description": "Profilo fittizio per sviluppo: persona che usa un deambulatore in casa.", "mobility_aid": "deambulatore", "aid_width_m": null, "vision": null, "support_needs": "Accompagnamento disponibile su richiesta", "relevant_history": null, "daily_routes": ["camera–bagno"]}},
+    {"id": "fictional-independent", "profile": {"description": "Profilo fittizio per confronto: persona autonoma nei percorsi domestici.", "mobility_aid": null, "aid_width_m": null, "vision": null, "support_needs": null, "relevant_history": null, "daily_routes": ["camera–bagno"]}}
+  ]
+}

@@ -4,7 +4,7 @@ Proposed hackathon stack, based on [SAFE_HOME.md](SAFE_HOME.md). Status: 16 Octo
 
 ## Current implementation
 
-The repository contains a Python Jev evaluation harness using `requests` and Pillow, public test images, and saved results. The application, 3D pipeline, and AMD deployment are not implemented yet.
+The repository now includes an authenticated FastAPI/SQLite application, persisted single-worker queue, React/three.js interface, bounded photo preparation, labelled synthetic fixtures, professional/simulated review controls, guarded Italian HTML/PDF release, and an isolated case runner. CPU containers have passed the fixture HTTP smoke workflow. Jev/Gemma HTTP and VGGT adapters are implemented with offline contract checks; real model execution, supported real pins and AMD deployment are still unvalidated. See [runtime evidence and pending gates](docs/runtime.md). The original public-photo Jev evaluation remains separate and unchanged.
 
 The [Jev smoke test](eval/jev/README.md) matched 42/42 presence labels and localized 8/8 positive targets above IoU 0.5 in each of two passes; median API latency was 1.61 seconds. This small, selected test does not establish end-to-end hazard accuracy.
 

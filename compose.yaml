@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports: ["127.0.0.1:${SAFE_HOME_PORT:-8000}:8000"]
+    environment: &environment
+      SAFE_HOME_DATA: /data
+      REVIEWER_USER: ${REVIEWER_USER:-reviewer}
+      REVIEWER_PASSWORD: ${REVIEWER_PASSWORD:?Set REVIEWER_PASSWORD in your shell or local .env}
+      REVIEWER_IDENTITY: ${REVIEWER_IDENTITY:-Team member — simulated reviewer}
+      RECON_BACKEND: fixture
+      GEMMA_BACKEND: fixture
+      JEV_ENABLED: "false"
+    volumes: ["safe-home-data:/data"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 3
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment: *environment
+    volumes: ["safe-home-data:/data"]
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  safe-home-data:

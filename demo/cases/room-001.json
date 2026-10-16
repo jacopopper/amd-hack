@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "room-001",
+  "version": "synthetic-controls-v1",
+  "manifest": "demo/manifest.json",
+  "photo_ids": ["control-1", "control-2"],
+  "profile_id": "fictional-walker",
+  "scene_label": "Controllo sintetico",
+  "calibration_reference": null,
+  "checklist_version": "2026-10-16.1",
+  "expectations": [
+    {"id": "rug-presence", "kind": "candidate", "photo_id": "control-1", "category": "rug", "presence": "present", "coverage": "visible", "box": [0.30, 0.64, 0.72, 0.86], "min_iou": 0.5},
+    {"id": "absent-box-gated", "kind": "candidate", "photo_id": "control-1", "category": "cable", "presence": "absent", "evidence": null},
+    {"id": "attachment-unknown", "kind": "candidate", "photo_id": "control-1", "category": "rug", "attachment": "unknown"},
+    {"id": "unseen-bathroom", "kind": "candidate", "photo_id": "control-1", "category": "bathroom", "presence": "unknown", "coverage": "out_of_frame"},
+    {"id": "unknown-scale", "kind": "unknown_scale"},
+    {"id": "finite-geometry", "kind": "finite_geometry"},
+    {"id": "source-validity", "kind": "source_validity"}
+  ],
+  "manual_checks": ["photo-evidence", "scene-and-pins", "final-report"],
+  "quality_scope": "Fixture checks exercise contracts only. Real visual/model quality and real pins remain blocked until a staged capture and live models are available.",
+  "simulated_review_script": ["approve", "edit", "reject", "defer"]
+}

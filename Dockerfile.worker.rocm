@@ -1,0 +1,16 @@
+# Supply a tested digest with ROCm PyTorch and the pinned VGGT checkout/dependencies.
+# No upstream requirements file is allowed to replace the image's PyTorch stack.
+ARG ROCM_WORKER_BASE
+FROM ${ROCM_WORKER_BASE}
+RUN apt-get update && apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements.lock ./
+RUN python -m pip install --no-cache-dir -r requirements.lock
+COPY pyproject.toml ./
+COPY backend/ backend/
+COPY guidance/ guidance/
+COPY demo/ demo/
+COPY scripts/ scripts/
+RUN python -m pip install --no-deps -e .
+ENV PYTHONUNBUFFERED=1 SAFE_HOME_DATA=/data
+CMD ["python", "-m", "safe_home.worker"]

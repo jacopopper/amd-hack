@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>Piano d’azione per la casa</title>
+<meta name="snapshot-sha256" content="{{ snapshot_hash }}">
+<style>
+@page { size: A4; margin: 18mm; @bottom-right { content: counter(page); font-size: 9pt; color: #526359 } }
+body { font: 11pt 'DejaVu Sans', sans-serif; line-height: 1.55; color: #243b31; max-width: 850px; margin: auto; padding: 20px }
+h1 { font-family: 'DejaVu Serif', serif; font-size: 28pt; line-height: 1.2; font-weight: normal }
+h2 { font-size: 17pt; font-weight: normal; margin: 26px 0 12px } h3 { font-size: 13pt }
+.eyebrow { font-size: 9pt; letter-spacing: 2px; text-transform: uppercase; color: #526359 }
+.notice { padding: 14px; background: #f4eedc; border-left: 3px solid #ae813b }
+article { border-top: 1px solid #bdcbbf; margin: 24px 0; padding-top: 10px }
+article h3, article p { overflow-wrap: anywhere } .sources { font-size: 9pt; color: #526359 }
+img { width: 48%; height: auto; margin-right: 1%; vertical-align: top } a { color: #286348 }
+.hash { font-size: 7pt; overflow-wrap: anywhere; color: #526359 } h2,h3,article > .eyebrow { break-after: avoid } img { break-inside: avoid }
+</style></head><body>
+{% set priorities = {'urgent': 'Urgente', 'important': 'Importante', 'recommended': 'Raccomandata'} %}
+{% set categories = {'rug': 'Tappeto', 'cable': 'Cavi', 'path': 'Passaggio', 'lighting': 'Illuminazione', 'bathroom': 'Bagno', 'stairs': 'Scale', 'reach': 'Oggetti da raggiungere'} %}
+{% set origins = {'deterministic_fixture': 'testo deterministico su dati sintetici', 'deterministic_fallback': 'testo deterministico dopo un errore di generazione Gemma', 'live_gemma': 'Gemma, esecuzione live'} %}
+<p class="eyebrow">Safe Home / rapporto dimostrativo</p>
+<h1>Piano d’azione<br>per la casa</h1>
+<p>{{ snapshot.label }} · {{ snapshot.created_at[:10] }}</p>
+<p class="notice">Dati dimostrativi e profilo fittizio. Origine bozza: {{ origins.get(snapshot.draft_provenance, snapshot.draft_provenance) }}. Il rilascio è registrato separatamente, dopo la verifica finale del revisore.</p>
+<h2>Azioni accettate dal revisore</h2>
+{% for hazard in snapshot.accepted %}
+<article><p class="eyebrow">{{ priorities.get(hazard.priority, hazard.priority) }} · {{ categories.get(hazard.category, hazard.category) }}</p>
+<h3>{{ hazard.observation }}</h3><p><strong>Azione:</strong> {{ hazard.suggested_action }}</p>
+<p>{{ hazard.profile_relevance }}</p><p><strong>Da verificare:</strong> {{ hazard.uncertainty }}</p>
+{% for image in hazard.evidence_thumbnails %}<img src="{{ image }}" alt="Evidenza fotografica approvata">{% endfor %}
+<p class="sources">Verifica: {{ hazard.reviewer }} · {{ hazard.reviewed_at[:10] }}<br>
+{% for g in hazard.guidance %}<a href="{{ g.source.url }}">{{ g.source.title }}</a> · {{ g.id }}. {{ g.source.applicability }}<br>{% endfor %}</p></article>
+{% else %}<p>Nessuna azione accettata. Questo non dimostra l’assenza di rischi.</p>{% endfor %}
+<h2>Limiti e prossimi controlli</h2><ul>
+{% for limit in snapshot.limitations %}<li>{{ limit }}</li>{% endfor %}
+{% for item in snapshot.deferred %}<li>Rinviato: {{ item.note }}</li>{% endfor %}
+{% for item in snapshot.follow_up_requests %}<li>{{ item }}</li>{% endfor %}
+</ul>
+<p>Aree senza copertura completa: {{ snapshot.coverage | selectattr('coverage', 'ne', 'visible') | list | length }} controlli. Le aree non visibili restano non valutate.</p>
+<p class="hash">Snapshot condiviso da HTML e PDF: {{ snapshot_hash }}</p>
+</body></html>

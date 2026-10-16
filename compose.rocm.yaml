@@ -1,0 +1,46 @@
+# Unvalidated deployment recipe. Every GPU image/revision must be supplied explicitly.
+# Run smoke tests and record exact digests before treating this as an AMD result.
+services:
+  api:
+    environment: &live
+      RECON_BACKEND: vggt
+      GEMMA_BACKEND: http
+      JEV_ENABLED: ${JEV_ENABLED:-false}
+      GEMMA_BASE_URL: http://vllm:8000/v1
+      GEMMA_MODEL: ${GEMMA_MODEL:-google/gemma-4-31B-it}
+      GEMMA_MODEL_REVISION: ${GEMMA_MODEL_REVISION:?Supply the exact tested model revision}
+  worker:
+    build:
+      dockerfile: Dockerfile.worker.rocm
+      args:
+        ROCM_WORKER_BASE: ${ROCM_WORKER_BASE:?Supply a tested ROCm worker image digest with pinned VGGT}
+    environment:
+      <<: *live
+      JEV_API_KEY: ${JEV_API_KEY:-}
+      VGGT_COMMIT: ${VGGT_COMMIT:?Supply the installed VGGT commit}
+      VGGT_CHECKPOINT: /models/vggt/model.pt
+      VGGT_CHECKPOINT_SHA256: ${VGGT_CHECKPOINT_SHA256:?Supply the local checkpoint checksum}
+    devices: ["/dev/kfd:/dev/kfd", "/dev/dri:/dev/dri"]
+    group_add: ["${VIDEO_GID:?Set host video group id}", "${RENDER_GID:?Set host render group id}"]
+    shm_size: 8gb
+    volumes: ["model-cache:/models"]
+    depends_on:
+      vllm:
+        condition: service_healthy
+  vllm:
+    image: ${VLLM_ROCM_IMAGE:?Supply a tested Gemma-compatible ROCm vLLM image digest}
+    command: ["--model", "${GEMMA_MODEL:-google/gemma-4-31B-it}", "--revision", "${GEMMA_MODEL_REVISION}", "--dtype", "bfloat16", "--max-model-len", "8192", "--max-num-seqs", "1", "--limit-mm-per-prompt", '{"image":4}', "--gpu-memory-utilization", "0.55", "--disable-log-requests", "--host", "0.0.0.0", "--port", "8000"]
+    environment:
+      HF_HOME: /models/huggingface
+      HF_TOKEN: ${HF_TOKEN:-}
+    devices: ["/dev/kfd:/dev/kfd", "/dev/dri:/dev/dri"]
+    group_add: ["${VIDEO_GID}", "${RENDER_GID}"]
+    shm_size: 8gb
+    volumes: ["model-cache:/models"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"]
+      interval: 20s
+      timeout: 6s
+      retries: 60
+volumes:
+  model-cache:
