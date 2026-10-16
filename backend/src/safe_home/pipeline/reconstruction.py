@@ -2,6 +2,7 @@ import struct
 import os
 import time
 import subprocess
+from inspect import getfile
 from pathlib import Path
 
 import numpy as np
@@ -43,12 +44,11 @@ def live_scene(context, scene, selected):
     if not settings.vggt_commit or not settings.vggt_checkpoint_sha256 or not checkpoint.is_file():
         raise ExternalFailure("Provide a local VGGT_CHECKPOINT, its SHA256 and the installed VGGT_COMMIT; no automatic checkpoint download")
     import torch
-    import vggt
     from vggt.models.vggt import VGGT
     from vggt.utils.load_fn import load_and_preprocess_images
     from vggt.utils.pose_enc import pose_encoding_to_extri_intri
     from vggt.utils.geometry import unproject_depth_map_to_point_map
-    installed = subprocess.run(["git", "-C", str(Path(vggt.__file__).resolve().parents[1]), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
+    installed = subprocess.run(["git", "-C", str(Path(getfile(VGGT)).resolve().parents[2]), "rev-parse", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
     if installed != settings.vggt_commit:
         raise ExternalFailure("Installed VGGT commit differs from configured commit")
     import hashlib

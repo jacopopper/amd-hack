@@ -5,19 +5,19 @@ Recorded 16 October 2026. **No staged room capture or AMD host is available**, c
 | Capability | Current evidence / status |
 |---|---|
 | Host | Linux, Python 3.12.3, Node 22.22.3, npm 10.9.8; 62 GiB RAM, approximately 447 GiB available disk at initial inspection |
-| AMD raw device access | No `/dev/kfd` or `/dev/dri`; no compatible AMD runtime available |
+| Local GPU access | Host inspection outside the restricted sandbox found an NVIDIA RTX 5090 Laptop GPU (24 GB), Intel graphics and `/dev/dri`. `/dev/kfd` is absent; no AMD/ROCm runtime is available |
 | AMD hosted endpoint | Not configured/validated for this app; no credential values inspected or published |
 | Model access/licenses | Gemma/VGGT target only. Exact permitted checkpoints, revisions, licenses, ROCm/vLLM images and digests must be verified before download/execution |
 | Gemma | Target `google/gemma-4-31B-it`; bounded image/JSON HTTP client and report calls implemented, offline request/reference tests passed; actual serving/inference pending |
-| VGGT | Adapter implemented: explicit local checkpoint/commit validation, recorded preprocessing, camera/depth/confidence NPZ and binary PLY export. No GPU run has validated it |
-| Jev | Pixel-only typed HTTP adapter implemented with presence/attribute gates and no ambiguous POST retry; disabled by default. Application live requests pending |
+| VGGT | Adapter exercised on the local NVIDIA GPU with one user-supplied image; actual NPZ, colored PLY and derived surface exported. AMD and multi-view validation remain pending |
+| Jev | Two standalone live experiments on the supplied image completed, including an object-agnostic hazard screen. Disabled by default in the fixture app; no queued end-to-end live assessment has completed |
 | Dataset | Two project-generated synthetic controls with frozen checksums. Real 12–20 view staged capture, marker and independent tape measurements pending |
 | Point cloud | Synthetic binary colored PLY for viewer development; relative units, unknown metric scale, no automatic pins |
 | CPU application | Authenticated API; local SQLite queue; bounded upload/preparation; labelled fixtures; review decisions/revisions; deterministic Italian HTML/PDF; family release/revocation; retention/deletion |
 | Case runner | Isolated run/check/inspect/compare, all stage names, actual-input fingerprints, hashed reuse, independent-stage preservation, report reruns, revision-bound attestations and explicit frozen baselines. Actual manual inspection/real baseline remains pending |
 | Containers | CPU API/worker build, health and fixture HTTP smoke passed. Base digests pinned after validation. Official checksum-verified Compose 5.6.0 was used from `/tmp/safe-home-tools/docker-compose`; the host has no installed Compose plugin. ROCm override passed configuration validation only, with nonexecuting placeholder variables; no GPU image is claimed tested |
 
-The external boundary is explicit: Jev may receive prepared images only after assessment acknowledgement; the patient profile must never enter its payload. Gemma is intended to run on the internal AMD endpoint. No application live model call has been made. No five-minute target, centimeter accuracy, fall reduction, clinical accuracy or reviewer-time benefit has been established.
+The external boundary is explicit: Jev may receive prepared images only after assessment acknowledgement; the patient profile must never enter its payload. Gemma is intended to run on the internal AMD endpoint. Standalone live experiments are recorded below; the fixture demo is unchanged. No five-minute end-to-end target, centimeter accuracy, fall reduction, clinical accuracy or reviewer-time benefit has been established.
 
 ## Tests already exercised
 
@@ -56,3 +56,15 @@ The CPU Compose build/fixture smoke used isolated project `safe-home-cpu-check`,
 The beta scope was frozen at the user’s request on 16 October: verified CPU workflow, review/release integrity, inspectable case tools and unvalidated live adapters. Real AMD execution, a captured room, a checked real baseline, full benchmark/ablation/cost results and submission evidence remain open. P1/P2 are deferred. This does not mark full P0 or the whole roadmap complete.
 
 A live native worker was observed holding the main `data/worker.lock`; the case command refused concurrent work with exit 3, as designed. That worker was preserved. Restart an already running API/worker to load beta source changes. Isolated container verification uses its own named volume and never resets the main assessment database.
+
+## Local single-image VGGT experiment
+
+On 16 October, the user-supplied kitchen image ran through `live_scene` on the NVIDIA RTX 5090 Laptop GPU using PyTorch `2.8.0+cu128`, CUDA 12.8 and BF16. Reconstruction including model initialization/loading took 13.789 seconds; peak allocated GPU memory was 7,535,709,184 bytes (7.02 GiB). The 5.03 GB initial checkpoint download was separate from this timing. An existing CUDA installation was reused read-only through the isolated `model-cache/vggt-env`; the CPU beta environment was not modified.
+
+Source revision: `a288dd0f14786c93483e45524328726ab7b1b4ce`. Research checkpoint: `facebook/VGGT-1B` revision `860abec7937da0a4c03c41d3c269c366e82abdf9`, SHA256 `d15bf50a8615c8225ed48b51ea5cac673d82442ec0309036df555a053253afe0`, verified before inference. This is the original non-commercial research checkpoint, not the separate commercial checkpoint.
+
+Artifacts are in gitignored `data/live-tests/kitchen-vggt/`: `scene.json`, source image, full camera/depth/confidence/world-point NPZ, a 50,764-point colored PLY and a surface with 82,852 triangles derived from adjacent depth pixels. The surface suppresses the lowest 15% of confidence values and large neighboring depth discontinuities; the PLY uses the adapter's median-confidence filter. Gaps are retained rather than filled with invented geometry. The standalone viewer runs on loopback port 8013.
+
+This is one actual single-view experiment. It does not validate multi-view coherence, metric dimensions, hidden surfaces, AMD execution, clinical quality or the queued Jev/Gemma/report pipeline. The normal app still requires at least two overview images for its reconstruction stage. No duplicate image was used to simulate overlap. `scripts/render_vggt_image.py` explicitly requires a GPU and cannot fall back to CPU.
+
+Standalone Jev evidence is in `data/live-tests/general-home-hazards/`: no object or room type was supplied in the questions, the hazard-presence score was 0.80, the selected risk was `trip_or_slip`, and its returned box covered the mat. Request duration was 5.120 seconds. This is a single strongest-candidate screen, not an exhaustive detector. The exact user-approved general question is saved in `backend/src/safe_home/prompts/jev-general.txt`; saving it does not replace the fixture app's checklist logic.

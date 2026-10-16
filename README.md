@@ -2,7 +2,7 @@
 
 **First beta · 16 October 2026.** The verified beta uses CPU fixtures with a complete upload → review → Italian web/PDF release workflow. Live adapters are experimental; real capture, AMD validation and P1/P2 work remain later milestones.
 
-Staged-data prototype implementing [the implementation plan](safe-home-implementation-plan.md). The CPU path runs from upload through a persisted worker, evidence review, Italian HTML/PDF draft and restricted family release. **Current findings and point clouds are synthetic fixtures. No live Jev/Gemma/VGGT application inference or AMD result is claimed.** The historical [Jev evaluation](eval/jev/README.md) is preserved separately.
+Staged-data prototype implementing [the implementation plan](safe-home-implementation-plan.md). The CPU path runs from upload through a persisted worker, evidence review, Italian HTML/PDF draft and restricted family release. **The default demo's findings and point clouds are synthetic fixtures.** Separate live Jev and single-image NVIDIA/VGGT experiments are recorded in [runtime evidence](docs/runtime.md#local-single-image-vggt-experiment); no full live pipeline or AMD result is claimed. The historical [Jev evaluation](eval/jev/README.md) is preserved separately.
 
 ## Local setup
 
