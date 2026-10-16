@@ -1,0 +1,281 @@
+{
+  "created_before_api_calls_utc": "2026-10-16T13:39:42.443140+00:00",
+  "model": "jev-1.14.0",
+  "binary_threshold": 0.5,
+  "box_iou_threshold": 0.5,
+  "box_coordinate_order": [
+    "left",
+    "top",
+    "right",
+    "bottom"
+  ],
+  "label_method": "Single visual inspection by the assistant before API calls; approximate hand-labelled visible-extent boxes. Smoke test, not expert/clinical ground truth. No patient information sent. Expected labels, source names, and box coordinates are NOT sent to Jev.",
+  "questions": {
+    "cables": {
+      "type": "noul",
+      "instructions": "Are any electrical cables or power leads visibly present in `photo`? Do not count plumbing pipes, railings, or an emergency alarm pull cord."
+    },
+    "rug": {
+      "type": "noul",
+      "instructions": "Is a distinct area rug or floor mat visibly present in `photo`? Do not count fitted wall-to-wall carpeting. Count a partially occluded rug if a part is visible."
+    },
+    "stairs": {
+      "type": "noul",
+      "instructions": "Are stair steps visibly present in `photo`?"
+    },
+    "grab_bar": {
+      "type": "noul",
+      "instructions": "Is a bathroom support grab bar visibly present in `photo`, intended to help a person use a toilet or sink? Do not count towel rails or stair handrails."
+    },
+    "stair_handrail": {
+      "type": "noul",
+      "instructions": "Is a handrail following a staircase visibly present in `photo`? Do not count bathroom grab bars."
+    },
+    "clutter": {
+      "type": "noul",
+      "instructions": "Does `photo` visibly show a substantial pile of boxes, bags, or loose household belongings crowding the room? Do not count ordinary arranged furniture, one rug, or electrical wiring alone."
+    },
+    "floor_view": {
+      "type": "choice",
+      "instructions": "How well does `photo` show the floor or stair walking surface? Judge the pictured area only, not the whole room.",
+      "criteria": {
+        "visible": "Some floor or stair surface is directly visible and can be inspected. This does not establish safety.",
+        "obscured": "Piles of belongings obscure essentially all of the floor.",
+        "out_of_frame": "The photo is aimed above floor level or otherwise excludes the walking surface."
+      }
+    },
+    "rug_attachment": {
+      "type": "choice",
+      "instructions": "For any rug visible in `photo`, can you establish from visible evidence whether its underside is secured to the floor? A flat-looking top surface alone cannot establish attachment.",
+      "criteria": {
+        "secured": "An attachment to the floor is actually visible.",
+        "unsecured": "The underside is actually exposed and visibly unattached.",
+        "unknown": "A rug is visible, but its underside or attachment cannot be inspected.",
+        "not_visible": "No rug is visible in this photo."
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "cables",
+      "file": "images/cables.jpg",
+      "sha256": "a774e962fee39624b12e708088c3f696d5db688e39eebbf08640abe184d26c0f",
+      "expected": {
+        "cables": true,
+        "rug": false,
+        "stairs": false,
+        "grab_bar": false,
+        "stair_handrail": false,
+        "clutter": false,
+        "floor_view": null,
+        "rug_attachment": "not_visible"
+      },
+      "boxes": [
+        {
+          "id": "power_adapter",
+          "target": "the large black rectangular power adapter with a white printed label in the lower middle of `photo`",
+          "expected": [
+            0.567,
+            0.59,
+            0.754,
+            0.785
+          ]
+        },
+        {
+          "id": "absent_steps",
+          "target": "stair steps in `photo`",
+          "expected": null
+        }
+      ],
+      "annotation_notes": "Wires are visible; the photo alone does not establish whether this surface is a walkway. Floor-view judgement is excluded as ambiguous."
+    },
+    {
+      "id": "bathroom",
+      "file": "images/bathroom.jpg",
+      "sha256": "8dd80fc853571dafcd63d8c93d7df1a4317db30893d6a3d387fe00874a85436f",
+      "expected": {
+        "cables": false,
+        "rug": false,
+        "stairs": false,
+        "grab_bar": true,
+        "stair_handrail": false,
+        "clutter": false,
+        "floor_view": "visible",
+        "rug_attachment": "not_visible"
+      },
+      "boxes": [
+        {
+          "id": "left_grab_bar",
+          "target": "the leftmost vertical black grab bar on the wall in `photo`",
+          "expected": [
+            0.047,
+            0.152,
+            0.157,
+            0.62
+          ]
+        },
+        {
+          "id": "folding_grab_bar",
+          "target": "the tall U-shaped black folding grab bar immediately to the right of the toilet in `photo`",
+          "expected": [
+            0.738,
+            0.151,
+            0.825,
+            0.615
+          ]
+        },
+        {
+          "id": "alarm_cord",
+          "target": "the thin red alarm pull cord BELOW the black alarm unit, including its bottom handle, in `photo`",
+          "expected": [
+            0.764,
+            0.667,
+            0.805,
+            0.921
+          ]
+        }
+      ],
+      "annotation_notes": "The red alarm cord is not an electrical floor cable. No clinical safety rating is assigned."
+    },
+    {
+      "id": "family_room",
+      "file": "images/family_room.jpg",
+      "sha256": "e4773991e00f319c8a35d0184b19a7046c3cb1843e3d46ec40109d40bceb3d08",
+      "expected": {
+        "cables": false,
+        "rug": true,
+        "stairs": false,
+        "grab_bar": false,
+        "stair_handrail": false,
+        "clutter": false,
+        "floor_view": "visible",
+        "rug_attachment": "unknown"
+      },
+      "boxes": [
+        {
+          "id": "rug",
+          "target": "the visible portion of the patterned rug on the floor to the left of the foreground sofa in `photo`",
+          "expected": [
+            0.229,
+            0.787,
+            0.402,
+            0.955
+          ]
+        },
+        {
+          "id": "absent_grab_bar",
+          "target": "a bathroom support grab bar in `photo`",
+          "expected": null
+        }
+      ],
+      "annotation_notes": "The rug is partially hidden by the sofa. Its visible portion is labelled; its attachment is unknown."
+    },
+    {
+      "id": "clutter",
+      "file": "images/clutter.jpg",
+      "sha256": "085e25ef37607b4733c34e75de850ee7252643da0528e8517f92c6fa3abfe467",
+      "expected": {
+        "cables": false,
+        "rug": false,
+        "stairs": false,
+        "grab_bar": false,
+        "stair_handrail": false,
+        "clutter": true,
+        "floor_view": "obscured",
+        "rug_attachment": "not_visible"
+      },
+      "boxes": [
+        {
+          "id": "blue_bag",
+          "target": "the largest blue plastic bag in the right foreground of `photo`",
+          "expected": [
+            0.684,
+            0.56,
+            0.948,
+            0.89
+          ]
+        }
+      ],
+      "annotation_notes": "Piles obscure the floor. Labels concern visible content only; hidden rugs or cables cannot be ruled out."
+    },
+    {
+      "id": "stairs",
+      "file": "images/stairs.jpg",
+      "sha256": "9837b45597eca9896687ff5a9d11ac1362378d634f1bafb8e0dfb3f226a61343",
+      "expected": {
+        "cables": false,
+        "rug": false,
+        "stairs": true,
+        "grab_bar": false,
+        "stair_handrail": true,
+        "clutter": false,
+        "floor_view": "visible",
+        "rug_attachment": "not_visible"
+      },
+      "boxes": [
+        {
+          "id": "handrail",
+          "target": "the diagonal wooden stair handrail along the RIGHT wall in `photo`",
+          "expected": [
+            0.526,
+            0.058,
+            0.876,
+            0.569
+          ]
+        }
+      ],
+      "annotation_notes": "A right-side handrail is visible; no inference about compliant dimensions or grip strength."
+    },
+    {
+      "id": "staged_room",
+      "file": "images/staged_room.jpg",
+      "sha256": "9bb8672b68ee2fe37f4f0929848ff282fd290a6e521bb91527c1e36c680764a8",
+      "expected": {
+        "cables": false,
+        "rug": true,
+        "stairs": false,
+        "grab_bar": false,
+        "stair_handrail": false,
+        "clutter": false,
+        "floor_view": "visible",
+        "rug_attachment": "unknown"
+      },
+      "boxes": [
+        {
+          "id": "rug",
+          "target": "the visible portion of the white shag rug in the bottom-left corner of `photo`",
+          "expected": [
+            0,
+            0.861,
+            0.216,
+            1
+          ]
+        }
+      ],
+      "annotation_notes": "The small rug is cut by the frame. Attachment cannot be established from its top surface."
+    },
+    {
+      "id": "upper_room_crop",
+      "file": "images/upper_room_crop.jpg",
+      "sha256": "dc08a51b25cb358bdf6647c8ec5917d06ccb105331b3f51172ae6a78964e0957",
+      "expected": {
+        "cables": false,
+        "rug": false,
+        "stairs": false,
+        "grab_bar": false,
+        "stair_handrail": false,
+        "clutter": false,
+        "floor_view": "out_of_frame",
+        "rug_attachment": "not_visible"
+      },
+      "boxes": [
+        {
+          "id": "absent_rug",
+          "target": "an area rug on the floor in `photo`",
+          "expected": null
+        }
+      ],
+      "annotation_notes": "Crop of staged_room, not an independent scene. No floor visible. Negative observations do not mean a safe room."
+    }
+  ]
+}

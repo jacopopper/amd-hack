@@ -1,0 +1,150 @@
+{
+  "case_id": "cables",
+  "repeat": 1,
+  "at_utc": "2026-10-16T13:41:44.259151+00:00",
+  "elapsed_seconds": 1.543364954000026,
+  "image_sha256": "a774e962fee39624b12e708088c3f696d5db688e39eebbf08640abe184d26c0f",
+  "questions": {
+    "cables": {
+      "type": "noul",
+      "instructions": "Are any electrical cables or power leads visibly present in `photo`? Do not count plumbing pipes, railings, or an emergency alarm pull cord."
+    },
+    "rug": {
+      "type": "noul",
+      "instructions": "Is a distinct area rug or floor mat visibly present in `photo`? Do not count fitted wall-to-wall carpeting. Count a partially occluded rug if a part is visible."
+    },
+    "stairs": {
+      "type": "noul",
+      "instructions": "Are stair steps visibly present in `photo`?"
+    },
+    "grab_bar": {
+      "type": "noul",
+      "instructions": "Is a bathroom support grab bar visibly present in `photo`, intended to help a person use a toilet or sink? Do not count towel rails or stair handrails."
+    },
+    "stair_handrail": {
+      "type": "noul",
+      "instructions": "Is a handrail following a staircase visibly present in `photo`? Do not count bathroom grab bars."
+    },
+    "clutter": {
+      "type": "noul",
+      "instructions": "Does `photo` visibly show a substantial pile of boxes, bags, or loose household belongings crowding the room? Do not count ordinary arranged furniture, one rug, or electrical wiring alone."
+    },
+    "floor_view": {
+      "type": "choice",
+      "instructions": "How well does `photo` show the floor or stair walking surface? Judge the pictured area only, not the whole room.",
+      "criteria": {
+        "visible": "Some floor or stair surface is directly visible and can be inspected. This does not establish safety.",
+        "obscured": "Piles of belongings obscure essentially all of the floor.",
+        "out_of_frame": "The photo is aimed above floor level or otherwise excludes the walking surface."
+      }
+    },
+    "rug_attachment": {
+      "type": "choice",
+      "instructions": "For any rug visible in `photo`, can you establish from visible evidence whether its underside is secured to the floor? A flat-looking top surface alone cannot establish attachment.",
+      "criteria": {
+        "secured": "An attachment to the floor is actually visible.",
+        "unsecured": "The underside is actually exposed and visibly unattached.",
+        "unknown": "A rug is visible, but its underside or attachment cannot be inspected.",
+        "not_visible": "No rug is visible in this photo."
+      }
+    },
+    "power_adapter_present": {
+      "type": "noul",
+      "instructions": "Is the large black rectangular power adapter with a white printed label in the lower middle of `photo` visibly present?"
+    },
+    "power_adapter_box": {
+      "type": "box",
+      "instructions": "The smallest box around the large black rectangular power adapter with a white printed label in the lower middle of `photo`. Include only the visible extent, not hidden parts."
+    },
+    "absent_steps_present": {
+      "type": "noul",
+      "instructions": "Is stair steps in `photo` visibly present?"
+    },
+    "absent_steps_box": {
+      "type": "box",
+      "instructions": "The smallest box around stair steps in `photo`. Include only the visible extent, not hidden parts."
+    }
+  },
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "cables": {
+        "type": "noul",
+        "noul": 1.0
+      },
+      "rug": {
+        "type": "noul",
+        "noul": 0.3
+      },
+      "stairs": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "grab_bar": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "stair_handrail": {
+        "type": "noul",
+        "noul": 0.01
+      },
+      "clutter": {
+        "type": "noul",
+        "noul": 0.04
+      },
+      "floor_view": {
+        "type": "choice",
+        "choice": "visible",
+        "confidence": 0.25,
+        "probabilities": {
+          "visible": 0.5,
+          "obscured": 0.4,
+          "out_of_frame": 0.1
+        }
+      },
+      "rug_attachment": {
+        "type": "choice",
+        "choice": "unknown",
+        "confidence": 0.73,
+        "probabilities": {
+          "secured": 0.0,
+          "unsecured": 0.02,
+          "unknown": 0.8,
+          "not_visible": 0.18
+        }
+      },
+      "power_adapter_present": {
+        "type": "noul",
+        "noul": 0.92
+      },
+      "power_adapter_box": {
+        "type": "box",
+        "box": {
+          "top": 0.58,
+          "bottom": 0.77,
+          "left": 0.56,
+          "right": 0.77
+        },
+        "confidence": 0.84
+      },
+      "absent_steps_present": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "absent_steps_box": {
+        "type": "box",
+        "box": {
+          "top": 0.03,
+          "bottom": 0.34,
+          "left": 0.01,
+          "right": 0.98
+        },
+        "confidence": 0.05
+      }
+    },
+    "usage": {
+      "input_tokens": 3278,
+      "output_tokens": 267
+    }
+  }
+}
