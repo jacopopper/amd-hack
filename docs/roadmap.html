@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safe Home — Mappa del progetto e prossimi passi</title>
+<style>
+:root{
+  --bg:#f6f7f9;--panel:#fff;--ink:#1c2230;--muted:#5d6678;--line:#dfe3ea;--accent:#2f5bd3;
+  --done:#1f8a4c;--done-bg:#e3f4ea;--fix:#a86400;--fix-bg:#fdf0dc;--todo:#b4232c;--todo-bg:#fbe5e6;--new:#6a3fc1;--new-bg:#eee7fb;
+  --shadow:0 1px 2px rgba(20,30,50,.06),0 4px 14px rgba(20,30,50,.06);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#12151b;--panel:#1b2029;--ink:#e6e9ef;--muted:#9aa3b5;--line:#2c3340;--accent:#7f9cff;
+  --done:#5fd394;--done-bg:#173325;--fix:#f0b24f;--fix-bg:#3a2a12;--todo:#ff7b82;--todo-bg:#3c1a1d;--new:#b79bff;--new-bg:#2a2140;
+  --shadow:none;
+}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:28px 32px 0;max-width:1200px;margin:auto}
+h1{margin:0 0 4px;font-size:26px}
+.sub{color:var(--muted);margin:0 0 18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow)}
+.kpi b{display:block;font-size:22px}
+.kpi span{color:var(--muted);font-size:13px}
+nav{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:inherit;color:var(--muted);cursor:pointer}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--accent);font-weight:600}
+nav button:focus-visible,.node:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{max-width:1200px;margin:auto;padding:22px 32px 60px}
+section[hidden]{display:none}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card h3{margin-top:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}header,main{padding-left:16px;padding-right:16px}}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.s-done{color:var(--done);background:var(--done-bg)}.s-fix{color:var(--fix);background:var(--fix-bg)}
+.s-todo{color:var(--todo);background:var(--todo-bg)}.s-new{color:var(--new);background:var(--new-bg)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px;align-items:center;color:var(--muted);font-size:13px}
+.legend label{display:flex;gap:5px;align-items:center;cursor:pointer}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;position:relative}
+@media (max-width:640px){.pipe{grid-template-columns:1fr}}
+.node{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit;box-shadow:var(--shadow);transition:transform .12s}
+.node:hover{transform:translateY(-2px)}
+.node.sel{outline:2px solid var(--accent)}
+.node.dim{opacity:.28}
+.node small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.node .n{font-weight:600}
+.node[data-s=done]{border-left-color:var(--done)}.node[data-s=fix]{border-left-color:var(--fix)}
+.node[data-s=todo]{border-left-color:var(--todo)}.node[data-s=new]{border-left-color:var(--new)}
+.row-label{grid-column:1/-1;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:6px}
+.detail h3{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.detail ul{margin:.3em 0 .8em;padding-left:1.2em}
+.detail h4{margin:.8em 0 .2em;font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+code{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(127,127,127,.13);padding:1px 5px;border-radius:4px}
+pre{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(127,127,127,.11);border:1px solid var(--line);padding:12px 14px;border-radius:8px;overflow:auto;position:relative;margin:.4em 0 1em}
+pre button{position:absolute;top:6px;right:6px;font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:2px 8px;cursor:pointer}
+/* checklist */
+.check{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.check:first-of-type{border-top:0}
+.check input{margin-top:4px;width:17px;height:17px;accent-color:var(--done)}
+.check.ok .t{text-decoration:line-through;color:var(--muted)}
+.check .d{color:var(--muted);font-size:13px}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 14px}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .25s}
+.pri{font-size:11px;font-weight:700;margin-left:6px}
+.pri.p0{color:var(--todo)}.pri.p1{color:var(--fix)}.pri.p2{color:var(--muted)}
+/* timeline */
+.tl{border-left:3px solid var(--line);margin-left:10px;padding-left:20px}
+.step{position:relative;margin-bottom:16px}
+.step:before{content:"";position:absolute;left:-29px;top:6px;width:13px;height:13px;border-radius:50%;background:var(--panel);border:3px solid var(--accent)}
+.step.gate:before{border-color:var(--todo)}
+.step h4{margin:0}
+.step .when{font-size:12px;color:var(--muted)}
+.gate-note{font-size:13px;color:var(--todo);font-weight:600}
+details{border:1px solid var(--line);border-radius:10px;padding:0 14px;margin-bottom:10px;background:var(--panel)}
+details[open]{padding-bottom:10px}
+summary{cursor:pointer;padding:12px 0;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.verdict{border-left:4px solid var(--accent);padding:6px 12px;margin:10px 0;background:rgba(127,127,127,.06);border-radius:0 8px 8px 0}
+.muted{color:var(--muted)}
+.vram input{width:100%}
+.models{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.model{margin:0}
+.model h3{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.model dl{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;margin:8px 0 0;font-size:14px}
+.model dt{color:var(--muted);font-weight:600}
+.model dd{margin:0}
+.where{font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
+.where.amd{color:var(--todo);border-color:var(--todo)}
+.stepn{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-size:13px;margin-right:8px;flex:none}
+#steps summary{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#steps .io{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:8px 0}
+@media (max-width:860px){#steps .io{grid-template-columns:1fr}}
+#steps .io div{background:rgba(127,127,127,.07);border-radius:8px;padding:8px 10px;font-size:14px}
+#steps .io b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.gloss{display:grid;grid-template-columns:180px 1fr;gap:8px 16px;margin:0}
+@media (max-width:640px){.gloss{grid-template-columns:1fr}}
+.gloss dt{font-weight:600}
+.gloss dd{margin:0;color:var(--muted)}
+.desc{font-size:15px;margin:.2em 0 .6em}
+.vram output{font-weight:700;font-size:18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Safe Home — mappa del progetto</h1>
+  <p class="sub">Stato del repo (commit <code>e3e1a8c</code>, prima beta del 16/10) + architettura 3D discussa · AMD Developer Hackathon ACT III, Roma · Health &amp; Wellbeing</p>
+  <div class="kpis">
+    <div class="kpi"><b id="countdown">—</b><span>alla consegna (18 ottobre 2026)</span></div>
+    <div class="kpi"><b>12 / ~33</b><span>task del piano chiusi (solo CPU)</span></div>
+    <div class="kpi"><b>0</b><span>inferenze reali su GPU AMD finora</span></div>
+    <div class="kpi"><b id="kpi-check">0%</b><span>la tua checklist “cosa mi serve”</span></div>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-tab="overview" aria-selected="true">Panoramica</button>
+    <button role="tab" data-tab="how">Come funziona</button>
+    <button role="tab" data-tab="pipeline">Pipeline interattiva</button>
+    <button role="tab" data-tab="needs">Cosa mi serve</button>
+    <button role="tab" data-tab="plan">Piano 48h</button>
+    <button role="tab" data-tab="decisions">Decisioni</button>
+    <button role="tab" data-tab="pitfalls">Insidie tecniche</button>
+    <button role="tab" data-tab="cmds">Comandi</button>
+  </nav>
+</header>
+
+<main>
+<!-- PANORAMICA -->
+<section id="overview">
+  <div class="grid2">
+    <div class="card">
+      <h3>Cos'è Safe Home</h3>
+      <p>Un familiare carica foto (o un video) della casa di una persona anziana e una descrizione dei suoi bisogni. Il sistema:</p>
+      <ol>
+        <li>trova i <b>potenziali pericoli di caduta</b> nelle foto (detector 2D esterno, Jev);</li>
+        <li><b>ricostruisce la stanza in 3D</b> su GPU AMD (VGGT) e porta i pericoli nella scena;</li>
+        <li>ricava le <b>misure dalla geometria</b> (scala data dal marker ArUco), mai dal LLM;</li>
+        <li>usa <b>Gemma</b> solo per il giudizio personalizzato sul profilo;</li>
+        <li>un <b>professionista</b> esplora la scena 3D, approva/modifica/rifiuta i rischi;</li>
+        <li>genera un <b>piano d'azione in italiano</b> (web + PDF) con link a scadenza per la famiglia.</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>A che punto siamo, in una frase</h3>
+      <p>Il <b>prodotto attorno ai modelli c'è e funziona su CPU</b> (upload, coda, revisione, report, rilascio, viewer 3D), ma <b>tutti i risultati sono fixture sintetiche</b>: nessun modello è mai stato chiamato davvero e nessuna GPU AMD è stata usata.</p>
+      <div class="verdict"><b>Il collo di bottiglia non è il codice:</b> sono due risorse esterne — <b>accesso AMD Developer Cloud (MI300X)</b> e <b>una vera ripresa di una stanza</b> con ArUco e misure col metro.</div>
+      <p class="muted">Regola dell'hackathon: le GPU AMD devono essere parte concreta del prodotto mostrato. Oggi questa condizione non è soddisfatta.</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Le tre fasce di lavoro</h3>
+    <table>
+      <tr><th style="width:22%">Fascia</th><th>Contenuto</th><th style="width:18%">Stato</th></tr>
+      <tr><td><b>A · Prodotto CPU</b></td><td>API FastAPI + SQLite, worker con coda, revisione a 4 decisioni, report HTML/PDF italiano, link famiglia, retention, case runner, Docker CPU, 22 test</td><td><span class="chip s-done">Fatto (fixture)</span></td></tr>
+      <tr><td><b>B · Modelli reali su AMD</b></td><td>Adapter Jev / Gemma / VGGT scritti; mai eseguiti dal vivo. Serve MI300X + vLLM ROCm + checkpoint</td><td><span class="chip s-fix">Codice pronto, mai validato</span></td></tr>
+      <tr><td><b>C · Estensione 3D</b> (dalla chat)</td><td>Box 3D allineate al pavimento, scala ArUco, fusione multi-frame, splat gsplat esplorabile, box wireframe nel viewer</td><td><span class="chip s-new">Nuovo</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" hidden>
+  <div class="card">
+    <h3>Il percorso di un'analisi, passo per passo</h3>
+    <p class="muted">Ogni passo del worker è uno <i>stage</i> con input e output salvati su disco e un'impronta (hash) degli input: se cambi solo un passo, gli altri si riusano. Ordine reale nel codice: <code>prepare → jev → reconstruct → geometry → gemma → report</code>, poi revisione e rilascio. Apri un passo per i dettagli.</p>
+    <div id="steps"></div>
+  </div>
+  <h3 style="margin:22px 0 10px">I modelli, uno per uno</h3>
+  <div class="models" id="models"></div>
+  <div class="card" style="margin-top:16px">
+    <h3>Chi fa cosa — la regola d'oro</h3>
+    <table>
+      <tr><th>Domanda</th><th>Chi risponde</th><th>Perché</th></tr>
+      <tr><td>C'è un tappeto / un cavo / un ostacolo in questa foto? Dove?</td><td><b>Jev</b> (presenza + box 2D)</td><td>Domande visive semplici, con un punteggio controllabile</td></tr>
+      <tr><td>Dov'è nello spazio? Quanto è largo il passaggio?</td><td><b>VGGT + geometria</b> (+ ArUco per i cm)</td><td>Le misure devono venire da calcoli verificabili, non da un modello linguistico</td></tr>
+      <tr><td>È un problema <i>per questa persona</i>? Cosa suggerire?</td><td><b>Gemma</b></td><td>Serve leggere il profilo e ragionare; l'azione è scelta da una checklist chiusa</td></tr>
+      <tr><td>È vero? Va nel piano?</td><td><b>Il professionista</b></td><td>Nessun output dei modelli arriva alla famiglia senza approvazione</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h3>Glossario</h3>
+    <dl class="gloss" id="gloss"></dl>
+  </div>
+</section>
+
+<!-- PIPELINE -->
+<section id="pipeline" hidden>
+  <div class="legend">
+    Filtra:
+    <label><input type="checkbox" data-f="done" checked> <span class="chip s-done">Implementato</span></label>
+    <label><input type="checkbox" data-f="fix" checked> <span class="chip s-fix">Pronto, mai live</span></label>
+    <label><input type="checkbox" data-f="todo" checked> <span class="chip s-todo">Da fare</span></label>
+    <label><input type="checkbox" data-f="new" checked> <span class="chip s-new">Nuovo (chat)</span></label>
+    <span>· clicca un blocco per i dettagli</span>
+  </div>
+  <div class="pipe" id="pipe"></div>
+  <div class="card detail" id="detail" style="margin-top:18px"></div>
+</section>
+
+<!-- NEEDS -->
+<section id="needs" hidden>
+  <div class="card">
+    <h3>Cosa ti serve per procedere</h3>
+    <p class="muted">Le spunte restano salvate nel browser (localStorage). P0 = senza questo non c'è demo valida.</p>
+    <div class="bar"><i id="needs-bar"></i></div>
+    <div id="needs-list"></div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section id="plan" hidden>
+  <div class="card">
+    <h3>Piano fino al 18 ottobre</h3>
+    <p class="muted">Ordine pensato per avere sempre una demo presentabile. I pallini rossi sono <b>gate</b>: se falliscono, non passare al livello successivo.</p>
+    <div class="tl" id="timeline"></div>
+  </div>
+</section>
+
+<!-- DECISIONS -->
+<section id="decisions" hidden>
+  <div class="card">
+    <h3>VGGT o Depth Anything 3?</h3>
+    <table>
+      <tr><th></th><th>VGGT-1B</th><th>DA3-Giant</th></tr>
+      <tr><td>Nel repo</td><td>Adapter completo (<code>pipeline/reconstruction.py</code>): preprocessing 518 tracciato, NPZ, PLY, manifest</td><td>Da scrivere</td></tr>
+      <tr><td>Qualità (paper DA3)</td><td>Baseline</td><td>+44% pose, +25% geometria</td></tr>
+      <tr><td>Export COLMAP</td><td><code>demo_colmap.py</code></td><td>Da verificare</td></tr>
+      <tr><td>Licenza pesi</td><td>CC-BY-NC</td><td>CC-BY-NC</td></tr>
+    </table>
+    <div class="verdict"><b>Raccomandazione:</b> resta su VGGT. Riscrivere l'adapter a 48 ore dalla consegna è rischio puro. Passa a DA3 solo se VGGT dà risultati inaccettabili sulla tua stanza.</div>
+  </div>
+  <div class="card">
+    <h3>Cosa mostrare all'operatore in 3D?</h3>
+    <table>
+      <tr><th>Opzione</th><th>Pro</th><th>Contro</th><th>Quando</th></tr>
+      <tr><td>Point cloud colorata (già nel viewer)</td><td>Esiste già, leggera, stesse coordinate delle box</td><td>Meno “wow”</td><td><span class="chip s-done">Base della demo</span></td></tr>
+      <tr><td>Splat ottimizzato gsplat (~7k iter)</td><td>Quasi fotografico</td><td>Training extra, centinaia di MB, normalizzazione coordinate da gestire</td><td><span class="chip s-new">Solo se il resto gira</span></td></tr>
+      <tr><td>Splat feed-forward (AnySplat / testa GS DA3)</td><td>Veloce</td><td>Sfocato, ghosting</td><td><span class="chip s-todo">Scartato</span></td></tr>
+      <tr><td>Gaussiane ricolorate per rischio</td><td>Effetto wow</td><td>Molto lavoro, bordi sfrangiati</td><td><span class="chip s-todo">Solo se avanza tempo</span></td></tr>
+    </table>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Foto o video? Stanza o appartamento?</h3>
+      <p>Il repo lavora su 12–20 foto di <b>una stanza</b>. Il video è solo un modo di acquisire: estrai ~2 fps e tieni il frame più nitido per finestra (varianza del Laplaciano). <b>Appartamento intero = P2</b> (multi-stanza, drift, VRAM): fuori scope per il 18.</p>
+    </div>
+    <div class="card vram">
+      <h3>Quanti frame in VRAM? <span class="muted" style="font-size:13px;font-weight:400">(stime VGGT, da verificare)</span></h3>
+      <input type="range" min="10" max="300" value="20" id="vram-r" aria-label="Numero di frame">
+      <p><output id="vram-o"></output></p>
+      <p class="muted" id="vram-n"></p>
+    </div>
+  </div>
+</section>
+
+<!-- PITFALLS -->
+<section id="pitfalls" hidden>
+  <p class="muted">Problemi concreti emersi confrontando il recap tecnico con il codice esistente. Apri ciascuno per la soluzione.</p>
+  <div id="pit-list"></div>
+</section>
+
+<!-- COMMANDS -->
+<section id="cmds" hidden>
+  <div class="card">
+    <h3>1 · Setup locale (questa copia non ha <code>.venv</code> né <code>node_modules</code>)</h3>
+<pre>python3 -m venv .venv
+.venv/bin/pip install -r requirements.lock
+.venv/bin/pip install --no-deps -e .
+npm --prefix web ci &amp;&amp; npm --prefix web run build
+export REVIEWER_USER=reviewer REVIEWER_PASSWORD='una-password-lunga'
+.venv/bin/python -m safe_home.cli init
+.venv/bin/python -m safe_home.cli seed-controls</pre>
+    <h3>2 · Avvio (due terminali)</h3>
+<pre>.venv/bin/uvicorn safe_home.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log
+.venv/bin/python -m safe_home.worker</pre>
+    <h3>3 · Verifiche CPU</h3>
+<pre>.venv/bin/python -m unittest discover -s tests
+.venv/bin/python scripts/smoke_e2e.py --mode fixture --base-url http://localhost:8000</pre>
+    <h3>4 · Ciclo su un singolo caso</h3>
+<pre>.venv/bin/python -m safe_home.cli case run demo/cases/room-001.json --mode fixture
+.venv/bin/python -m safe_home.cli case inspect --run RUN_ID
+.venv/bin/python -m safe_home.cli case run demo/cases/room-001.json --mode fixture --stage geometry --reuse-run RUN_ID</pre>
+    <h3>5 · Su AMD Developer Cloud (MI300X)</h3>
+<pre>docker pull rocm/pytorch:rocm6.4.3_ubuntu24.04_py3.12_pytorch_release_2.6.0
+rocm-smi                      # verifica che la GPU sia visibile
+python scripts/gpu_smoke.py   # preflight del repo: dice cosa manca
+# gsplat (solo fase opzionale)
+pip install amd_gsplat --extra-index-url=https://pypi.amd.com/rocm-6.4.3/simple/</pre>
+    <h3>6 · Dataset di prova (solo per sbloccare VGGT, ~12,5 GB)</h3>
+<pre>curl -LO http://storage.googleapis.com/gresearch/refraw360/360_v2.zip   # scena "room"; licenza da verificare</pre>
+  </div>
+</section>
+</main>
+
+<script>
+const STAGES = [
+  {row:"Input"},
+  {id:"capture",n:"Acquisizione",s:"todo",sub:"foto/video + ArUco",desc:"Si fotografa (o si filma) una stanza girando lungo il perimetro, con un marker ArUco stampato in vista. Le foto devono sovrapporsi: è la sovrapposizione che permette di ricostruire il 3D. Il familiare compila anche il profilo della persona (mobilità, ausili, bisogni).",
+   
+   have:["Due controlli sintetici generati (<code>data/demo/synthetic-*.png</code>) con checksum","Manifest <code>demo/manifest.json</code>, profili <code>demo/profiles.json</code>, caso <code>demo/cases/room-001.json</code>","Il live mode rifiuta il dataset sintetico (by design)"],
+   miss:["12–20 viste sovrapposte di <b>una</b> stanza, punti di vista che cambiano (non solo rotazione)","Marker ArUco stampato, ben visibile su superficie piana in più frame","2–3 misure col metro per verificare la scala","Pericoli messi in scena (tappeto, cavo) e una zona non valutabile","Etichette scritte <b>prima</b> di chiamare i modelli"],
+   chat:["Riprese: altezza petto, movimento lento, perimetro verso il centro, luci accese","Da video: ~2 fps, frame più nitido per finestra (varianza del Laplaciano)","Ripiego temporaneo: scena <code>room</code> di Mip-NeRF 360 (solo per testare VGGT; niente ArUco né pericoli)"],
+   files:["demo/","plan §0.2"]},
+  {id:"prepare",n:"prepare",s:"done",sub:"EXIF, padding 518",desc:"Mette in ordine le foto prima di qualunque modello: raddrizza l'orientamento EXIF, toglie i metadati (posizione GPS, telefono), ridimensiona e crea la versione 518×518 con bordo che serve a VGGT. Registra esattamente come ha trasformato ogni foto, così un punto o una box si possono riportare da un'immagine all'altra senza errori.",
+   
+   have:["Normalizza EXIF, rimuove metadati, limiti di upload","Registra le trasformazioni (scale_xy, offset_xy) per riportare box/pixel tra originale e 518×518"],
+   miss:["Estrazione frame da video (se usi il video)"],chat:[],files:["pipeline/photos.py"]},
+  {row:"Modelli"},
+  {id:"jev",n:"jev",s:"fix",sub:"API esterna · box 2D",desc:"Jev (typesafe.ai) è un modello di visione a domande chiuse. Per ogni foto e per ogni voce della checklist (tappeto, cavo, ostacolo nel passaggio, luce notturna, maniglione, corrimano) gli chiediamo: è presente? (punteggio 0–1), dov'è? (box 2D), l'area si vede bene? (visibile / parziale / coperta / fuori inquadratura). Riceve solo i pixel, mai il profilo.",
+   
+   have:["Client HTTP tipizzato, solo pixel (mai il profilo), gate presenza/attributi","Disabilitato di default; conferma esplicita prima di inviare foto","Eval storica su 7 immagini: 42/42 binarie, 11/13 scelte, 8/8 box IoU≥0,5"],
+   miss:["Nessuna chiamata live dall'app","Serve <code>JEV_ENABLED=true</code> + <code>JEV_API_KEY</code>"],chat:["Le box 2D sono l'input del passaggio 2D→3D"],files:["pipeline/jev.py","eval/jev/"]},
+  {id:"reconstruct",n:"reconstruct",s:"fix",sub:"VGGT su AMD · 3D",desc:"VGGT guarda tutte le foto insieme e, in un solo passaggio, stima per ciascuna da dove è stata scattata (posa), con quale obiettivo (intrinseche K) e quanto è lontano ogni pixel (mappa di profondità + confidenza). Da qui si ottiene una nuvola di punti 3D colorata della stanza. Le unità sono relative: senza ArUco non sappiamo quanto vale “1”.",
+   
+   have:["Adapter VGGT: verifica commit + SHA256 del checkpoint, mai download implicito","Output NPZ (depth, confidenza, estrinseche world-to-camera, K, point map) + PLY binario colorato","Manifest con convenzioni: OpenCV [R|t], z-depth, unità relative, scala sconosciuta"],
+   miss:["<b>Mai eseguito su GPU</b>: è il passo che rende la demo valida per l'hackathon","Servono MI300X, <code>VGGT_CHECKPOINT</code>, <code>VGGT_COMMIT</code>, <code>VGGT_CHECKPOINT_SHA256</code>"],
+   chat:["DA3-Giant come alternativa: migliore sui benchmark, ma da scrivere → non ora","VRAM: ~11 GB / 50 frame, ~21 GB / 100 (stime)"],files:["pipeline/reconstruction.py","scripts/gpu_smoke.py","Dockerfile.worker.rocm"]},
+  {id:"gemma",n:"gemma",s:"fix",sub:"Gemma su AMD · giudizio",desc:"Gemma è il modello che “ragiona”. Riceve le foto (a gruppi di 4), le box di Jev, la checklist e il profilo confermato, e restituisce in italiano: osservazione, perché conta per questa persona, priorità, incertezza, azione suggerita (scelta solo tra quelle della checklist). Il codice rifiuta risposte con misure, prezzi o riferimenti inventati.",
+   
+   have:["Client HTTP verso endpoint vLLM, JSON vincolato, riparazione limitata","Testato solo con trasporto simulato"],
+   miss:["vLLM ROCm con <code>google/gemma-4-31B-it</code> su MI300X","<code>GEMMA_BASE_URL</code>, <code>GEMMA_MODEL</code>, <code>GEMMA_MODEL_REVISION</code>","Test di convivenza in memoria con VGGT"],
+   chat:["Il LLM giudica, <b>non misura</b>"],files:["pipeline/gemma.py","prompts/assessment.txt","compose.rocm.yaml"]},
+  {row:"Geometria e 3D"},
+  {id:"geometry",n:"geometry",s:"new",sub:"box 2D → 3D, scala",desc:"Collega le box 2D di Jev allo spazio 3D. Prende la parte centrale della box, guarda i punti 3D corrispondenti e, se sono abbastanza e compatti, calcola un punto (pin). Poi controlla che il punto sia coerente in almeno un'altra foto. Se non lo è, si astiene: il pericolo resta “solo in foto”. L'estensione prevista: box 3D invece di pin, pavimento orizzontale, scala in cm dall'ArUco.",
+   
+   have:["<code>unproject()</code>: back-projection con depth, K, [R|t]","<code>supported_anchor()</code>: pin 3D solo se ci sono abbastanza punti di supporto (min 20)","Box senza supporto restano evidenze solo-immagine"],
+   miss:["Da pin a <b>box 3D</b> (percentili 2–98)","Piano pavimento con RANSAC → asse verticale allineato alla gravità","<b>Scala ArUco</b>: angoli del marker in più frame, fattore = mediana; dichiarare l'errore vs metro","Fusione multi-frame per classe (IoU 3D / distanza centroidi)","Misure geometriche (corridoi, larghezze) — P1"],
+   chat:["X_cam = d·K⁻¹[u,v,1]ᵀ, X_world = Rᵀ(X_cam − t) — formula corretta","Detection in un solo frame: <b>declassare</b>, non scartare","SAM2 opzionale: la mediana della depth basta per la demo"],files:["pipeline/geometry.py"]},
+  {id:"splat",n:"gsplat (splat)",s:"new",sub:"opzionale, visivo",desc:"Il Gaussian Splatting rappresenta la stanza come milioni di piccole “macchie” colorate e semitrasparenti, ottimizzate per riprodurre le foto: il risultato è navigabile e quasi fotografico. È solo per la vista: non contiene oggetti né misure.",
+   
+   have:[],
+   miss:["Export COLMAP (VGGT <code>demo_colmap.py</code>) → <code>simple_trainer.py</code> ~7k iter → <code>.ply</code>","<code>recon.py</code> esiste solo come bozza non testata","Gestire la normalizzazione del mondo di gsplat (vedi Insidie)","Compressione per il web (SH grado 0 / .spz)"],
+   chat:["Su AMD: <code>amd_gsplat</code> (ROCm 6.4.3, PyTorch 2.6), stessa API","Fare <b>solo</b> se la catena VGGT → box 3D → report gira già su AMD"],files:["(nuovo) recon.py"]},
+  {id:"viewer",n:"Viewer 3D",s:"done",sub:"three.js",desc:"Mostra la stanza in 3D nel browser (three.js) con i pin dei pericoli. Cliccando un pin si apre la foto con la box corrispondente, e viceversa. Il revisore può togliere un pin sbagliato.",
+   
+   have:["Point cloud PLY, selezione pin ↔ foto, fallback senza WebGL","three.js caricato on demand"],
+   miss:["Box wireframe colorate per rischio con etichetta","Al clic: frame originale con la detection 2D","Livello splat con Spark (opzionale)"],chat:["Visualizzazione veloce senza codice: trascinare il .ply in SuperSplat"],files:["web/src/components/SceneViewer.tsx"]},
+  {row:"Revisione e consegna"},
+  {id:"review",n:"Revisione",s:"done",sub:"approva/modifica/rifiuta/rimanda",desc:"Un professionista (infermiere, terapista occupazionale) rivede ogni pericolo proposto: approva, modifica il testo, rifiuta o rimanda. Ogni decisione è salvata con le revisioni; due modifiche in conflitto vengono bloccate.",
+   
+   have:["Decisioni con revisioni e guardie contro scritture obsolete","Autenticazione revisore, cookie HttpOnly, controllo cross-origin"],miss:["Revisione reale da un professionista (oggi simulata)"],chat:[],files:["api.py","web/src/components/ReviewControls.tsx"]},
+  {id:"report",n:"Report + rilascio",s:"done",sub:"HTML/PDF italiano",desc:"Dai soli pericoli approvati genera il piano d'azione in italiano, web e PDF, dallo stesso contenuto. Gemma può riformulare, ma il codice verifica che copi esattamente osservazioni e azioni approvate. Dopo il rilascio, la famiglia riceve un link segreto valido 7 giorni.",
+   
+   have:["Stesso snapshot per web e PDF (WeasyPrint)","Azioni rifiutate escluse; rilascio con link famiglia a 7 giorni, mostrato una volta, revocabile","Stress test PDF su 8 pagine ispezionato"],miss:["Report da dati reali"],chat:[],files:["pipeline/reports.py","templates/report.html"]},
+  {id:"deploy",n:"Deploy + demo",s:"todo",sub:"AMD Cloud, video",desc:"Mettere online l'app su AMD Developer Cloud (API + worker + modelli su MI300X), misurare tempi e memoria, registrare il video della demo.",
+   
+   have:["Docker CPU verificato; immagini base fissate per digest","<code>compose.rocm.yaml</code> valido solo come configurazione"],
+   miss:["Deploy su AMD Developer Cloud con HTTPS e log senza capability","Benchmark tempi/memoria/costi","Video demo registrato + materiale di consegna"],chat:[],files:["compose.rocm.yaml","docs/demo-script.md"]},
+];
+const LABEL={done:"Implementato",fix:"Pronto, mai live",todo:"Da fare",new:"Nuovo (chat)"};
+
+const pipe=document.getElementById("pipe"), detail=document.getElementById("detail");
+STAGES.forEach(st=>{
+  if(st.row){const d=document.createElement("div");d.className="row-label";d.textContent=st.row;pipe.append(d);return;}
+  const b=document.createElement("button");b.className="node";b.dataset.s=st.s;b.dataset.id=st.id;
+  b.innerHTML=`<span class="n">${st.n}</span> <span class="chip s-${st.s}">${LABEL[st.s]}</span><small>${st.sub}</small>`;
+  b.onclick=()=>show(st.id);pipe.append(b);
+});
+const li=a=>a.length?"<ul>"+a.map(x=>`<li>${x}</li>`).join("")+"</ul>":"<p class='muted'>—</p>";
+function show(id){
+  const st=STAGES.find(s=>s.id===id);
+  document.querySelectorAll(".node").forEach(n=>n.classList.toggle("sel",n.dataset.id===id));
+  detail.innerHTML=`<h3>${st.n} <span class="chip s-${st.s}">${LABEL[st.s]}</span></h3>
+  <p class="desc"><b>Cosa fa.</b> ${st.desc}</p>
+  <div class="grid2"><div><h4>Cosa c'è già</h4>${li(st.have)}<h4>File</h4>${li(st.files.map(f=>`<code>${f}</code>`))}</div>
+  <div><h4>Cosa manca</h4>${li(st.miss)}${st.chat.length?`<h4>Dalla discussione 3D</h4>${li(st.chat)}`:""}</div></div>`;
+}
+show("reconstruct");
+document.querySelectorAll(".legend input").forEach(cb=>cb.onchange=()=>{
+  const on=[...document.querySelectorAll(".legend input")].filter(c=>c.checked).map(c=>c.dataset.f);
+  document.querySelectorAll(".node").forEach(n=>n.classList.toggle("dim",!on.includes(n.dataset.s)));
+});
+
+const NEEDS=[
+  {g:"Accessi",items:[
+    ["amd","Accesso AMD Developer Cloud (MI300X) con shell o container","P0","Senza questo la demo non rispetta la regola dell'hackathon. Verifica con <code>rocm-smi</code>."],
+    ["hf","Account Hugging Face con accesso a Gemma (+ token)","P0","Licenza Gemma da accettare; <code>HF_TOKEN</code> solo sul server."],
+    ["jevkey","Chiave API Jev","P0","<code>JEV_API_KEY</code>; mai nel frontend."]]},
+  {g:"Dati",items:[
+    ["aruco","Marker ArUco stampato (dimensione nota, misurata dopo la stampa)","P0","Le stampanti scalano: misura il lato stampato col righello."],
+    ["capture","12–20 foto (o video) di una stanza con pericoli messi in scena","P0","Tappeto, cavo a terra, niente maniglioni; una zona volutamente non valutabile."],
+    ["tape","2–3 misure col metro della stessa stanza","P0","Servono per dichiarare l'errore della scala ArUco."],
+    ["labels","Etichette dei pericoli scritte prima delle chiamate ai modelli","P0","Presenza, assenza, zone non coperte → <code>room-001.json</code>."],
+    ["mip","(Opzionale) scena Mip-NeRF 360 \"room\" per testare VGGT subito","P2","~12,5 GB; licenza da verificare; nessun ArUco."]]},
+  {g:"Modelli e immagini",items:[
+    ["vggtw","Checkpoint VGGT-1B + commit esatto + SHA256","P0","CC-BY-NC: ok per l'hackathon."],
+    ["vllm","Immagine vLLM ROCm compatibile con Gemma (digest)","P0","Da indicare in <code>VLLM_ROCM_IMAGE</code>."],
+    ["rocmimg","Immagine base worker ROCm (rocm/pytorch 6.4.3 / PyTorch 2.6)","P0","<code>ROCM_WORKER_BASE</code>, più <code>VIDEO_GID</code>/<code>RENDER_GID</code>."],
+    ["gsplatpkg","amd_gsplat installato e testato","P2","Solo per lo splat opzionale."]]},
+  {g:"Codice da scrivere",items:[
+    ["box3d","Box 3D + pavimento RANSAC in <code>geometry.py</code>","P0","Sviluppabile subito su CPU con le fixture."],
+    ["scale","Calibrazione scala da ArUco (multi-frame, mediana)","P1","Necessaria per qualunque misura in cm."],
+    ["viewerbox","Box wireframe + clic → foto con detection nel viewer","P0","Estende <code>SceneViewer.tsx</code>."],
+    ["splatcode","Pipeline gsplat + livello Spark nel viewer","P2","Solo se tutto il resto gira su AMD."]]},
+  {g:"Consegna",items:[
+    ["deploy","Deploy su AMD con HTTPS, log senza token famiglia","P0",""],
+    ["bench","Tempi e memoria reali misurati su MI300X","P1","<code>scripts/benchmark.py</code> raccoglie i dati."],
+    ["video","Video demo registrato + testo di consegna","P0","Traccia in <code>docs/demo-script.md</code>."]]},
+];
+const KEY="safehome-needs";
+const state=JSON.parse(localStorage.getItem(KEY)||"{}");
+const nl=document.getElementById("needs-list");
+NEEDS.forEach(g=>{
+  const h=document.createElement("h4");h.textContent=g.g;h.style.margin="16px 0 4px";nl.append(h);
+  g.items.forEach(([id,t,p,d])=>{
+    const row=document.createElement("label");row.className="check";
+    row.innerHTML=`<input type="checkbox" data-id="${id}"><div><div class="t">${t}<span class="pri ${p.toLowerCase()}">${p}</span></div>${d?`<div class="d">${d}</div>`:""}</div>`;
+    const cb=row.querySelector("input");cb.checked=!!state[id];
+    cb.onchange=()=>{state[id]=cb.checked;localStorage.setItem(KEY,JSON.stringify(state));upd();};
+    nl.append(row);
+  });
+});
+function upd(){
+  const all=[...nl.querySelectorAll("input")];const ok=all.filter(c=>c.checked).length;
+  all.forEach(c=>c.closest(".check").classList.toggle("ok",c.checked));
+  const pct=Math.round(ok/all.length*100);
+  document.getElementById("needs-bar").style.width=pct+"%";document.getElementById("kpi-check").textContent=pct+"%";
+}
+upd();
+
+const PLAN=[
+  {w:"Oggi · subito",t:"Setup locale e verifica che i 22 test passino",d:"Comandi nella scheda “Comandi”. Conferma che la beta CPU è sana prima di toccare altro."},
+  {w:"Oggi · in parallelo",t:"Chiedere accesso AMD Developer Cloud + chiavi (HF, Jev)",d:"È il percorso critico: tutto il resto aspetta questo.",gate:true,g:"Gate: GPU visibile con rocm-smi"},
+  {w:"Oggi",t:"Fare la ripresa della stanza (≈15 minuti)",d:"ArUco stampato e misurato, pericoli messi in scena, 15–20 foto, 2–3 misure col metro, etichette scritte prima."},
+  {w:"Oggi · CPU",t:"Box 3D + pavimento RANSAC in geometry.py, box wireframe nel viewer",d:"Si sviluppa con le fixture mentre si aspetta l'accesso AMD."},
+  {w:"Domani mattina",t:"VGGT reale su MI300X con la tua stanza",d:"case run in live mode sullo stage reconstruct; ispeziona depth, pose, PLY.",gate:true,g:"Gate: point cloud riconoscibile, box 3D al posto giusto"},
+  {w:"Domani",t:"Scala ArUco + Jev live + Gemma su vLLM ROCm",d:"Verifica scala contro il metro. Controlla che VGGT e Gemma convivano in memoria."},
+  {w:"Domani pomeriggio",t:"Catena completa: upload → revisione → report rilasciato, tutto su AMD",d:"Questa è la demo minima valida.",gate:true,g:"Gate: report reale rilasciato"},
+  {w:"Solo se avanza tempo",t:"gsplat ~7k iter + livello Spark nel viewer",d:"Attenzione a normalizzazione delle coordinate e peso del file."},
+  {w:"18 ottobre",t:"Deploy, video demo, consegna",d:"Mostra esplicitamente MI300X/ROCm in uso (rocm-smi, tempi)."},
+];
+const tl=document.getElementById("timeline");
+PLAN.forEach(p=>{const s=document.createElement("div");s.className="step"+(p.gate?" gate":"");
+  s.innerHTML=`<div class="when">${p.w}</div><h4>${p.t}</h4><div>${p.d}</div>${p.g?`<div class="gate-note">${p.g}</div>`:""}`;tl.append(s);});
+
+const PITS=[
+  ["gsplat normalizza le coordinate del mondo","Con <code>normalize_world_space</code> attivo (default di <code>simple_trainer.py</code>, da verificare) gsplat applica una similarità alla scena: lo splat <b>non</b> è più nelle coordinate delle box. Disattivalo, oppure salva la trasformazione e applicala al contrario alle box."],
+  ["--use_ba cambia le pose","Dopo il bundle adjustment le camere non coincidono con quelle feed-forward usate per le depth. Splat e box devono usare lo <b>stesso</b> insieme di pose. In più il BA richiede il tracker (VRAM e dipendenze in più su ROCm). Per la demo: senza BA."],
+  ["Coordinate delle box: originale vs 518×518","Jev lavora sull'immagine originale; K e depth sono nello spazio 518 con padding. Le box vanno trasformate con <code>scale_xy</code>/<code>offset_xy</code> registrati da <code>prepare</code>. Il repo lo fa già: non bypassarlo con uno script separato."],
+  ["Scala relativa di VGGT","VGGT restituisce unità relative con origine nella prima camera. Stima il fattore dagli angoli ArUco back-proiettati in più frame (mediana) e dichiara l'errore rispetto al metro. Nessuna misura in cm senza questo."],
+  ["Peso dello splat nel browser","1–3 milioni di gaussiane × ~62 float = centinaia di MB. Usa armoniche sferiche di grado 0 o un formato compresso (.spz, PLY compresso SuperSplat)."],
+  ["Detection viste in un solo frame","Non scartarle: declassale a “non confermate” o “solo immagine”. Un pericolo visto una volta resta un pericolo, e il repo già mantiene visibili le evidenze non localizzate."],
+  ["SAM2 = un altro modello da validare su ROCm","Per la demo basta il filtro sulla mediana della depth dentro la box (simile a <code>supported_anchor</code>)."],
+  ["Superfici difficili","Pareti bianche lisce, controluce, specchi (“stanza fantasma”), vetro. Inquadra le pareti insieme a oggetti; evita gli specchi o segnalali come zona non valutabile."],
+  ["Licenze","Pesi VGGT-1B e DA3-Giant CC-BY-NC: ok per l'hackathon, da rivedere per un uso commerciale. Licenza Mip-NeRF 360 da verificare prima di usarla in una demo pubblica."],
+];
+const pl=document.getElementById("pit-list");
+PITS.forEach(([t,d],i)=>{const e=document.createElement("details");if(i<2)e.open=true;e.innerHTML=`<summary>${t}</summary><div>${d}</div>`;pl.append(e);});
+
+const r=document.getElementById("vram-r"),o=document.getElementById("vram-o"),vn=document.getElementById("vram-n");
+const pts=[[1,1.9],[10,5.6],[50,11.4],[100,21.2],[200,40.6]];
+function vram(f){for(let i=1;i<pts.length;i++){if(f<=pts[i][0]){const[a,b]=[pts[i-1],pts[i]];return a[1]+(b[1]-a[1])*(f-a[0])/(b[0]-a[0]);}}const[a,b]=[pts[3],pts[4]];return b[1]+(b[1]-a[1])*(f-b[0])/(b[0]-a[0]);}
+function vupd(){const f=+r.value,g=vram(f);o.textContent=`${f} frame ≈ ${g.toFixed(0)} GB`;
+  vn.textContent=g<14?"Entra anche su una GPU da 16 GB.":g<22?"Serve una GPU da 24 GB o più.":g<30?"Serve una GPU da 32 GB (es. RTX 5090).":"Solo MI300X (192 GB) o simili.";}
+r.oninput=vupd;vupd();
+
+document.querySelectorAll("pre").forEach(p=>{const b=document.createElement("button");b.textContent="Copia";
+  b.onclick=()=>{navigator.clipboard.writeText(p.childNodes[0].textContent.trim());b.textContent="Copiato";setTimeout(()=>b.textContent="Copia",1200);};p.append(b);});
+
+const STEPS=[
+  {t:"Intake: profilo e consenso",who:"Familiare / operatore",where:"Browser",
+   d:"Si crea la valutazione con il profilo della persona (descrizione, mobilità, ausili). Il profilo va confermato prima dell'analisi. Si dichiara se le foto possono essere inviate a un servizio esterno (Jev): senza consenso Jev non riceve nulla.",
+   i:"Testo del profilo, consenso", o:"Valutazione in stato bozza"},
+  {t:"Upload delle foto",who:"Familiare",where:"API (CPU)",
+   d:"Si caricano 12–20 foto sovrapposte della stanza (ruolo “panoramica”) ed eventuali foto di dettaglio. L'API controlla formato e dimensioni e le salva in un'area privata.",
+   i:"JPEG/PNG", o:"Foto salvate con checksum"},
+  {t:"Avvio analisi → coda",who:"Operatore",where:"API + worker",
+   d:"“Analizza” mette un job nella coda SQLite. Il worker (un solo processo, con un lock per non contendersi la GPU) lo prende e registra con quali backend gira (fixture o live): un worker configurato diversamente rifiuta il job.",
+   i:"Richiesta di analisi", o:"Job in coda, poi in esecuzione"},
+  {t:"prepare — preparazione immagini",who:"Codice",where:"CPU",
+   d:"Orientamento EXIF, rimozione metadati, ridimensionamento, versione quadrata 518×518 con bordo per VGGT. Ogni trasformazione (scala, offset, area utile) è salvata: serve per spostare box e punti tra foto originale e immagine del modello.",
+   i:"Foto originali", o:"Foto preparate + trasformazioni"},
+  {t:"jev — pericoli candidati in 2D",who:"Jev (API esterna)",where:"typesafe.ai",
+   d:"Per ogni foto e ogni voce della checklist: presenza (0–1), box, visibilità dell'area. Sopra 0,75 = presente, sotto 0,25 = assente, in mezzo = incerto. Le box di oggetti assenti si scartano: Jev restituisce sempre un rettangolo, anche quando l'oggetto non c'è. Per il tappeto si chiede se il fissaggio è visibile; di solito la risposta corretta è “sconosciuto”.",
+   i:"Pixel + checklist (mai il profilo)", o:"Candidati: categoria, presenza, box, copertura"},
+  {t:"reconstruct — stanza in 3D",who:"VGGT",where:"GPU AMD",
+   d:"Tutte le foto panoramiche entrano insieme in VGGT, che stima posizione di ogni scatto, parametri della camera e profondità di ogni pixel, con una confidenza. Si filtra per confidenza e si esporta la nuvola di punti (PLY) per il viewer. Questo passo non sa nulla di pericoli o profili.",
+   i:"Foto preparate 518×518", o:"Pose, K, depth, confidenza (NPZ) + nuvola di punti (PLY)"},
+  {t:"geometry — dai riquadri ai punti 3D",who:"Codice (NumPy)",where:"CPU",
+   d:"Per tappeti, ostacoli e scale presenti: prende il 60% centrale della box, legge i punti 3D, tiene quelli affidabili e calcola la mediana. Se i punti sono pochi o sparpagliati (oggetto + muro dietro) si astiene. Poi riproietta il punto nelle altre foto e richiede almeno 2 viste coerenti. Domani: box 3D, pavimento con RANSAC, scala ArUco.",
+   i:"Candidati Jev + output VGGT", o:"Pin 3D supportati + astensioni motivate"},
+  {t:"gemma — valutazione personalizzata",who:"Gemma 4 31B (vLLM)",where:"GPU AMD",
+   d:"A gruppi di 4 foto, Gemma riceve immagini, candidati Jev, checklist e profilo. Deve passare in rassegna tutta la checklist, anche dove Jev non ha trovato nulla, e restituire un JSON con osservazione, rilevanza per il profilo, priorità, incertezza e azione. Il codice valida tutto: ID esistenti, azione presa dalla checklist, nessuna misura o prezzo. Se la risposta non è valida c'è un solo tentativo di correzione, poi il job fallisce visibilmente. I pin 3D li aggancia il codice, non Gemma.",
+   i:"Foto + candidati + profilo + checklist", o:"Pericoli in italiano, copertura, richieste di altre foto"},
+  {t:"Revisione professionale",who:"Infermiere / terapista",where:"Browser",
+   d:"Il revisore vede ogni pericolo con la foto, la box e il pin 3D, e decide: approva, modifica, rifiuta o rimanda. Può togliere un pin sbagliato. Le aree non valutate restano esplicite.",
+   i:"Pericoli proposti", o:"Decisioni con storico delle revisioni"},
+  {t:"report — bozza del piano d'azione",who:"Gemma (riformulazione) + template",where:"GPU AMD + CPU",
+   d:"Con i soli pericoli approvati si genera una bozza in italiano. Gemma può ordinare e collegare il testo ma deve copiare esattamente osservazioni e azioni approvate; i rifiutati e i rimandati non possono comparire. Lo stesso contenuto produce HTML e PDF (WeasyPrint).",
+   i:"Decisioni approvate", o:"Bozza HTML + PDF"},
+  {t:"Rilascio alla famiglia",who:"Operatore",where:"API",
+   d:"Il revisore controlla la bozza e la rilascia. Viene creato un link segreto, mostrato una volta sola, valido 7 giorni, che dà accesso solo al report. Se la valutazione cambia dopo la bozza, il rilascio viene rifiutato (bozza obsoleta). Cancellare la valutazione revoca il link.",
+   i:"Bozza approvata", o:"Report rilasciato + link famiglia"},
+];
+const sl=document.getElementById("steps");
+STEPS.forEach((st,i)=>{const e=document.createElement("details");if(i===4||i===5)e.open=true;
+  e.innerHTML=`<summary><span class="stepn">${i+1}</span>${st.t} <span class="where${/AMD/.test(st.where)?" amd":""}">${st.where}</span></summary>
+  <p>${st.d}</p><div class="io"><div><b>Chi</b>${st.who}</div><div><b>Input</b>${st.i}</div><div><b>Output</b>${st.o}</div></div>`;sl.append(e);});
+
+const MODELS=[
+  {n:"Jev 1.14",where:"API esterna (typesafe.ai)",amd:false,s:"fix",
+   what:"Modello di visione che risponde a domande chiuse su un'immagine: sì/no con punteggio (<i>noul</i>), scelta tra opzioni (<i>choice</i>), riquadro (<i>box</i>).",
+   role:"Primo filtro: trova i candidati e dice dove sono nella foto.",
+   inp:"Una foto + domande fisse dalla checklist.", out:"Punteggi di presenza, box 2D, copertura dell'area.",
+   lim:"Restituisce sempre una box, anche per oggetti assenti: va filtrata con il punteggio. Non vede sotto i tappeti. Non gira su AMD: non conta come “uso GPU AMD”.",
+   ev:"Eval su 7 foto pubbliche: 42/42 sì/no, 8/8 box con IoU ≥ 0,5, ~1,6 s a richiesta."},
+  {n:"VGGT-1B",where:"GPU AMD (MI300X)",amd:true,s:"fix",
+   what:"Visual Geometry Grounded Transformer (Meta / Oxford). Rete feed-forward: da N foto stima in un colpo pose delle camere, intrinseche, profondità e point map. Niente ottimizzazione lunga stile COLMAP.",
+   role:"Il cuore 3D e il pezzo che rende concreta la GPU AMD nella demo.",
+   inp:"12–20 foto a 518 px.", out:"Pose [R|t], K, depth + confidenza per pixel, nuvola di punti.",
+   lim:"Unità relative (serve ArUco). VRAM cresce con i frame (~11 GB a 50). Pesi CC-BY-NC. Pareti bianche, specchi e vetro danno profondità sbagliate.",
+   ev:"Adapter scritto e testato offline; mai eseguito su GPU."},
+  {n:"Gemma 4 31B-it",where:"GPU AMD via vLLM",amd:true,s:"fix",
+   what:"Modello multimodale (testo + immagini) di Google, servito con vLLM su ROCm tramite API compatibile OpenAI.",
+   role:"Giudizio: collega quello che si vede al profilo della persona e scrive in italiano. Due usi: valutazione dei pericoli e riformulazione del report.",
+   inp:"Foto, candidati Jev, checklist, profilo confermato.", out:"JSON vincolato da schema: pericoli, priorità, incertezza, azioni.",
+   lim:"Non deve misurare né inventare: il codice rifiuta numeri con unità, prezzi, ID non forniti. Temperatura 0, una sola correzione. Serve una revisione fissata (<code>GEMMA_MODEL_REVISION</code>).",
+   ev:"Client testato con trasporto simulato; mai servito davvero."},
+  {n:"gsplat (Gaussian Splatting)",where:"GPU AMD (amd_gsplat)",amd:true,s:"new",
+   what:"Libreria Nerfstudio che ottimizza milioni di gaussiane 3D finché il loro rendering riproduce le foto. Su AMD c'è il port ufficiale ROCm con la stessa API.",
+   role:"Solo visualizzazione: una stanza navigabile quasi fotografica per l'operatore.",
+   inp:"Foto + pose (formato COLMAP).", out:"File .ply di gaussiane (posizione, scala, rotazione, opacità, colore).",
+   lim:"Nessuna semantica né misura. File pesanti (centinaia di MB). Buchi dove la camera non è passata. Opzionale.",
+   ev:"Non ancora iniziato; esiste solo una bozza di script non testata."},
+  {n:"Depth Anything 3",where:"GPU (alternativa)",amd:true,s:"todo",
+   what:"Modello successivo a VGGT per pose e profondità da più viste; secondo il paper è più preciso.",
+   role:"Possibile sostituto di VGGT, non ora.",
+   inp:"Come VGGT.", out:"Come VGGT.",
+   lim:"Adapter da scrivere da zero; pesi Giant CC-BY-NC.",ev:"Solo valutato a tavolino."},
+  {n:"SAM2",where:"GPU (opzionale)",amd:true,s:"todo",
+   what:"Segment Anything 2 (Meta): da una box produce la maschera precisa dell'oggetto.",
+   role:"Migliorerebbe le box 3D escludendo lo sfondo dentro la box.",
+   inp:"Foto + box.", out:"Maschera per pixel.",
+   lim:"Un modello in più da validare su ROCm; per la demo basta il filtro sulla profondità mediana.",ev:"Non previsto per il 18."},
+];
+const ml=document.getElementById("models");
+MODELS.forEach(m=>{const c=document.createElement("div");c.className="card model";
+  c.innerHTML=`<h3>${m.n} <span class="chip s-${m.s}">${LABEL[m.s]}</span></h3><span class="where${m.amd?" amd":""}">${m.where}</span>
+  <p>${m.what}</p><dl><dt>Ruolo</dt><dd>${m.role}</dd><dt>Input</dt><dd>${m.inp}</dd><dt>Output</dt><dd>${m.out}</dd><dt>Limiti</dt><dd>${m.lim}</dd><dt>Evidenza</dt><dd>${m.ev}</dd></dl>`;ml.append(c);});
+
+const GLOSS=[
+  ["Posa (estrinseche [R|t])","Posizione e orientamento della camera al momento dello scatto. VGGT dà la trasformazione mondo → camera."],
+  ["Intrinseche K","Parametri dell'obiettivo (focale, centro): dicono come un punto 3D finisce su un pixel."],
+  ["Depth map","Per ogni pixel, la distanza dalla camera lungo l'asse ottico."],
+  ["Point cloud / nuvola di punti","Insieme di punti 3D colorati ottenuto dalle depth: è ciò che oggi mostra il viewer."],
+  ["Back-projection","Da pixel + profondità al punto 3D: X = Rᵀ(d·K⁻¹[u,v,1]ᵀ − t)."],
+  ["Gaussian splat","Rappresentazione 3D fatta di tante gaussiane colorate; bella da vedere, senza oggetti né misure."],
+  ["ArUco","Marker quadrato stampato, riconoscibile automaticamente; conoscendone il lato in cm si ricava la scala reale della scena."],
+  ["RANSAC","Metodo robusto per trovare un piano (il pavimento) ignorando i punti che non c'entrano."],
+  ["IoU","Sovrapposizione tra due box (intersezione / unione): 1 = identiche, 0 = disgiunte."],
+  ["Fixture","Dati finti e dichiarati come tali, per sviluppare senza modelli. Oggi tutta la demo è in modalità fixture."],
+  ["Stage / fingerprint","Passo del worker e impronta dei suoi input: se l'impronta non cambia, l'output si riusa."],
+  ["vLLM","Server per modelli linguistici, efficiente su GPU; espone un'API compatibile OpenAI."],
+  ["ROCm","Lo stack software AMD per calcolo su GPU, equivalente di CUDA. PyTorch lo supporta."],
+  ["MI300X","GPU AMD per data center con 192 GB di memoria, disponibile su AMD Developer Cloud."],
+];
+const gl=document.getElementById("gloss");
+GLOSS.forEach(([t,d])=>{gl.insertAdjacentHTML("beforeend",`<dt>${t}</dt><dd>${d}</dd>`);});
+
+const tabs=document.querySelectorAll("nav button");
+tabs.forEach(t=>t.onclick=()=>{tabs.forEach(x=>x.setAttribute("aria-selected",x===t));
+  document.querySelectorAll("main>section").forEach(s=>s.hidden=s.id!==t.dataset.tab);});
+
+const days=Math.ceil((new Date(2026,9,18)-new Date().setHours(0,0,0,0))/864e5);
+document.getElementById("countdown").textContent=days>1?`${days} giorni`:days===1?"domani":days===0?"oggi":"scaduta";
+</script>
+</body>
+</html>
