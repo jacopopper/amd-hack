@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Step Wise · Room capture</title>
+<style>
+:root{color-scheme:light;font:14px/1.5 system-ui,sans-serif;color:#213d33;background:#f4f2eb}
+*{box-sizing:border-box}body{margin:0}header{height:78px;padding:15px 28px;border-bottom:1px solid #d8dcd3;display:flex;align-items:center;justify-content:space-between}.brand{font:29px Georgia,serif;letter-spacing:-1px}.label{text-transform:uppercase;letter-spacing:1.8px;font-size:10px}
+main{display:grid;grid-template-columns:280px minmax(0,1fr);height:calc(100svh - 78px)}
+aside{padding:24px;overflow:auto}h1{font:34px/1.1 Georgia,serif;letter-spacing:-1px;margin:12px 0 20px}p{color:#607166;font-size:13px}#photo{width:100%;max-height:280px;object-fit:contain;background:#e4e7de;display:block}
+.notice{background:#e9e3d0;border-left:3px solid #ac8d50;padding:12px;color:#665b3d;font-size:12px}
+section{min-width:0;display:flex;flex-direction:column;padding:20px 24px 20px 0;gap:12px}
+#stage{position:relative;flex:1;min-height:350px;background:#151e1a;border-radius:5px;overflow:hidden;touch-action:none}
+canvas{display:block}#loading{position:absolute;inset:0;display:grid;place-items:center;z-index:3;color:white;padding:40px;text-align:center;pointer-events:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center}button,select,a{font:inherit;font-size:12px;padding:8px 11px;border:1px solid #bcc9be;color:#244e3b;border-radius:3px;background:transparent;text-decoration:none;cursor:pointer}button[aria-pressed=true]{background:#244e3b;color:white}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #c78d42;outline-offset:2px}button:disabled{opacity:.45;cursor:wait}select{max-width:180px;width:100%;margin:10px 0}.stats{font-size:12px;color:#677568}
+@media(max-width:800px){header{padding:12px 18px}main{grid-template-columns:1fr;height:auto}aside{padding:18px}h1{font-size:28px;margin:8px 0 14px}#photo{max-height:190px}.notice{margin:12px 0}section{padding:0 18px 18px}#stage{height:64svh;flex:auto}.stats{font-size:11px}}
+</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script>
+</head>
+<body>
+<header><div class="brand">Step Wise.</div><div class="label">Private capture / local reconstruction</div></header>
+<main>
+<aside>
+<div class="label">VGGT + Gaussian splatting</div><h1>Your room,<br>from every angle.</h1>
+<img id="photo" alt="Selected source photograph">
+<label for="view">Photographic viewpoint</label><select id="view"></select>
+<div class="toolbar"><button id="previous">Previous</button><button id="next">Next</button></div>
+<p>Drag to orbit, scroll to zoom, right-drag to pan. Choose a photo to return to its estimated camera position.</p>
+<div class="notice">Observed surfaces, not a surveyed digital twin. Unseen areas remain unknown. Scale is relative; dimensions and hazard anchors are not validated.</div>
+<p id="status">Loading reconstruction…</p>
+<p id="selection">Only the explicitly selected capture photos are used. No images were sent to an external service.</p>
+</aside>
+<section>
+<div id="stage"><div id="loading" role="status">Loading the observed room surfaces…</div></div>
+<div class="toolbar">
+<button id="splats" aria-pressed="false" disabled>Gaussian splats</button>
+<button id="surface" aria-pressed="true">Observed mesh</button>
+<button id="points" aria-pressed="false">Point cloud</button>
+<button id="reset">Reset viewpoint</button>
+<a href="room.ply" download>Download splat PLY</a>
+<a href="observed.ply" download>Download mesh</a>
+</div>
+<div class="stats" id="stats"></div>
+</section>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './vendor/OrbitControls.js';
+import {PLYLoader} from './vendor/PLYLoader.js';
+import {Viewer, SceneRevealMode, RenderMode} from './vendor/splats.js';
+const stage=document.querySelector('#stage'),loading=document.querySelector('#loading');
+try {
+  const request=async path=>{const r=await fetch(path);if(!r.ok)throw Error(`${path}: HTTP ${r.status}`);return r.json()};
+  const data=await request('viewpoints.json');
+  const scene=new THREE.Scene();
+  const renderer=new THREE.WebGLRenderer({antialias:false,preserveDrawingBuffer:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setClearColor('#151e1a');
+  stage.append(renderer.domElement);
+  renderer.domElement.setAttribute('aria-label','Interactive reconstruction of all captured room views');
+  const camera=new THREE.PerspectiveCamera(65,1,.003,100);
+  const controls=new OrbitControls(camera,renderer.domElement);
+  controls.enableDamping=true;
+  controls.minDistance=.015;
+  controls.maxDistance=15;
+  const geometry=await new PLYLoader().loadAsync('observed.ply');
+  const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide}));
+  const points=new THREE.Points(geometry,new THREE.PointsMaterial({vertexColors:true,size:.002,sizeAttenuation:true}));
+  scene.add(mesh,points);
+  points.visible=false;
+  let viewer=null,current=Math.min(12,data.views.length-1),mode='surface';
+  const selector=document.querySelector('#view');
+  data.views.forEach((v,i)=>{const option=document.createElement('option');option.value=i;option.textContent=`${i+1} / ${data.views.length} · ${v.id}`;selector.append(option)});
+  const sourceView=index=>{
+    current=(index+data.views.length)%data.views.length;
+    const v=data.views[current],matrix=new THREE.Matrix4().set(...v.world_to_camera.flat()).invert();
+    const position=new THREE.Vector3().setFromMatrixPosition(matrix);
+    const forward=new THREE.Vector3(0,0,1).transformDirection(matrix);
+    camera.up.copy(new THREE.Vector3(0,-1,0).transformDirection(matrix));
+    camera.position.copy(position);
+    camera.fov=2*Math.atan(518/(2*v.intrinsics[1][1]))*180/Math.PI;
+    controls.target.copy(position).addScaledVector(forward,.65);
+    camera.lookAt(controls.target);camera.updateProjectionMatrix();controls.update();
+    selector.value=String(current);
+    document.querySelector('#photo').src=v.image;
+    window.captureViewIndex=current;
+  };
+  sourceView(current);
+  const setMode=value=>{
+    mode=value;mesh.visible=value==='surface';points.visible=value==='points';
+    if(viewer)viewer.splatMesh.visible=value==='splats';
+    for(const name of ['splats','surface','points'])document.querySelector('#'+name).setAttribute('aria-pressed',String(name===value));
+    window.captureMode=value;
+  };
+  document.querySelector('#surface').onclick=()=>setMode('surface');
+  document.querySelector('#points').onclick=()=>setMode('points');
+  document.querySelector('#splats').onclick=()=>setMode('splats');
+  selector.onchange=()=>sourceView(Number(selector.value));
+  document.querySelector('#previous').onclick=()=>sourceView(current-1);
+  document.querySelector('#next').onclick=()=>sourceView(current+1);
+  document.querySelector('#reset').onclick=()=>sourceView(current);
+  new ResizeObserver(()=>{
+    const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();
+  }).observe(stage);
+  loading.remove();
+  document.querySelector('#stats').textContent=`${data.views.length} input photos · ${data.mesh_vertices.toLocaleString()} observed vertices · ${data.mesh_triangles.toLocaleString()} triangles`;
+  document.querySelector('#status').textContent='VGGT observed mesh is ready. Checking Gaussian training…';
+  window.captureReady=true;
+  renderer.setAnimationLoop(()=>{
+    controls.update();
+    if(viewer){viewer.update(renderer,camera);viewer.render();}
+    else renderer.render(scene,camera);
+  });
+  const trained=await fetch('training.json');
+  if(trained.ok){
+    const training=await trained.json();
+    viewer=new Viewer({selfDrivenMode:false,renderer,camera,threeScene:scene,useBuiltInControls:false,
+      sharedMemoryForWorkers:false,gpuAcceleratedSort:false,integerBasedSort:false,
+      sphericalHarmonicsDegree:2,sceneRevealMode:SceneRevealMode.Instant,renderMode:RenderMode.Always,
+      rootElement:stage,ignoreDevicePixelRatio:false});
+    await viewer.addSplatScene('room.ply',{splatAlphaRemovalThreshold:5,showLoadingUI:true,progressiveLoad:false});
+    document.querySelector('#splats').disabled=false;
+    document.querySelector('#status').textContent=`All ${training.views} photos trained for ${training.steps.toLocaleString()} steps · ${training.gaussians.toLocaleString()} Gaussian splats.`;
+    document.querySelector('#stats').textContent+=` · ${training.gaussians.toLocaleString()} trained splats`;
+    setMode('splats');
+    window.splatsReady=true;
+  }else{
+    document.querySelector('#status').textContent='VGGT mesh ready. Splat training is still running; reload when it finishes.';
+  }
+  window.captureSetView=sourceView;
+  window.captureSetMode=setMode;
+} catch(error) {
+  if(loading.isConnected)loading.textContent='Room view could not load: '+error.message;
+  document.querySelector('#status').textContent=error.message;
+  window.captureError=error.message;
+  console.error(error);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "provenance": "derived_planar_surface_regularization",
+  "metric_validated": false,
+  "fills_unseen_areas": false,
+  "input_sha256": "30526577a8560a2d145a6ebe3b02231bfad0514d9ed104454d14470c36721766",
+  "preserves_colors_and_opacity": true,
+  "surfaces": [
+    {
+      "surface": "floor",
+      "splats_regularized": 6172,
+      "plane_normal": [
+        -0.01046872516892282,
+        0.9813385649961851,
+        0.19200267353494227
+      ],
+      "plane_center": [
+        -0.3830162758939504,
+        0.33188100045503927,
+        1.096362099563028
+      ],
+      "rms_plane_distance_before": 0.004624735619474789,
+      "rms_plane_distance_after": 0.001618657466816176,
+      "units": "relative",
+      "observed_region_samples": 6981
+    },
+    {
+      "surface": "ceiling",
+      "splats_regularized": 5463,
+      "plane_normal": [
+        -0.024038755410843875,
+        0.9814794683239857,
+        0.19005312808992136
+      ],
+      "plane_center": [
+        0.40056372303019416,
+        -0.5176343469236541,
+        0.7912934166201159
+      ],
+      "rms_plane_distance_before": 0.005181751215241815,
+      "rms_plane_distance_after": 0.0018136129253346351,
+      "units": "relative",
+      "observed_region_samples": 3250
+    }
+  ],
+  "output_sha256": "a76b779fee68bcddc082c4bd81395d7b65a7891ff27754cb2bad525a8e32e761"
+}
