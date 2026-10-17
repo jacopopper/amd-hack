@@ -38,8 +38,8 @@ def room_presentation(scene, assessment):
     return {"model_url": f"/api/assets/{value['asset_id']}", "provenance": provenance,
             "coordinate_space": "raw_scene_relative" if completed else "illustrative",
             "display_transform": value.get("display_transform") if completed else None,
-            "label": ("Ricostruzione fotografica · superfici mancanti completate a mano" if completed
-                      else "Modello illustrativo · proporzioni e posizioni non misurate"),
+            "label": ("Photo reconstruction · missing surfaces completed by hand" if completed
+                      else "Illustrative model · proportions and positions not measured"),
             "hazard_positions": {} if completed else value["hazard_positions"]}
 
 
@@ -131,7 +131,7 @@ def create_app(settings=None):
             if request.headers.get("sec-fetch-site") == "cross-site" or not same_origin:
                 return JSONResponse({"error": "Cross-origin mutation denied"}, status_code=403)
             if settings.demo and not DEMO_MUTATIONS.match(request.url.path):
-                return JSONResponse({"error": "Nella demo pubblica si possono solo revisionare i pericoli e rilasciare il report."}, status_code=403)
+                return JSONResponse({"error": "In the public demo you can only review hazards and release the report."}, status_code=403)
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
         response.headers["Referrer-Policy"] = "no-referrer"

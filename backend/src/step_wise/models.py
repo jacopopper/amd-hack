@@ -307,7 +307,7 @@ class DraftItem(StrictModel):
 
 
 class DraftOutput(StrictModel):
-    title: Literal["Piano d’azione per la casa"]
+    title: Literal["Home action plan"]
     items: list[DraftItem] = Field(max_length=60)
 
 

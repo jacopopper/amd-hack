@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from step_wise import cases, db, snapshot, worker
+from step_wise import capture_case, cases, db, snapshot, worker
 from step_wise.config import ROOT, Settings
 from step_wise.demo import generate_controls, load_case, seed_case
 
@@ -19,6 +19,7 @@ def main(argv=None):
     reset.add_argument("--assessment", required=True)
     export = commands.add_parser("export-demo", help="Freeze an analysed assessment as the public demo case in demo/snapshot")
     export.add_argument("--assessment", required=True)
+    commands.add_parser("import-capture", help="Create a reviewable case from the reconstructed room in frontend/public/capture-data")
     work = commands.add_parser("worker")
     work.add_argument("--once", action="store_true")
     cleanup = commands.add_parser("cleanup", help="Dry run unless --execute is supplied")
@@ -68,6 +69,8 @@ def main(argv=None):
             result = {"status": "deleted", "assessment_id": args.assessment, "scope": "synthetic development only"}
         elif args.command == "export-demo":
             result = snapshot.export_case(settings, args.assessment)
+        elif args.command == "import-capture":
+            result = capture_case.import_capture(settings)
         elif args.command == "worker":
             worker.run(settings, once=args.once)
             result = {"status": "worker stopped"}

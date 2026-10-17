@@ -188,7 +188,7 @@ class Workflow(unittest.TestCase):
             self.assertNotIn("data:image", content)
             self.assertNotIn("position_world", content)
             supplied = json.loads(content)
-            result = schema.model_validate({"title": "Piano d’azione per la casa", "items": [{"hazard_id": h["id"], **{key: h[key] for key in ("observation", "priority", "suggested_action")}} for h in supplied["accepted"]]})
+            result = schema.model_validate({"title": "Home action plan", "items": [{"hazard_id": h["id"], **{key: h[key] for key in ("observation", "priority", "suggested_action")}} for h in supplied["accepted"]]})
             validate(result)
             return result, [{"status": "mocked_contract_test"}]
 
@@ -378,10 +378,10 @@ class Contracts(unittest.TestCase):
         accepted = [{"id": "accepted", "observation": "Tappeto", "suggested_action": "Verificare", "priority": "important"}]
         item = {"hazard_id": "invented", "observation": "Tappeto", "suggested_action": "Verificare", "priority": "important"}
         with self.assertRaises(ValueError):
-            validate_draft({"title": "Piano d’azione per la casa", "items": [item]}, accepted)
+            validate_draft({"title": "Home action plan", "items": [item]}, accepted)
         item.update(hazard_id="accepted", suggested_action="Costa 200 euro")
         with self.assertRaises(ValueError):
-            validate_draft({"title": "Piano d’azione per la casa", "items": [item]}, accepted)
+            validate_draft({"title": "Home action plan", "items": [item]}, accepted)
 
 if __name__ == "__main__":
     unittest.main()

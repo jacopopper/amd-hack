@@ -130,7 +130,7 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
 
 
 def relevance(profile, fields):
-    return "Profilo confermato: " + "; ".join(f"{name}={json.dumps(profile[name], ensure_ascii=False)}" for name in fields)
+    return "Confirmed profile: " + "; ".join(f"{name}={json.dumps(profile[name], ensure_ascii=False)}" for name in fields)
 
 
 def prior_batch_calls(context, batch_number):
@@ -242,7 +242,7 @@ def live_assess(context):
             if g["category"] == "*":
                 continue
             if (p["photo_id"], g["category"]) not in covered:
-                coverage.append(Coverage(photo_id=p["photo_id"], category=g["category"], coverage="unknown", note="Controllo non restituito dal modello; area non valutata."))
+                coverage.append(Coverage(photo_id=p["photo_id"], category=g["category"], coverage="unknown", note="Check not returned by the model; area not assessed."))
     # Preserve separate objects unless boxes overlap on the same source evidence.
     merged = []
     for h in hazards:
@@ -280,13 +280,13 @@ def assess(context):
             continue
         evidence = candidate["evidence"] or {"photo_id": candidate["photo_id"], "box": None}
         entry = next(g for g in guidance.values() if g["category"] == category)
-        observation = {"rug": "Controllo sintetico: tappeto visibile, fissaggio sconosciuto.", "path": "Controllo sintetico: oggetto nel passaggio.", "lighting": "Percorso notturno fuori inquadratura: illuminazione da verificare.", "bathroom": "Bagno fuori inquadratura: supporti non valutabili."}[category]
-        hazards.append(Hazard(category=category, observation=observation, profile_relevance="Esempio di sviluppo; rilevanza da verificare sul profilo confermato.",
+        observation = {"rug": "Synthetic check: visible rug, fixing unknown.", "path": "Synthetic check: object in the walkway.", "lighting": "Night route out of frame: lighting to be checked.", "bathroom": "Bathroom out of frame: supports cannot be assessed."}[category]
+        hazards.append(Hazard(category=category, observation=observation, profile_relevance="Development example; relevance to be checked against the confirmed profile.",
                               profile_fields=["description"], priority="important" if category in {"rug", "path"} else "recommended",
                               evidence=[evidence], guidance_ids=[entry["id"]],
-                              uncertainty="Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.", suggested_action=entry["action"]))
-    coverage = [Coverage(photo_id=p["id"], category=g["category"], coverage="unknown", note="Fixture: questo controllo non è stato eseguito da un modello.")
+                              uncertainty="Fixture, not inference. No safety check or metric measurement.", suggested_action=entry["action"]))
+    coverage = [Coverage(photo_id=p["id"], category=g["category"], coverage="unknown", note="Fixture: this check was not run by a model.")
                 for p in context["photos"] for g in guidance.values() if g["category"] != "*"]
-    output = AssessmentOutput(hazards=hazards, coverage=coverage, follow_up_requests=["Acquisire immagini sovrapposte reali; verificare di persona le aree non visibili."])
+    output = AssessmentOutput(hazards=hazards, coverage=coverage, follow_up_requests=["Capture real overlapping photos; check areas that are not visible in person."])
     validate_output(output, context, scenes, guidance)
     return {**output.model_dump(mode="json"), "provenance": "fixture", "producer": "synthetic-contract-fixture-v1", "modes": settings.modes()}

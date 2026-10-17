@@ -231,7 +231,7 @@ def geometry(context):
                     "marker": {"scene_id": scene["id"], "position_world": surface,
                                "photo_id": candidate["photo_id"], "evidence_box": candidate["evidence"]["box"],
                                "method": "photo_surface_estimate",
-                               "uncertainty": "Posizione indicativa dalla profondità della foto, non confermata da più viste."}})
+                               "uncertainty": "Approximate position from the photo’s depth, not confirmed by multiple views."}})
             center = foreground_anchor(region, support, background, background_support, camera_center) if len(region) else None
             views = []
             if center is not None:
@@ -267,7 +267,7 @@ def geometry(context):
                 continue
             anchors.append({"photo_id": candidate["photo_id"], "category": candidate["category"], "evidence_box": candidate["evidence"]["box"],
                             "anchor": {"scene_id": scene["id"], "position_world": center, "method": "foreground_multiview", "source_photo_ids": views,
-                                       "uncertainty": "Posizione proposta da una regione e più viste coerenti; verificare che appartenga all’oggetto indicato. Scala metrica sconosciuta."}})
+                                       "uncertainty": "Position proposed from one region and several consistent views; check that it belongs to the indicated object. Metric scale unknown."}})
     return {"scenes": scenes, "measurements": [], "anchors": anchors, "anchor_abstentions": abstentions,
             "evidence_markers": evidence_markers, "provenance": "derived",
             "status": "degraded" if any(s["status"] != "ready" for s in scenes) else "succeeded",

@@ -5,16 +5,16 @@
     "title": "CDC STEADI — Check for Safety (2017)",
     "url": "https://www.cdc.gov/steadi/pdf/steadi-brochure-checkforsafety-508.pdf",
     "verified_on": "2026-10-16",
-    "applicability": "General US prevention guidance, translated summaries; not Italian building law or individual clinical advice."
+    "applicability": "General US prevention guidance, plain-language summaries; not Italian building law or individual clinical advice."
   },
   "entries": [
-    {"id": "floor-rug", "category": "rug", "question": "a rug on the visible floor", "action": "Verificare il fissaggio del tappeto; valutare rimozione o supporto antiscivolo."},
-    {"id": "floor-cable", "category": "cable", "question": "a cable crossing the visible walking area", "action": "Sistemare i cavi lungo la parete e liberare il passaggio."},
-    {"id": "floor-path", "category": "path", "question": "objects obstructing the visible walking area", "action": "Liberare il percorso dagli oggetti e verificare il passaggio di persona."},
-    {"id": "night-light", "category": "lighting", "question": "a night light on the visible bedroom to bathroom route", "action": "Verificare di notte l’illuminazione del percorso e valutare una luce notturna."},
-    {"id": "bath-support", "category": "bathroom", "question": "a support grab bar beside a visible toilet or bath", "action": "Verificare con un professionista il bisogno di supporti in bagno e la loro installazione."},
-    {"id": "stair-handrail", "category": "stairs", "question": "a handrail beside visible stairs", "action": "Verificare la stabilità e la continuità dei corrimano con un professionista."},
-    {"id": "reach-items", "category": "reach", "question": "frequently used objects on a high shelf", "action": "Spostare gli oggetti di uso frequente in una posizione raggiungibile senza salire su sedie."},
-    {"id": "home-hazard-review", "category": "*", "question": "any other visible feature that may warrant a home-safety review", "action": "Chiedere al professionista di verificare l’elemento e il possibile rischio sul posto; la sola fotografia non consente di concludere sulla sicurezza."}
+    {"id": "floor-rug", "category": "rug", "question": "a rug on the visible floor", "action": "Check that the rug is secured; consider removing it or adding a non-slip backing."},
+    {"id": "floor-cable", "category": "cable", "question": "a cable crossing the visible walking area", "action": "Route cables along the wall and keep the walkway clear."},
+    {"id": "floor-path", "category": "path", "question": "objects obstructing the visible walking area", "action": "Clear objects from the walkway and check the passage in person."},
+    {"id": "night-light", "category": "lighting", "question": "a night light on the visible bedroom to bathroom route", "action": "Check the route’s lighting at night and consider a night light."},
+    {"id": "bath-support", "category": "bathroom", "question": "a support grab bar beside a visible toilet or bath", "action": "Check with a professional whether bathroom supports are needed and how to install them."},
+    {"id": "stair-handrail", "category": "stairs", "question": "a handrail beside visible stairs", "action": "Check with a professional that the handrails are stable and continuous."},
+    {"id": "reach-items", "category": "reach", "question": "frequently used objects on a high shelf", "action": "Move frequently used items within reach, so no one has to climb on chairs."},
+    {"id": "home-hazard-review", "category": "*", "question": "any other visible feature that may warrant a home-safety review", "action": "Ask the professional to check the item and the possible risk on site; a photograph alone cannot establish safety."}
   ]
 }

@@ -57,7 +57,7 @@ def draft_report(context):
         for hazard in snapshot["accepted"]:
             hazard["evidence_thumbnails"] = [evidence_thumbnail(settings, conn, row["id"], e) for e in hazard["evidence"]]
             hazard["guidance"] = [context["guidance"][g] for g in hazard["guidance_ids"]]
-    draft = {"title": "Piano d’azione per la casa", "items": [{"hazard_id": h["id"], **{key: h[key] for key in ("observation", "suggested_action", "priority")}} for h in snapshot["accepted"]]}
+    draft = {"title": "Home action plan", "items": [{"hazard_id": h["id"], **{key: h[key] for key in ("observation", "suggested_action", "priority")}} for h in snapshot["accepted"]]}
     validate_draft(draft, snapshot["accepted"])
     provenance = "deterministic_fixture"
     if settings.gemma_backend == "http":
@@ -80,9 +80,9 @@ def draft_report(context):
             snapshot["draft_warning"] = str(exc) + ". Deterministic reviewed values require final approval. No successful Gemma call is claimed."
     snapshot["draft"] = draft
     snapshot["draft_provenance"] = provenance
-    scale_note = ("Scala metrica verificata solo nelle stanze con calibrazione; nessuna misura è inferita dal modello."
-                  if snapshot.get("calibrations") else "Scala metrica non validata; nessuna dimensione è disponibile.")
-    snapshot["limitations"] = ["Dati dimostrativi e profilo fittizio.", "Il ruolo del revisore è dichiarato da chi rilascia il rapporto.", scale_note]
+    scale_note = ("Metric scale is verified only in rooms with a calibration; no measurement is inferred by the model."
+                  if snapshot.get("calibrations") else "Metric scale not validated; no dimensions are available.")
+    snapshot["limitations"] = ["Demonstration data and a fictional profile.", "The reviewer’s role is declared by the person who releases the report.", scale_note]
     snapshot_hash = db.digest(db.dumps(snapshot).encode())
     template_path = Path(__file__).resolve().parents[1] / "templates"
     env = Environment(loader=FileSystemLoader(template_path), autoescape=select_autoescape(["html"]))

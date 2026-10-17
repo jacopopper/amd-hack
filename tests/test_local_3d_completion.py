@@ -327,7 +327,7 @@ class QueuedLocal3D(unittest.TestCase):
                          "coverage": [], "follow_up_requests": ["Inspect the fictional mat."]}
             else:
                 supplied = json.loads(content)
-                value = {"title": "Piano d’azione per la casa", "items": [
+                value = {"title": "Home action plan", "items": [
                     {"hazard_id": h["id"], **{key: h[key] for key in ("observation", "priority", "suggested_action")}}
                     for h in supplied["accepted"]]}
             result = schema.model_validate(value)

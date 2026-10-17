@@ -28,34 +28,34 @@ def run(base_url, executable=None):
         page.goto(base_url + "/")
         page.wait_for_load_state("networkidle")
         page.screenshot(path=str(output / "desktop-patients.png"), full_page=True)
-        page.get_by_role("link", name="Nuovo paziente").click()
+        page.get_by_role("link", name="New patient").click()
 
-        page.locator("input[name=label]").fill("Browser smoke · profilo fittizio")
-        page.locator("textarea[name=description]").fill("Profilo fittizio: usa un deambulatore, nessuna storia clinica fornita.")
-        page.locator("input[name=mobility_aid]").fill("deambulatore")
+        page.locator("input[name=label]").fill("Browser smoke · fictional profile")
+        page.locator("textarea[name=description]").fill("Fictional profile: uses a walker, no clinical history provided.")
+        page.locator("input[name=mobility_aid]").fill("walker")
         page.locator("input[name=profile_confirmed]").check()
         page.locator("input[name=staged_data]").check()
         page.screenshot(path=str(output / "desktop-intake.png"), full_page=True)
-        page.get_by_role("button", name="Continua con le foto").click()
+        page.get_by_role("button", name="Continue to photos").click()
 
-        page.get_by_role("heading", name="Foto della casa").wait_for()
+        page.get_by_role("heading", name="Photos of the home").wait_for()
         match = re.search(r"[?&]id=([^&]+)", page.url)
         assert match, page.url
         assessment_id = match.group(1)
-        page.get_by_label("Stanza").fill("Soggiorno")
+        page.get_by_label("Room").fill("Living room")
         photos = [str(ROOT / "data/demo/synthetic-1.png"), str(ROOT / "data/demo/synthetic-2.png")]
         page.locator("input[type=file]").set_input_files(photos)
-        expect(page.get_by_text("2 panoramiche · 0 dettagli", exact=False)).to_be_visible(timeout=30000)
-        page.get_by_role("button", name="Avvia l’analisi").click()
+        expect(page.get_by_text("2 overview · 0 detail", exact=False)).to_be_visible(timeout=30000)
+        page.get_by_role("button", name="Start analysis").click()
 
-        page.get_by_role("button", name="Avvia revisione").wait_for(timeout=60000)
-        expect(page.get_by_text("Stiamo analizzando la casa")).to_be_hidden(timeout=60000)
+        page.get_by_role("button", name="Start review").wait_for(timeout=60000)
+        expect(page.get_by_text("Analysing the home")).to_be_hidden(timeout=60000)
         page.locator("canvas").wait_for(timeout=20000)
         page.screenshot(path=str(output / "desktop-scene.png"))
 
         # Validate the whole selection before any upload, even when an earlier file is valid.
-        page.get_by_role("button", name="Foto", exact=True).click()
-        page.get_by_role("heading", name="Foto della casa").wait_for()
+        page.get_by_role("button", name="Photos", exact=True).click()
+        page.get_by_role("heading", name="Photos of the home").wait_for()
         uploads = []
         upload_url = f"{base_url}/api/assessments/{assessment_id}/photos"
         page.on("request", lambda request: uploads.append(request.url) if request.method == "POST" and request.url == upload_url else None)
@@ -64,7 +64,7 @@ def run(base_url, executable=None):
             {"name": "valid.png", "mimeType": "image/png", "buffer": png},
             {"name": "unsupported.heic", "mimeType": "image/heic", "buffer": b"unsupported test file"},
         ])
-        expect(page.get_by_text("Usa file JPG o PNG", exact=False)).to_be_visible()
+        expect(page.get_by_text("Use JPG or PNG files", exact=False)).to_be_visible()
         assert not uploads, "An invalid mixed batch uploaded a file before validation"
         before = context.request.get(f"{base_url}/api/assessments/{assessment_id}").json()
         assert len(before["photos"]) == 2
@@ -73,29 +73,29 @@ def run(base_url, executable=None):
         # The first upload changes ready -> draft. The modal must survive to send the second.
         def inspect_batch(route):
             if route.request.method == "POST" and len(uploads) == 2:
-                expect(page.get_by_role("heading", name="Foto della casa")).to_be_visible()
-                expect(page.get_by_text("3 panoramiche · 0 dettagli", exact=False)).to_be_visible()
-                expect(page.get_by_role("button", name="Chiudi", exact=True)).to_be_disabled()
-                expect(page.get_by_label("Stanza", exact=True)).to_be_disabled()
-                expect(page.get_by_label("Tipo di foto", exact=True)).to_be_disabled()
-                expect(page.get_by_role("button", name="Avvia l’analisi")).to_be_disabled()
+                expect(page.get_by_role("heading", name="Photos of the home")).to_be_visible()
+                expect(page.get_by_text("3 overview · 0 detail", exact=False)).to_be_visible()
+                expect(page.get_by_role("button", name="Close", exact=True)).to_be_disabled()
+                expect(page.get_by_label("Room", exact=True)).to_be_disabled()
+                expect(page.get_by_label("Photo type", exact=True)).to_be_disabled()
+                expect(page.get_by_role("button", name="Start analysis")).to_be_disabled()
                 page.screenshot(path=str(output / "desktop-batch-upload.png"))
             route.continue_()
 
         page.route(upload_url, inspect_batch)
         page.locator("input[type=file]").set_input_files(photos)
-        expect(page.get_by_text("4 panoramiche · 0 dettagli", exact=False)).to_be_visible(timeout=30000)
-        expect(page.get_by_role("button", name="Chiudi", exact=True)).to_be_enabled()
+        expect(page.get_by_text("4 overview · 0 detail", exact=False)).to_be_visible(timeout=30000)
+        expect(page.get_by_role("button", name="Close", exact=True)).to_be_enabled()
         page.unroute(upload_url, inspect_batch)
         after = context.request.get(f"{base_url}/api/assessments/{assessment_id}").json()
         assert len(uploads) == 2 and len(after["photos"]) == 4
         assert {photo["scene_id"] for photo in after["photos"]} == {original_scene}, "Batch created another room"
         assert after["input_revision"] == before["input_revision"] + 2 and after["status"] == "draft"
-        page.get_by_role("button", name="Chiudi", exact=True).click()
-        expect(page.get_by_role("heading", name="Foto della casa")).to_be_visible()
-        expect(page.get_by_role("button", name="Chiudi", exact=True)).to_have_count(0)
-        page.get_by_role("button", name="Avvia l’analisi").click()
-        page.get_by_role("button", name="Avvia revisione").wait_for(timeout=60000)
+        page.get_by_role("button", name="Close", exact=True).click()
+        expect(page.get_by_role("heading", name="Photos of the home")).to_be_visible()
+        expect(page.get_by_role("button", name="Close", exact=True)).to_have_count(0)
+        page.get_by_role("button", name="Start analysis").click()
+        page.get_by_role("button", name="Start review").wait_for(timeout=60000)
 
         # Exercise VGGT's client-side frame cap without configuring or calling a live model.
         capped = context.new_page()
@@ -104,44 +104,44 @@ def run(base_url, executable=None):
         capped.on("request", lambda request: mutations.append(request.url) if request.method == "POST" else None)
         capped.goto(f"{base_url}/pazienti?id={assessment_id}")
         capped.wait_for_load_state("networkidle")
-        capped.get_by_role("button", name="Foto", exact=True).click()
+        capped.get_by_role("button", name="Photos", exact=True).click()
         capacity = health["photo_limits"]["frame_cap"] - 4
         capped.locator("input[type=file]").set_input_files([
             {"name": f"over-cap-{i}.png", "mimeType": "image/png", "buffer": png} for i in range(capacity + 1)
         ])
-        expect(capped.get_by_text(f"puoi aggiungerne ancora {capacity}", exact=False)).to_be_visible()
+        expect(capped.get_by_text(f"you can add {capacity} more", exact=False)).to_be_visible()
         assert not mutations, "Over-cap selection sent a mutation"
         capped.screenshot(path=str(output / "desktop-upload-cap.png"))
         capped.close()
 
-        page.get_by_role("button", name="Avvia revisione").click()
+        page.get_by_role("button", name="Start review").click()
         card = page.locator("aside")
-        for index, answer in enumerate(["Confermo", "Non è un problema", "Serve verificare", "Confermo"], start=1):
-            expect(card).to_contain_text(f"{index} di 4")
-            if answer == "Serve verificare":
+        for index, answer in enumerate(["Confirm", "Exclude", "Check in person", "Confirm"], start=1):
+            expect(card).to_contain_text(f"{index} of 4")
+            if answer == "Check in person":
                 card.get_by_role("button", name=answer).click()
-                card.locator("textarea").fill("Richiedere la foto mancante; revisione simulata.")
-                card.get_by_role("button", name="Invia").click()
+                card.locator("textarea").fill("Request the missing photo; simulated review.")
+                card.get_by_role("button", name="Mark to check in person").click()
             else:
                 card.get_by_role("button", name=answer).click()
-        page.get_by_role("heading", name="Revisione completata").wait_for()
+        page.get_by_role("heading", name="Review complete").wait_for()
         page.screenshot(path=str(output / "desktop-summary.png"))
-        page.get_by_role("button", name="Prepara il report").click()
+        page.get_by_role("button", name="Prepare report").click()
 
-        page.get_by_role("button", name="Rivedi e rilascia").click(timeout=60000)
-        dialog = page.locator("div.glass", has=page.get_by_role("heading", name="Rilascia alla famiglia"))
+        page.get_by_role("button", name="Review and release").click(timeout=60000)
+        dialog = page.locator("div.glass", has=page.get_by_role("heading", name="Release to the family"))
         pdf_url = dialog.get_by_role("link", name="PDF").get_attribute("href")
         response = context.request.get(base_url + pdf_url)
         assert response.status == 200 and response.body().startswith(b"%PDF")
         dialog.get_by_role("checkbox").check()
-        dialog.get_by_role("button", name="Rilascia", exact=True).click()
+        dialog.get_by_role("button", name="Release", exact=True).click()
         family_link = page.locator("input[readonly]").input_value()
         page.screenshot(path=str(output / "desktop-released.png"))
         anonymous = browser.new_context()
         assert anonymous.request.get(family_link).status == 200
         assert anonymous.request.get(family_link + "?format=pdf").body().startswith(b"%PDF")
-        page.get_by_role("button", name="Revoca il link").click()
-        expect(page.get_by_text("è stato revocato")).to_be_visible()
+        page.get_by_role("button", name="Revoke link").click()
+        expect(page.get_by_text("has been revoked")).to_be_visible()
         assert anonymous.request.get(family_link).status == 404
         anonymous.close()
 
@@ -149,14 +149,14 @@ def run(base_url, executable=None):
         fallback = context.new_page()
         fallback.add_init_script(NO_WEBGL)
         fallback.goto(f"{base_url}/pazienti?id={assessment_id}")
-        expect(fallback.get_by_text("Vista 3D non disponibile.", exact=False)).to_be_visible(timeout=20000)
-        fallback.get_by_role("button", name="Foto della stanza").click()
-        expect(fallback.get_by_role("img", name="Foto 1 della stanza")).to_be_visible()
+        expect(fallback.get_by_text("3D view unavailable.", exact=False)).to_be_visible(timeout=20000)
+        fallback.get_by_role("button", name="Room photos").click()
+        expect(fallback.get_by_role("img", name="Room photo 1")).to_be_visible()
         fallback.close()
 
         page.set_viewport_size({"width": 390, "height": 844})
         page.goto(base_url + "/pazienti/nuovo")
-        page.get_by_role("button", name="Continua con le foto").wait_for()
+        page.get_by_role("button", name="Continue to photos").wait_for()
         page.screenshot(path=str(output / "phone-intake.png"), full_page=True)
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Phone intake overflows"
         assert not errors, errors

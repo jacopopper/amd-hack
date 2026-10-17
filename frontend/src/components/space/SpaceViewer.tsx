@@ -171,7 +171,7 @@ export default function SpaceViewer({
     (async () => {
       try {
         const response = await fetch(assetUrl, { signal: abort.signal, credentials: "same-origin" });
-        if (!response.ok) throw new Error("scena non disponibile");
+        if (!response.ok) throw new Error("scene unavailable");
         const bytes = await response.arrayBuffer();
         const cutaways: { object: THREE.Object3D; normal: THREE.Vector3; origin: THREE.Vector3 }[] = [];
         let points: THREE.Points | null = null;
@@ -297,7 +297,7 @@ export default function SpaceViewer({
                 position_world: local.toArray() as [number, number, number],
                 method: "reviewer_corrected",
                 source_photo_ids: selected.evidence.map((e) => e.photo_id),
-                uncertainty: "Punto scelto dal revisore: verificare sulla foto sorgente.",
+                uncertainty: "Point chosen by the reviewer: check it against the source photo.",
               });
             return;
           }
@@ -466,7 +466,7 @@ export default function SpaceViewer({
 
   return (
     <div className={`absolute inset-0 overflow-hidden bg-[radial-gradient(ellipse_at_50%_40%,#2a2e35_0%,#121418_60%,#0a0b0d_100%)] ${tool !== "none" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}>
-      <div ref={mount} className="absolute inset-0" aria-label="Casa in 3D" />
+      <div ref={mount} className="absolute inset-0" aria-label="Home in 3D" />
       <div className="pointer-events-none absolute inset-0">
         {state === "ready" &&
           tagged.map((h) => {
@@ -482,21 +482,21 @@ export default function SpaceViewer({
                 onClick={() => onSelect(h.id)}
                 style={{ visibility: "hidden", ["--tag" as string]: priorityMeta[e.priority].color }}
                 className="group pointer-events-auto absolute left-0 top-0 flex items-center"
-                aria-label={`Pericolo ${hazards.indexOf(h) + 1}: ${categoryLabel[e.category] ?? e.category}`}
-                title={illustrative ? "Posizione illustrativa: verifica la foto originale." : e.anchor ? e.anchor.uncertainty : `Posizione indicativa: ${h.evidence_marker?.uncertainty}`}
+                aria-label={`Hazard ${hazards.indexOf(h) + 1}: ${categoryLabel[e.category] ?? e.category}`}
+                title={illustrative ? "Illustrative position: check the original photo." : e.anchor ? e.anchor.uncertainty : `Approximate position: ${h.evidence_marker?.uncertainty}`}
               >
                 <span className={`relative grid place-items-center rounded-full border-2 border-white bg-[var(--tag)] text-[10px] font-bold text-white shadow-[0_2px_10px_rgba(0,0,0,0.5)] transition-all ${!e.anchor || illustrative ? "border-dashed" : ""} ${selected ? "h-8 w-8" : "h-7 w-7 group-hover:h-8 group-hover:w-8"}`}>
                   {hazards.indexOf(h) + 1}
                   {selected && <span className="absolute inset-0 animate-ping rounded-full bg-[var(--tag)] opacity-60" />}
                 </span>
                 <span className={`absolute left-full ml-2 whitespace-nowrap rounded-md bg-black/75 px-2 py-1 text-xs text-white backdrop-blur transition-opacity ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                  {categoryLabel[e.category] ?? e.category}{illustrative ? " · posizione illustrativa" : !e.anchor && " · posizione indicativa"}
+                  {categoryLabel[e.category] ?? e.category}{illustrative ? " · illustrative position" : !e.anchor && " · approximate position"}
                 </span>
               </button>
             );
           })}
         <div ref={measureLabel} style={{ visibility: "hidden" }} className="absolute left-0 top-0 rounded-md bg-white px-2 py-1 font-mono text-xs font-medium text-black shadow">
-          {measurement ?? "scala non calibrata"}
+          {measurement ?? "scale not calibrated"}
         </div>
       </div>
       {state === "ready" && (
@@ -504,41 +504,41 @@ export default function SpaceViewer({
           {scene?.presentation && (
             <div className="flex gap-2">
               <button onClick={() => setShowPresentation((value) => !value)} className="rounded-lg bg-white/95 px-3 py-2 text-xs font-medium text-black shadow backdrop-blur">
-                {presentation ? "Superfici originali" : scene.presentation.provenance === "photo_completed" ? "Ricostruzione completata" : "Modello illustrativo"}
+                {presentation ? "Original surfaces" : scene.presentation.provenance === "photo_completed" ? "Completed reconstruction" : "Illustrative model"}
               </button>
               <button onClick={() => {
                 const rt = runtime.current;
                 if (!rt) return;
                 const [position, target] = homeView(rt, mode);
                 rt.flight = { from: [rt.camera.position.clone(), rt.controls.target.clone()], to: [position, target], start: performance.now(), duration: 700 };
-              }} className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur">Vista iniziale</button>
+              }} className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur">Initial view</button>
             </div>
           )}
           {illustrative && (
             <span className="max-w-sm rounded bg-black/75 px-3 py-2 text-[11px] leading-relaxed text-white/85">
-              Modello illustrativo ispirato alle foto. Proporzioni e pin non misurati.
-              {tool !== "none" && " Posizionamento e misure disponibili solo nella geometria dalle foto."}
+              Illustrative model based on the photos. Proportions and pins are not measured.
+              {tool !== "none" && " Placing and measuring work only on the geometry from the photos."}
             </span>
           )}
           {photoCompleted && (
             <span className="max-w-sm rounded bg-black/75 px-3 py-2 text-[11px] leading-relaxed text-white/85">
-              Ricostruzione fotografica con superfici mancanti completate a mano.
-              {tool !== "none" && " Posizionamento e misure disponibili sulle superfici originali."}
+              Photo reconstruction with missing surfaces completed by hand.
+              {tool !== "none" && " Placing and measuring work on the original surfaces."}
             </span>
           )}
           {hasSurface && (
             <button onClick={() => setSurfaceMode((value) => !value)} className="rounded-lg bg-black/70 px-3 py-2 text-xs text-white backdrop-blur">
-              {surfaceMode ? "Mostra punti" : "Mostra superfici"}
+              {surfaceMode ? "Show points" : "Show surfaces"}
             </button>
           )}
           {!illustrative && tagged.some((h) => !effective(h).anchor) && (
-            <span className="rounded bg-black/70 px-2 py-1 text-[11px] text-white/80">Segnaposto tratteggiati: posizione indicativa, verifica dalla foto.</span>
+            <span className="rounded bg-black/70 px-2 py-1 text-[11px] text-white/80">Dashed pins: approximate position, check against the photo.</span>
           )}
         </div>
       )}
-      {state === "loading" && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Apertura della casa…</div>}
-      {(state === "error" || !webgl) && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Vista 3D non disponibile. La revisione resta possibile dalle foto.</div>}
-      {!scene?.ply_url && !presentation && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Questa stanza non ha una ricostruzione 3D. Usa la vista foto.</div>}
+      {state === "loading" && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Opening the home…</div>}
+      {(state === "error" || !webgl) && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">3D view unavailable. You can still review from the photos.</div>}
+      {!scene?.ply_url && !presentation && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">This room has no 3D reconstruction. Use the photo view.</div>}
     </div>
   );
 }

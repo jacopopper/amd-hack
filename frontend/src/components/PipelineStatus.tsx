@@ -8,7 +8,7 @@ import type { Job } from "@/lib/types";
 
 const where: Record<string, string> = {
   prepare: "CPU",
-  jev: "API TypeSafe",
+  jev: "TypeSafe API",
   reconstruct: "GPU · VGGT",
   geometry: "CPU",
   gemma: "Gemma",
@@ -43,8 +43,8 @@ export default function PipelineStatus({ jobId }: { jobId: string }) {
   if (!job) return null;
   return (
     <div className="glass w-[400px] rounded-2xl p-6">
-      <h2 className="text-lg font-semibold">Stiamo analizzando la casa</h2>
-      <p className="mt-1 text-sm text-white/55">Puoi lasciare questa pagina: il lavoro continua sul server.</p>
+      <h2 className="text-lg font-semibold">Analysing the home</h2>
+      <p className="mt-1 text-sm text-white/55">You can leave this page: the work continues on the server.</p>
       <ol className="mt-5 space-y-3.5">
         {Object.entries(job.stages)
           .sort(([a], [b]) => rank(a) - rank(b))

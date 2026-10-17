@@ -13,6 +13,7 @@ import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
 import AvatarViewer from "@/components/space/AvatarViewer";
 import PatientChip from "@/components/space/PatientChip";
 import PhotoView from "@/components/space/PhotoView";
+import CaptureStage from "@/components/space/CaptureStage";
 import Reel from "@/components/space/Reel";
 import TourSummary from "@/components/space/TourSummary";
 import PipelineStatus from "@/components/PipelineStatus";
@@ -49,6 +50,8 @@ export default function PatientSpace({ id }: { id: string }) {
   const [sceneId, setSceneId] = useState("");
   const [selected, setSelected] = useState<string | undefined>();
   const [view, setView] = useState<View>("dollhouse");
+  // Set when this device cannot draw the reconstructed room usably; the review then stays on the photos.
+  const [roomFallback, setRoomFallback] = useState(false);
   const [tool, setTool] = useState<Tool>("none");
   const [photoId, setPhotoId] = useState("");
   const [pickedAnchor, setPickedAnchor] = useState<Anchor | null>(null);
@@ -103,7 +106,7 @@ export default function PatientSpace({ id }: { id: string }) {
   const busy = !!assessment && ACTIVE.includes(assessment.status);
   const released = assessment?.status === "released";
   const reportCurrent = !!report && !!assessment && report.review_revision === assessment.review_revision && report.input_revision === assessment.input_revision;
-  const patientName = assessment?.inputs.label.split(/[ ·]/)[0] || "il paziente";
+  const patientName = assessment?.inputs.label.split(/[ ·]/)[0] || "the patient";
 
   const select = useCallback(
     (hid: string | undefined) => {
@@ -117,7 +120,8 @@ export default function PatientSpace({ id }: { id: string }) {
       const pid = effective(h).evidence[0]?.photo_id;
       if (pid) setPhotoId(pid);
       // Keep navigational/illustrative pins in 3D without promoting them to anchors.
-      const hasPresentationPin = scenes.find((s) => s.id === sid)?.presentation?.hazard_positions[h.id];
+      const room = scenes.find((s) => s.id === sid);
+      const hasPresentationPin = room?.presentation?.hazard_positions[h.id] ?? room?.capture?.pins[h.id];
       if (!effective(h).anchor && !h.evidence_marker && !hasPresentationPin) setView("photos");
     },
     [hazards, assessment, scenes],
@@ -133,9 +137,14 @@ export default function PatientSpace({ id }: { id: string }) {
     const next = ordered.find((h) => !h.review) ?? ordered[0];
     if (!next) return;
     setTouring(true);
-    setView("dollhouse");
+    if (!roomFallback) setView("dollhouse");
     select(next.id);
-  }, [ordered, select]);
+  }, [ordered, select, roomFallback]);
+
+  const fallBackToPhotos = useCallback(() => {
+    setRoomFallback(true);
+    setView("photos");
+  }, []);
 
 
   async function saveReview(payload: ReviewPayload) {
@@ -187,7 +196,7 @@ export default function PatientSpace({ id }: { id: string }) {
             </Link>
           </div>
         ) : (
-          "Apertura della casa…"
+          "Opening the home…"
         )}
       </div>
     );
@@ -220,10 +229,20 @@ export default function PatientSpace({ id }: { id: string }) {
         <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(ellipse_at_50%_40%,#2a2e35_0%,#121418_60%,#0a0b0d_100%)]">
           <PipelineStatus jobId={assessment.jobs[0].id} />
         </div>
-      ) : view === "photos" ? (
-        <PhotoView photos={roomPhotos} hazards={roomHazards} photoId={photoId || roomPhotos[0]?.id} selectedId={selected} panelOpen={!!hazard} onPhoto={setPhotoId} onSelect={select} />
       ) : (
-        <SpaceViewer scene={scene} hazards={hazards} selectedId={selected} mode={view} tool={tool} rightInset={hazard ? 420 : 0} onSelect={select} onPick={setPickedAnchor} />
+        <>
+          {/* The reconstructed room stays loaded behind the photos, so switching back is instant. */}
+          {scene?.capture && (
+            <div className={view === "photos" ? "invisible" : undefined}>
+              <CaptureStage capture={scene.capture} hazards={roomHazards} selectedId={selected} onSelect={select} onUnavailable={fallBackToPhotos} />
+            </div>
+          )}
+          {view === "photos" ? (
+            <PhotoView photos={roomPhotos} hazards={roomHazards} photoId={photoId || roomPhotos[0]?.id} selectedId={selected} panelOpen={!!hazard} onPhoto={setPhotoId} onSelect={select} />
+          ) : (
+            !scene?.capture && <SpaceViewer scene={scene} hazards={hazards} selectedId={selected} mode={view} tool={tool} rightInset={hazard ? 420 : 0} onSelect={select} onPick={setPickedAnchor} />
+          )}
+        </>
       )}
 
       {/* Top-left: whose home this is */}
@@ -234,7 +253,7 @@ export default function PatientSpace({ id }: { id: string }) {
       </div>
 
       {/* Top-center: rooms */}
-      {scenes.length > 0 && (
+      {scenes.length > 1 && (
         <div className={`absolute top-4 z-10 flex justify-center ${hazard ? "left-[360px] right-[440px]" : "left-[360px] right-[360px]"}`}>
           <div className="glass flex gap-1 rounded-2xl p-1">
             {scenes.map((s) => {
@@ -261,31 +280,31 @@ export default function PatientSpace({ id }: { id: string }) {
       {!hazard && (
         <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
           <div className="glass flex h-11 items-center gap-3 rounded-2xl px-4 text-sm">
-            <span className="text-white/60">Verificati</span>
+            <span className="text-white/60">Checked</span>
             <span className="tabular-nums">
-              {decided} di {hazards.length}
+              {decided} of {hazards.length}
             </span>
           </div>
           {!demo && !released && !busy && (
             <button onClick={() => setEditingPhotos(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
-              <Camera className="h-4 w-4" /> Foto
+              <Camera className="h-4 w-4" /> Photos
             </button>
           )}
           {reportCurrent ? (
             <button onClick={() => setReleasing(true)} className={`flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black ${next === "release" ? "pulse-cta" : ""}`}>
-              <FileText className="h-4 w-4" /> {released ? "Report rilasciato" : "Rivedi e rilascia"}
+              <FileText className="h-4 w-4" /> {released ? "Report released" : "Review and release"}
             </button>
           ) : drafting ? (
             <span className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm text-white/70">
-              <Loader2 className="h-4 w-4 animate-spin" /> Report in preparazione
+              <Loader2 className="h-4 w-4 animate-spin" /> Preparing report
             </span>
           ) : next === "report" ? (
             <button onClick={() => setSummary(true)} className="pulse-cta flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
-              <FileText className="h-4 w-4" /> Prepara il report
+              <FileText className="h-4 w-4" /> Prepare report
             </button>
           ) : (
             <button onClick={() => setSummary(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
-              <FileText className="h-4 w-4" /> Riepilogo
+              <FileText className="h-4 w-4" /> Summary
             </button>
           )}
         </div>
@@ -326,24 +345,31 @@ export default function PatientSpace({ id }: { id: string }) {
 
       {/* Bottom-left: views and tools */}
       <div className="glass absolute bottom-4 left-4 z-10 flex flex-col gap-1 rounded-2xl p-1.5">
-        <ToolButton title="Casa in 3D" label="3D" active={view === "dollhouse"} onClick={() => setView("dollhouse")}>
+        <ToolButton title="Home in 3D" label="3D" active={view === "dollhouse"} onClick={() => setView("dollhouse")}>
           <Box className="h-5 w-5" />
         </ToolButton>
-        <ToolButton title="Pianta dall’alto" label="Pianta" active={view === "plan"} onClick={() => setView("plan")}>
-          <MapIcon className="h-5 w-5" />
-        </ToolButton>
-        <ToolButton title="Foto della stanza" label="Foto" active={view === "photos"} onClick={() => setView("photos")}>
+        {/* The reconstructed room has no plan view and no metric scale, so it shows only 3D and photos. */}
+        {!scene?.capture && (
+          <ToolButton title="Top-down floor plan" label="Floor plan" active={view === "plan"} onClick={() => setView("plan")}>
+            <MapIcon className="h-5 w-5" />
+          </ToolButton>
+        )}
+        <ToolButton title="Room photos" label="Photos" active={view === "photos"} onClick={() => setView("photos")}>
           <Images className="h-5 w-5" />
         </ToolButton>
-        <span className="mx-2 my-0.5 h-px bg-white/10" />
-        <ToolButton
-          title={calibrated ? "Misura" : "Misura: serve la scala dal marker stampato"}
-          active={tool === "measure"}
-          disabled={!calibrated || view === "photos"}
-          onClick={() => setTool((t) => (t === "measure" ? "none" : "measure"))}
-        >
-          <Ruler className="h-5 w-5" />
-        </ToolButton>
+        {!scene?.capture && (
+          <>
+            <span className="mx-2 my-0.5 h-px bg-white/10" />
+            <ToolButton
+              title={calibrated ? "Measure" : "Measure: calibrate the scale with tape measurements first"}
+              active={tool === "measure"}
+              disabled={!calibrated || view === "photos"}
+              onClick={() => setTool((t) => (t === "measure" ? "none" : "measure"))}
+            >
+              <Ruler className="h-5 w-5" />
+            </ToolButton>
+          </>
+        )}
       </div>
 
       {/* Bottom: highlight reel of this room */}
@@ -354,15 +380,15 @@ export default function PatientSpace({ id }: { id: string }) {
       </div>
 
       {scene?.provenance === "fixture" && view !== "photos" && !busy && (
-        <span className="pointer-events-none absolute left-4 top-[84px] z-0 rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Geometria sintetica · non ricostruita da foto</span>
+        <span className="pointer-events-none absolute left-4 top-[84px] z-0 rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Synthetic geometry · not reconstructed from photos</span>
       )}
-      {touring && hazard && <span className="pointer-events-none absolute left-1/2 top-[76px] z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">Revisione guidata · rispondi per passare al successivo</span>}
+      {touring && hazard && <span className="pointer-events-none absolute left-1/2 top-[76px] z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">Guided review · answer to move to the next one</span>}
       {error && <p className="glass absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl px-4 py-2 text-sm text-[var(--urgent)]">{error}</p>}
 
       {editingPhotos && (
         <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="flex h-full max-h-[860px] flex-col items-center gap-2">
-            <p className="rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Cambiare le foto annulla l’analisi attuale e le risposte date finora.</p>
+            <p className="rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Changing the photos discards the current analysis and the answers given so far.</p>
             <PreparePanel assessment={assessment} scenes={scenes} modes={modes} limits={photoLimits} reload={load} onClose={() => setEditingPhotos(false)} />
           </div>
         </div>

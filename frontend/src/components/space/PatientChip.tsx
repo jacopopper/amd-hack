@@ -6,10 +6,10 @@ import { ArrowLeft, ChevronDown, Loader2, Trash2 } from "lucide-react";
 import type { Profile } from "@/lib/types";
 
 const rows: [keyof Profile, string][] = [
-  ["mobility_aid", "Ausilio"],
-  ["vision", "Vista"],
-  ["relevant_history", "Storia"],
-  ["support_needs", "Supporto"],
+  ["mobility_aid", "Aid"],
+  ["vision", "Vision"],
+  ["relevant_history", "History"],
+  ["support_needs", "Support"],
 ];
 
 // Top-left identity of the space: who lives here, expandable to the full profile.
@@ -34,7 +34,7 @@ export default function PatientChip({ name, profile, onDelete, children }: { nam
   return (
     <div className="glass w-80 overflow-hidden rounded-2xl">
       <div className="flex items-center gap-1 p-1.5">
-        <Link href="/" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white" title="Tutti i pazienti">
+        <Link href="/" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white" title="All patients">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <button onClick={() => setOpen((o) => !o)} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl px-2 py-1 text-left hover:bg-white/5">
@@ -52,30 +52,30 @@ export default function PatientChip({ name, profile, onDelete, children }: { nam
             {rows.map(([key, label]) => (
               <div key={key} className="contents">
                 <dt className="text-white/45">{label}</dt>
-                <dd className={profile[key] ? "" : "text-white/35"}>{key === "mobility_aid" ? (aid ?? "Non indicato") : ((profile[key] as string | null) ?? "Non indicato")}</dd>
+                <dd className={profile[key] ? "" : "text-white/35"}>{key === "mobility_aid" ? (aid ?? "Not given") : ((profile[key] as string | null) ?? "Not given")}</dd>
               </div>
             ))}
-            <dt className="text-white/45">Percorsi</dt>
-            <dd>{profile.daily_routes.join(", ") || <span className="text-white/35">Non indicati</span>}</dd>
+            <dt className="text-white/45">Routes</dt>
+            <dd>{profile.daily_routes.join(", ") || <span className="text-white/35">Not given</span>}</dd>
           </dl>
           {children}
           {onDelete && (
             <div className="mt-4 border-t border-white/10 pt-3">
               {confirming ? (
                 <div className="space-y-2">
-                  <p className="text-[13px] leading-relaxed text-white/60">Foto, analisi e report verranno cancellati e il link della famiglia smetterà di funzionare.</p>
+                  <p className="text-[13px] leading-relaxed text-white/60">Photos, analysis and report will be deleted and the family link will stop working.</p>
                   <div className="flex gap-2">
                     <button onClick={() => setConfirming(false)} className="flex-1 rounded-lg py-1.5 text-[13px] text-white/60 hover:bg-white/5">
-                      Annulla
+                      Cancel
                     </button>
                     <button disabled={deleting} onClick={remove} className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-[var(--urgent)] py-1.5 text-[13px] font-medium text-black disabled:opacity-60">
-                      {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Elimina
+                      {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />} Delete
                     </button>
                   </div>
                 </div>
               ) : (
                 <button onClick={() => setConfirming(true)} className="flex items-center gap-1.5 text-[13px] text-white/45 hover:text-[var(--urgent)]">
-                  <Trash2 className="h-3.5 w-3.5" /> Elimina la valutazione
+                  <Trash2 className="h-3.5 w-3.5" /> Delete the assessment
                 </button>
               )}
               {error && <p className="mt-2 text-xs text-[var(--urgent)]">{error}</p>}

@@ -65,70 +65,70 @@ export default function NewPatientPage() {
   return (
     <div className="min-h-full bg-[#0a0b0d] text-white">
       <header className="mx-auto flex max-w-3xl items-center gap-4 px-8 pt-8">
-        <Link href="/" className="grid h-10 w-10 place-items-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white" aria-label="Torna ai pazienti">
+        <Link href="/" className="grid h-10 w-10 place-items-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white" aria-label="Back to patients">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <Brand />
       </header>
       <main className="mx-auto max-w-3xl px-8 pb-16 pt-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Nuovo paziente</h1>
-        <p className="mt-1 text-white/50">Chi vive nella casa e di cosa ha bisogno. Le foto si aggiungono subito dopo.</p>
+        <h1 className="text-3xl font-semibold tracking-tight">New patient</h1>
+        <p className="mt-1 text-white/50">Who lives in the home and what they need. Photos come right after.</p>
 
         <form onSubmit={submit} className="mt-10 space-y-10">
           <section className="space-y-4">
             <label className="block text-sm text-white/60">
-              Nome o etichetta
-              <input name="label" required maxLength={120} placeholder="Es. Maria R. · Via Roma" className={field} />
+              Name or label
+              <input name="label" required maxLength={120} placeholder="e.g. Maria R. · Via Roma" className={field} />
             </label>
             <label className="block text-sm text-white/60">
-              Descrizione della persona
-              <textarea name="description" required maxLength={2000} rows={3} placeholder="Età indicativa, situazione, cosa preoccupa la famiglia…" className={`${field} resize-none`} />
+              About the person
+              <textarea name="description" required maxLength={2000} rows={3} placeholder="Approximate age, situation, what worries the family…" className={`${field} resize-none`} />
             </label>
           </section>
 
           <section>
-            <h2 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Mobilità e bisogni</h2>
+            <h2 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Mobility and needs</h2>
             <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="block text-sm text-white/60">
-                Ausilio per camminare
-                <input name="mobility_aid" maxLength={200} placeholder="Es. deambulatore, bastone" className={field} />
+                Walking aid
+                <input name="mobility_aid" maxLength={200} placeholder="e.g. walker, cane" className={field} />
               </label>
               <label className="block text-sm text-white/60">
-                Larghezza dell’ausilio (cm)
-                <input name="aid_width_cm" type="number" min={1} max={300} step={1} placeholder="Es. 60" className={field} />
+                Aid width (cm)
+                <input name="aid_width_cm" type="number" min={1} max={300} step={1} placeholder="e.g. 60" className={field} />
               </label>
               <label className="block text-sm text-white/60">
-                Vista
-                <input name="vision" maxLength={500} placeholder="Es. cataratta, occhiali da lettura" className={field} />
+                Vision
+                <input name="vision" maxLength={500} placeholder="e.g. cataracts, reading glasses" className={field} />
               </label>
               <label className="block text-sm text-white/60">
-                Supporto necessario
-                <input name="support_needs" maxLength={500} placeholder="Es. aiuto per alzarsi di notte" className={field} />
+                Support needed
+                <input name="support_needs" maxLength={500} placeholder="e.g. help getting up at night" className={field} />
               </label>
             </div>
             <label className="mt-4 block text-sm text-white/60">
-              Storia rilevante
-              <textarea name="relevant_history" maxLength={1000} rows={2} placeholder="Es. caduta in bagno a marzo, protesi d’anca" className={`${field} resize-none`} />
+              Relevant history
+              <textarea name="relevant_history" maxLength={1000} rows={2} placeholder="e.g. fall in the bathroom in March, hip replacement" className={`${field} resize-none`} />
             </label>
             <label className="mt-4 block text-sm text-white/60">
-              Percorsi di tutti i giorni <span className="text-white/35">· uno per riga</span>
-              <textarea name="daily_routes" rows={3} placeholder={"Camera → bagno di notte\nCucina → soggiorno"} className={`${field} resize-none`} />
+              Everyday routes <span className="text-white/35">· one per line</span>
+              <textarea name="daily_routes" rows={3} placeholder={"Bedroom → bathroom at night\nKitchen → living room"} className={`${field} resize-none`} />
             </label>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Conferme</h2>
+            <h2 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Confirmations</h2>
             <Check name="profile_confirmed" required>
-              Ho verificato queste informazioni con la persona o la famiglia.
+              I have checked this information with the person or their family.
             </Check>
             <Check name="staged_data" required>
-              Uso solo dati fittizi e foto di una casa allestita per la prova: il prototipo non è pronto per pazienti reali.
+              I am using only fictional data and photos of a home staged for testing: the prototype is not ready for real patients.
             </Check>
             <Check name="external_processing_consent">
-              Le foto possono essere inviate ai servizi esterni di analisi delle immagini. <span className="text-white/45">Senza questo consenso l’analisi dal vivo non parte.</span>
+              The photos may be sent to external image-analysis services. <span className="text-white/45">Without this consent the live analysis will not start.</span>
             </Check>
             <Check name="clinical_external_processing_consent">
-              Il profilo può essere inviato al modello che valuta i rischi per questa persona.
+              The profile may be sent to the model that assesses the risks for this person.
             </Check>
           </section>
 
@@ -138,7 +138,7 @@ export default function NewPatientPage() {
             </p>
           )}
           <button disabled={busy} className="flex h-11 items-center gap-2 rounded-xl bg-white px-5 text-[15px] font-medium text-black transition hover:bg-white/90 disabled:opacity-60">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Continua con le foto <ArrowRight className="h-4 w-4" /></>}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Continue to photos <ArrowRight className="h-4 w-4" /></>}
           </button>
         </form>
       </main>

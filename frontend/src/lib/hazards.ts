@@ -10,14 +10,14 @@ export const byPriority = (a: Hazard, b: Hazard) => priorityMeta[effective(a).pr
 
 // What the reviewer answers, in plain words, and how it maps to the backend decision.
 export const answers = {
-  confirm: { label: "Confermo", hint: "È un rischio reale: va nel piano d’azione" },
-  dismiss: { label: "Non è un problema", hint: "Escluso dal piano" },
-  verify: { label: "Serve verificare", hint: "Richiede un controllo o altre foto" },
+  confirm: { label: "Confirm", hint: "A real risk: it goes into the action plan" },
+  dismiss: { label: "Not a problem", hint: "Left out of the plan" },
+  verify: { label: "Check in person", hint: "Needs a visit or more photos" },
 } as const;
 export type Answer = keyof typeof answers;
 
 // How a saved decision reads back to the reviewer, as on the review slide.
-export const decisionLabel: Record<Decision, string> = { approve: "Confermato", edit: "Corretto e confermato", reject: "Escluso", defer: "Da verificare" };
+export const decisionLabel: Record<Decision, string> = { approve: "Confirmed", edit: "Edited and confirmed", reject: "Excluded", defer: "Check in person" };
 
 export const answerOf = (decision?: Decision): Answer | null =>
   decision === "approve" || decision === "edit" ? "confirm" : decision === "reject" ? "dismiss" : decision === "defer" ? "verify" : null;

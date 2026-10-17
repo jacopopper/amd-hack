@@ -27,12 +27,12 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
   const synthetic = modes?.reconstruction === "fixture" && modes?.gemma === "fixture";
   const failed = assessment.status === "failed" ? assessment.jobs.find((j) => j.kind === "analyze" && j.error) : undefined;
   const blockers = [
-    (!modes || !limits) && "Caricamento della configurazione…",
-    ...overCap.map((r) => `${r.label}: supera il limite di ${limits?.frame_cap} panoramiche. Rimuovi gli scatti meno utili prima dell’analisi.`),
-    !inputs.profile_confirmed && "Il profilo non è confermato.",
-    overview === 0 && "Serve almeno una foto panoramica.",
-    needsPhotoConsent && !inputs.external_processing_consent && "Manca il consenso all’analisi esterna delle foto.",
-    needsClinicalConsent && !inputs.clinical_external_processing_consent && "Manca il consenso all’invio del profilo al modello.",
+    (!modes || !limits) && "Loading configuration…",
+    ...overCap.map((r) => `${r.label}: over the limit of ${limits?.frame_cap} overview photos. Remove the least useful shots before the analysis.`),
+    !inputs.profile_confirmed && "The profile is not confirmed.",
+    overview === 0 && "At least one overview photo is needed.",
+    needsPhotoConsent && !inputs.external_processing_consent && "Consent to external photo analysis is missing.",
+    needsClinicalConsent && !inputs.clinical_external_processing_consent && "Consent to send the profile to the model is missing.",
   ].filter(Boolean) as string[];
 
   async function run(task: () => Promise<unknown>) {
@@ -51,13 +51,13 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
   // Each upload bumps the input revision, so files go one at a time against the latest one.
   const upload = (files: File[]) =>
     run(async () => {
-      if (!limits || !modes) throw new Error("Attendi il caricamento della configurazione.");
-      if (assessment.photos.length + files.length > limits.max_photos) throw new Error(`Massimo ${limits.max_photos} foto per casa. Nessun file caricato.`);
-      if (role === "overview" && modes.reconstruction === "vggt" && roomOverviews + files.length > limits.frame_cap) throw new Error(`Questa stanza ha ${roomOverviews} panoramiche: puoi aggiungerne ancora ${Math.max(0, limits.frame_cap - roomOverviews)}. Nessun file caricato.`);
-      if (files.some((file) => !/\.(jpe?g|png)$/i.test(file.name) || file.size > limits.max_file_bytes)) throw new Error(`Usa file JPG o PNG, massimo ${Math.round(limits.max_file_bytes / 1024 / 1024)} MB ciascuno. Nessun file caricato.`);
+      if (!limits || !modes) throw new Error("Wait for the configuration to load.");
+      if (assessment.photos.length + files.length > limits.max_photos) throw new Error(`At most ${limits.max_photos} photos per home. No files uploaded.`);
+      if (role === "overview" && modes.reconstruction === "vggt" && roomOverviews + files.length > limits.frame_cap) throw new Error(`This room has ${roomOverviews} overview photos: you can add ${Math.max(0, limits.frame_cap - roomOverviews)} more. No files uploaded.`);
+      if (files.some((file) => !/\.(jpe?g|png)$/i.test(file.name) || file.size > limits.max_file_bytes)) throw new Error(`Use JPG or PNG files, up to ${Math.round(limits.max_file_bytes / 1024 / 1024)} MB each. No files uploaded.`);
       let current = assessment;
       for (const [i, file] of [...files].entries()) {
-        setProgress(`Caricamento ${i + 1} di ${files.length}…`);
+        setProgress(`Uploading ${i + 1} of ${files.length}…`);
         const body = new FormData();
         body.set("file", file);
         body.set("scene_label", room.trim());
@@ -90,11 +90,11 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
     <div className="glass glass-solid flex max-h-full w-[640px] max-w-full flex-col overflow-hidden rounded-2xl">
       <header className="flex items-start gap-3 px-6 pb-3 pt-5">
         <div>
-          <h2 className="text-xl font-semibold">Foto della casa</h2>
-          <p className="mt-0.5 text-sm text-white/50">Aggiungi le nuove foto alla stessa stanza: verranno ricostruite insieme a quelle già presenti.</p>
+          <h2 className="text-xl font-semibold">Photos of the home</h2>
+          <p className="mt-0.5 text-sm text-white/50">Add new photos to the same room: they will be reconstructed together with the existing ones.</p>
         </div>
         {onClose && (
-          <button disabled={busy} onClick={onClose} className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30" aria-label="Chiudi">
+          <button disabled={busy} onClick={onClose} className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30" aria-label="Close">
             <X className="h-4 w-4" />
           </button>
         )}
@@ -102,33 +102,33 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 pb-6">
         <details className="rounded-xl bg-white/[0.04] px-4 py-3 text-sm text-white/65">
-          <summary className="cursor-pointer font-medium text-white/85">Come fotografare la stanza per il 3D</summary>
+          <summary className="cursor-pointer font-medium text-white/85">How to photograph the room for 3D</summary>
           <ul className="mt-2 list-disc space-y-1 pl-4">
-            <li>Punta a 12–20 scatti d’insieme nitidi. Spostati lungo le pareti, mantenendo circa due terzi della scena in comune tra scatti vicini.</li>
-            <li>Inquadra ogni angolo, il pavimento, le pareti e i lati nascosti dei mobili da più posizioni.</li>
-            <li>Usa la stessa lente, luce stabile e mobili fermi. Carica gli originali JPG/PNG, evitando screenshot e panorami cuciti.</li>
-            <li>“Panoramiche” indica normali scatti d’insieme. I “Dettagli” aiutano la revisione, ma non entrano nel 3D.</li>
+            <li>Aim for 12–20 sharp overview shots. Move along the walls, keeping about two thirds of the scene shared between neighbouring shots.</li>
+            <li>Frame every corner, the floor, the walls and the hidden sides of furniture from several positions.</li>
+            <li>Use the same lens, steady light and furniture that stays put. Upload the original JPG/PNG files, not screenshots or stitched panoramas.</li>
+            <li>“Overview” means ordinary wide shots. “Detail” photos help the review but are not used for 3D.</li>
           </ul>
         </details>
         {failed && (
           <p className="flex gap-2 rounded-xl bg-[var(--urgent)]/10 px-3.5 py-3 text-sm text-[var(--urgent)]">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> L’ultima analisi non è riuscita: {failed.error}
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> The last analysis failed: {failed.error}
           </p>
         )}
 
-        {rooms.length === 0 && <p className="rounded-xl bg-white/[0.04] px-4 py-6 text-center text-sm text-white/45">Nessuna foto ancora.</p>}
+        {rooms.length === 0 && <p className="rounded-xl bg-white/[0.04] px-4 py-6 text-center text-sm text-white/45">No photos yet.</p>}
         {rooms.map((r) => (
           <section key={r.id}>
             <h3 className="text-sm font-medium">
-              {r.label} <span className="font-normal text-white/40">· {r.photos.filter((p) => p.role === "overview").length} panoramiche · {r.photos.filter((p) => p.role === "detail").length} dettagli</span>
+              {r.label} <span className="font-normal text-white/40">· {r.photos.filter((p) => p.role === "overview").length} overview · {r.photos.filter((p) => p.role === "detail").length} detail</span>
             </h3>
             <div className="mt-2 grid grid-cols-5 gap-2">
               {r.photos.map((p) => (
                 <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg bg-white/5 ring-1 ring-white/10">
                   {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API image */}
                   <img src={p.asset_url} alt="" className="h-full w-full object-cover" />
-                  {p.role === "detail" && <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px]">dettaglio</span>}
-                  <button disabled={busy} onClick={() => remove(p.id)} className="absolute right-1 top-1 hidden h-6 w-6 place-items-center rounded-md bg-black/70 text-white/80 hover:text-white group-hover:grid" aria-label="Rimuovi la foto">
+                  {p.role === "detail" && <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px]">detail</span>}
+                  <button disabled={busy} onClick={() => remove(p.id)} className="absolute right-1 top-1 hidden h-6 w-6 place-items-center rounded-md bg-black/70 text-white/80 hover:text-white group-hover:grid" aria-label="Remove photo">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -139,19 +139,19 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
 
         <section className="rounded-xl bg-white/[0.04] p-3.5">
           <div className="flex flex-wrap items-center gap-2">
-            <input disabled={busy} value={room} onChange={(e) => setRoom(e.target.value)} list="rooms" maxLength={120} placeholder="Stanza, es. Bagno" aria-label="Stanza" className={`${field} min-w-0 flex-1`} />
+            <input disabled={busy} value={room} onChange={(e) => setRoom(e.target.value)} list="rooms" maxLength={120} placeholder="Room, e.g. Bathroom" aria-label="Room" className={`${field} min-w-0 flex-1`} />
             <datalist id="rooms">
               {scenes.map((s) => (
                 <option key={s.id} value={s.label} />
               ))}
             </datalist>
-            <select disabled={busy} value={role} onChange={(e) => setRole(e.target.value as "overview" | "detail")} aria-label="Tipo di foto" className={field}>
-              <option value="overview">Panoramiche</option>
-              <option value="detail">Dettaglio</option>
+            <select disabled={busy} value={role} onChange={(e) => setRole(e.target.value as "overview" | "detail")} aria-label="Photo type" className={field}>
+              <option value="overview">Overview</option>
+              <option value="detail">Detail</option>
             </select>
             <label className={`flex h-10 cursor-pointer items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90 ${!room.trim() || busy ? "pointer-events-none opacity-40" : ""}`}>
               {progress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              {progress ?? "Aggiungi foto"}
+              {progress ?? "Add photos"}
               <input
                 disabled={busy || !room.trim() || !limits || !modes}
                 type="file"
@@ -165,40 +165,40 @@ export default function PreparePanel({ assessment, scenes, modes, limits, reload
               />
             </label>
           </div>
-          {limits && <p className="mt-2 text-xs text-white/45">{assessment.photos.length}/{limits.max_photos} foto nella casa · JPG/PNG fino a {Math.round(limits.max_file_bytes / 1024 / 1024)} MB.{modes?.reconstruction === "vggt" && ` Per questa stanza: ${roomOverviews}/${limits.frame_cap} panoramiche.`}</p>}
-          <p className="mt-2 text-xs text-white/45">Le nuove foto richiedono una nuova analisi e revisione. Le superfici completate a mano vanno riadattate alla nuova ricostruzione.</p>
+          {limits && <p className="mt-2 text-xs text-white/45">{assessment.photos.length}/{limits.max_photos} photos in the home · JPG/PNG up to {Math.round(limits.max_file_bytes / 1024 / 1024)} MB.{modes?.reconstruction === "vggt" && ` This room: ${roomOverviews}/${limits.frame_cap} overview photos.`}</p>}
+          <p className="mt-2 text-xs text-white/45">New photos need a new analysis and review. Hand-completed surfaces must be refitted to the new reconstruction.</p>
         </section>
 
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Consensi</h3>
+          <h3 className="text-[13px] font-medium uppercase tracking-wider text-white/40">Consent</h3>
           {(
             [
-              ["external_processing_consent", "Le foto possono essere inviate ai servizi esterni di analisi delle immagini.", needsPhotoConsent],
-              ["clinical_external_processing_consent", "Il profilo può essere inviato al modello che valuta i rischi per questa persona.", needsClinicalConsent],
+              ["external_processing_consent", "The photos may be sent to external image-analysis services.", needsPhotoConsent],
+              ["clinical_external_processing_consent", "The profile may be sent to the model that assesses the risks for this person.", needsClinicalConsent],
             ] as const
           ).map(([key, label, needed]) => (
             <label key={key} className="flex cursor-pointer items-start gap-3 rounded-xl bg-white/[0.04] px-3.5 py-3 text-sm leading-relaxed text-white/80 hover:bg-white/[0.07]">
               <input type="checkbox" checked={inputs[key]} disabled={busy} onChange={(e) => consent(key, e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-white" />
               <span>
-                {label} {needed ? <span className="text-white/45">Necessario con i modelli configurati.</span> : <span className="text-white/35">Non usato in modalità dimostrativa.</span>}
+                {label} {needed ? <span className="text-white/45">Required with the configured models.</span> : <span className="text-white/35">Not used in demo mode.</span>}
               </span>
             </label>
           ))}
-          <p className="px-1 text-xs text-white/35">Aggiungere o togliere foto ritira il consenso alle foto: va dato di nuovo.</p>
+          <p className="px-1 text-xs text-white/35">Adding or removing photos withdraws photo consent: it must be given again.</p>
         </section>
       </div>
 
       <footer className="border-t border-white/10 px-6 py-4">
-        {synthetic && <p className="mb-2 text-xs text-[var(--important)]">Modalità dimostrativa: i pericoli e la geometria sono sintetici, non ricavati dalle foto.</p>}
+        {synthetic && <p className="mb-2 text-xs text-[var(--important)]">Demo mode: hazards and geometry are synthetic, not derived from the photos.</p>}
         {blockers.map((b) => (
           <p key={b} className="text-xs text-white/50">
             {b}
           </p>
         ))}
-        {!blockers.length && thinRooms.length > 0 && <p className="text-xs text-white/50">Meno di 2 panoramiche in: {thinRooms.join(", ")}. Queste stanze resteranno senza 3D.</p>}
+        {!blockers.length && thinRooms.length > 0 && <p className="text-xs text-white/50">Fewer than 2 overview photos in: {thinRooms.join(", ")}. These rooms will have no 3D.</p>}
         {error && <p className="mt-1 text-xs text-[var(--urgent)]">{error}</p>}
         <button disabled={busy || blockers.length > 0} onClick={analyze} className="mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-white text-[15px] font-medium text-black transition hover:bg-white/90 disabled:opacity-40">
-          {busy && !progress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Avvia l’analisi
+          {busy && !progress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />} Start analysis
         </button>
       </footer>
     </div>

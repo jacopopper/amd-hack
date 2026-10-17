@@ -9,7 +9,7 @@ import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 // Orbitable glTF figure generated from the confirmed profile (MPFB2), framed like the preview image.
 export default function AvatarModel({ url }: { url: string }) {
   const mount = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState("Caricamento del modello…");
+  const [message, setMessage] = useState("Loading model…");
 
   useEffect(() => {
     const element = mount.current;
@@ -56,7 +56,7 @@ export default function AvatarModel({ url }: { url: string }) {
       },
       undefined,
       () => {
-        if (!disposed) setMessage("Modello 3D non disponibile. L’immagine resta disponibile.");
+        if (!disposed) setMessage("3D model unavailable. The image is still available.");
       },
     );
     const animate = () => {
@@ -87,7 +87,7 @@ export default function AvatarModel({ url }: { url: string }) {
 
   // The canvas lives in its own node: React must never reconcile children of the element three.js appends to.
   return (
-    <div className="absolute inset-0" aria-label="Modello 3D della figura">
+    <div className="absolute inset-0" aria-label="3D model of the figure">
       <div className="absolute inset-0" ref={mount} />
       {message && (
         <p className="pointer-events-none absolute inset-0 grid place-items-center p-4 text-center text-xs text-white/55" role="status">

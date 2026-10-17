@@ -21,14 +21,14 @@ export default function PhotoView({ photos, hazards, photoId, selectedId, panelO
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  if (!photo) return <div className="absolute inset-0 grid place-items-center bg-[#0a0b0d] text-sm text-white/50">Nessuna foto per questa stanza.</div>;
+  if (!photo) return <div className="absolute inset-0 grid place-items-center bg-[#0a0b0d] text-sm text-white/50">No photos for this room.</div>;
   const regions = hazards.flatMap((h) => effective(h).evidence.filter((e) => e.photo_id === photo.id && e.box).map((e) => ({ h, box: e.box! })));
 
   return (
     <div className={`absolute inset-0 flex items-center justify-center bg-[#0a0b0d] pb-36 pl-24 pt-20 transition-[padding] ${panelOpen ? "pr-[460px]" : "pr-24"}`}>
       <div className="relative max-h-full" style={{ aspectRatio: `${photo.width} / ${photo.height}` }}>
         {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API image */}
-        <img src={photo.asset_url} alt={`Foto ${index + 1} della stanza`} className="max-h-[calc(100vh-14rem)] w-full rounded-lg object-contain" />
+        <img src={photo.asset_url} alt={`Room photo ${index + 1}`} className="max-h-[calc(100vh-14rem)] w-full rounded-lg object-contain" />
         <svg viewBox={`0 0 ${photo.width} ${photo.height}`} className="absolute inset-0 h-full w-full">
           {regions.map(({ h, box }) => {
             const e = effective(h);
@@ -46,16 +46,16 @@ export default function PhotoView({ photos, hazards, photoId, selectedId, panelO
       </div>
       {photos.length > 1 && (
         <>
-          <button onClick={() => step(-1)} className="glass absolute left-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full" aria-label="Foto precedente">
+          <button onClick={() => step(-1)} className="glass absolute left-6 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full" aria-label="Previous photo">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <button onClick={() => step(1)} className={`glass absolute top-1/2 ${panelOpen ? "right-[436px]" : "right-6"} grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full`} aria-label="Foto successiva">
+          <button onClick={() => step(1)} className={`glass absolute top-1/2 ${panelOpen ? "right-[436px]" : "right-6"} grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full`} aria-label="Next photo">
             <ChevronRight className="h-5 w-5" />
           </button>
         </>
       )}
       <span className="glass absolute left-24 top-20 rounded-full px-3 py-1 text-xs tabular-nums text-white/70">
-        Foto {index + 1} di {photos.length}
+        Photo {index + 1} of {photos.length}
       </span>
     </div>
   );

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/readme/hero.jpg" alt="Venerdì Maria torna a casa. Nessuno ha mai visto la casa in cui torna." width="100%">
+<img src="docs/readme/hero.jpg" alt="On Friday, Maria goes home. No one has ever seen the home she is going back to." width="100%">
 
 # Step Wise
 
@@ -17,7 +17,7 @@
 
 ---
 
-## Venerdì Maria torna a casa.
+## On Friday, Maria goes home.
 
 Maria is 84. She fell in her hallway at night and broke her hip. On Friday she goes home with a walker.
 
@@ -96,7 +96,7 @@ A family member photographs the home room by room, with overlapping shots. The n
 <td>
 
 ### 05 · Review
-The nurse sees each hazard with its photo, its place in the room and the reason. **Confermo**, **Non è un problema** or **Serve verificare**. Minutes, not a home visit.
+The nurse sees each hazard with its photo, its place in the room and the reason. **Confirm**, **Edit**, **Exclude** or **Check in person**. Minutes, not a home visit.
 
 **Nothing reaches the family without their sign-off.**
 
@@ -109,7 +109,7 @@ The nurse sees each hazard with its photo, its place in the room and the reason.
 <td>
 
 ### 06 · Family plan
-The family receives the approved plan on their phone: actions by priority, in plain Italian, with sources. A private link that expires after 7 days and can be revoked.
+The family receives the approved plan on their phone: actions by priority, in plain language, each with its photo. A private link that expires after 7 days and can be revoked.
 
 <sub>Jinja2 · WeasyPrint HTML/PDF</sub>
 
@@ -145,7 +145,7 @@ docker compose -f compose.demo.yaml up --build
 Open <http://localhost:8000>. You open Maria's case and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
 
 > [!IMPORTANT]
-> The bundled snapshot is a **control case**: its analysis is deterministic fixture output, not a model run, and the room view labels its geometry as synthetic. It demonstrates the review workflow, not image analysis or clinical accuracy.
+> The bundled case is a **real room**: 8 of the 39 phone photos and the offline VGGT + Gaussian-splat reconstruction. Its two hazards were **marked by hand by the team**, not detected by a model, and every finding says so. It demonstrates the review workflow on a real 3D room, not detection or clinical accuracy.
 
 <details>
 <summary><b>Full local setup (fixture pipeline, API + worker)</b></summary>
@@ -197,11 +197,11 @@ export RECON_BACKEND=fixture GEMMA_BACKEND=fixture AVATAR_BACKEND=fixture JEV_EN
 
 **5. Walk the flow** at <http://localhost:8000>:
 
-1. **Nuovo paziente** → fill in a fictional profile under **Mobilità e bisogni**.
-2. Upload `data/demo/synthetic-1.png` and `synthetic-2.png` to one room as **Panoramiche**.
-3. **Avvia l’analisi** and follow the stage status.
+1. **New patient** → fill in a fictional profile under **Mobility and needs**.
+2. Upload `data/demo/synthetic-1.png` and `synthetic-2.png` to one room as **Overview**.
+3. **Start analysis** and follow the stage status.
 4. Open the room; each pin and photo box opens its evidence card. Confirm, dismiss or flag, and edit the action if needed.
-5. **Prepara il report** → check the HTML/PDF → **Rilascia alla famiglia**. **Revoca il link** disables it.
+5. **Prepare report** → check the HTML/PDF → **Review and release** → **Release**. **Revoke link** disables it.
 
 For hot reload and the `/api` proxy, see the [frontend README](frontend/README.md). The fixture demo needs no keys.
 
@@ -257,7 +257,7 @@ flowchart TD
     CONF --> AV["avatar<br/>Blender + MPFB2"]
     GEO --> REV["Reviewer app<br/>photo, 3D view, decision"]
     AV --> REV
-    REV --> RPT["report<br/>Italian HTML/PDF"]
+    REV --> RPT["report<br/>HTML/PDF"]
     RPT --> FAM["Family link<br/>7-day token, revocable"]
 ```
 
@@ -269,7 +269,7 @@ flowchart TD
 | `gemma` | Full-image hazard sweep, personalized to the confirmed profile | Gemma-4-31B-IT · AMD endpoint | 1 image in 6.29 s, 4 images in 11.00 s (synthetic smoke) |
 | `geometry` | Floor and gravity estimate, multiview anchors or abstention | CPU · NumPy | Floor normal error 0.39–0.83° on rendered scenes |
 | `avatar` | Illustrative older-adult figure; walker only when confirmed | Blender 4.5.14 · MPFB2 2.0.18 | Rigged GLB in 2.0 s, no clinical text inside |
-| `report` | Italian HTML/PDF from reviewed findings only | Jinja2 · WeasyPrint | 8-page long-text PDF inspected without clipping |
+| `report` | HTML/PDF from reviewed findings only | Jinja2 · WeasyPrint | 8-page long-text PDF inspected without clipping |
 
 All figures come from dated runs in [runtime evidence](docs/runtime.md). They are development measurements, not accuracy or clinical claims.
 
@@ -291,7 +291,7 @@ All figures come from dated runs in [runtime evidence](docs/runtime.md). They ar
 </tr>
 </table>
 
-VGGT-1B recovered the cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. Photos are EXIF/GPS-free and nothing left the machine. The scale is not calibrated, and the hazard pins in the [`/capture`](frontend/src/app/capture/page.tsx) demo view are hand-placed, not model output. Details in [capture reconstruction](docs/capture-reconstruction.md).
+VGGT-1B recovered the cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. Photos are EXIF/GPS-free and nothing left the machine. The scale is not calibrated, and the hazard pins in the judge demo's room view are hand-placed, not model output. The demo streams a 20 MB compressed copy of the splats (`.ksplat`, 651,321 Gaussians after the viewer's opacity cut). Details in [capture reconstruction](docs/capture-reconstruction.md).
 
 ### Object checks and avatar
 
@@ -370,9 +370,9 @@ Exit code `4` from `case check` means manual checks remain pending, not an execu
 
 <br>
 
-The **Monolocale WhatsApp** study starts from five real photos and VGGT geometry. Its optional `photo_completed` presentation keeps the photographic textures and adds manually fitted floor, walls, ceiling and selected furniture, window and door surfaces. **Ricostruzione completata** and **Superfici originali** switch between the completion and the captured surfaces.
+The **Monolocale WhatsApp** study starts from five real photos and VGGT geometry. Its optional `photo_completed` presentation keeps the photographic textures and adds manually fitted floor, walls, ceiling and selected furniture, window and door surfaces. **Completed reconstruction** and **Original surfaces** switch between the completion and the captured surfaces.
 
-Missing surfaces are inferred: completion creates no validated hazard anchors or measurements, and the original photos and raw reconstruction stay available. To add photos, upload **12–20 overlapping overviews in total** to the exact existing room label (**Soggiorno**) as **Panoramiche**, then re-run the analysis; `VGGT_FRAME_CAP` (default 20) is checked before queueing, and nothing is silently dropped. Adding photos invalidates the analysis, review, calibration and manual completion. The [completion script](scripts/complete_monolocale.py) is authored for the original five-image set; attach new output with [`attach_room_presentation.py`](scripts/attach_room_presentation.py), which checks it against the current revision and source hashes.
+Missing surfaces are inferred: completion creates no validated hazard anchors or measurements, and the original photos and raw reconstruction stay available. To add photos, upload **12–20 overlapping overviews in total** to the exact existing room label (**Soggiorno**) as **Overview**, then re-run the analysis; `VGGT_FRAME_CAP` (default 20) is checked before queueing, and nothing is silently dropped. Adding photos invalidates the analysis, review, calibration and manual completion. The [completion script](scripts/complete_monolocale.py) is authored for the original five-image set; attach new output with [`attach_room_presentation.py`](scripts/attach_room_presentation.py), which checks it against the current revision and source hashes.
 
 </details>
 
@@ -430,16 +430,17 @@ amd-hack/
 │   │   ├── avatar*.py           # Blender/MPFB2 avatar generation
 │   │   └── reports.py           # Report drafting and release
 │   ├── prompts/                 # Gemma and Jev prompts
-│   └── templates/report.html    # Italian HTML/PDF template
+│   └── templates/report.html    # HTML/PDF report template
 ├── frontend/src/
 │   ├── app/                     # Patient list, intake, patient space
-│   ├── components/              # PatientSpace, DemoLanding, ReleaseDialog, space/ (three.js viewer, cards)
+│   ├── components/              # PatientSpace, ReleaseDialog, space/ (3D viewers, cards)
 │   └── lib/                     # API client, types, labels
-├── scripts/                     # Smoke tests, benchmarks, Monolocale completion
+├── frontend/public/capture-data/ # Compressed room splats and cameras for the 3D room view
+├── scripts/                     # Smoke tests, capture reconstruction, Monolocale completion (archive/: one-offs)
 ├── tests/                       # Python unittest suite
 ├── eval/jev/                    # Jev evaluation harness and historical results
-├── demo/                        # Fixture cases, judge-demo snapshot, dated artifacts
-├── docs/                        # Runtime evidence, demo runbook, 3D plan, README images
+├── demo/                        # Fixture cases, judge-demo snapshot, capture photos, dated artifacts
+├── docs/                        # Runtime evidence, capture reconstruction, product blueprint (archive/: old plans)
 └── pitch/                       # Pitch site, source captures, Jev results
 ```
 
@@ -466,6 +467,6 @@ Code is released under the [MIT License](LICENSE). Third-party material keeps it
 <div align="center">
 <br>
 
-***Venerdì Maria torna a casa. Questa volta qualcuno ha guardato il corridoio.***
+***On Friday, Maria goes home. This time, someone looked at the hallway.***
 
 </div>

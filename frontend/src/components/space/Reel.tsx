@@ -14,7 +14,7 @@ export default function Reel({ hazards, photos, selectedId, decided, total, puls
     <div className="glass flex items-center gap-3 rounded-2xl p-2">
       <button onClick={onPlay} className={`flex h-[76px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white px-4 text-black transition hover:bg-white/90 ${pulse ? "pulse-cta" : ""}`}>
         <Play className="h-5 w-5 fill-black" />
-        <span className="text-xs font-medium">{decided === 0 ? "Avvia revisione" : decided < total ? "Continua" : "Rivedi"}</span>
+        <span className="text-xs font-medium">{decided === 0 ? "Start review" : decided < total ? "Continue" : "Review again"}</span>
       </button>
       <div className="flex min-w-0 gap-2 overflow-x-auto">
         {hazards.map((h) => {
@@ -40,7 +40,7 @@ export default function Reel({ hazards, photos, selectedId, decided, total, puls
             </button>
           );
         })}
-        {!hazards.length && <p className="px-3 text-sm text-white/50">Nessun pericolo in questa stanza.</p>}
+        {!hazards.length && <p className="px-3 text-sm text-white/50">No hazards in this room.</p>}
       </div>
     </div>
   );

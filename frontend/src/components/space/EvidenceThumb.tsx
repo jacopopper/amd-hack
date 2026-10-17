@@ -16,7 +16,7 @@ export default function EvidenceThumb({ photo, evidence, width, height, classNam
   return (
     <div
       role="img"
-      aria-label="Dettaglio della foto"
+      aria-label="Photo detail"
       style={{ width, height, backgroundImage: `url(${photo.asset_url})`, backgroundSize: `${photo.width * scale}px ${photo.height * scale}px`, backgroundPosition: `${left}px ${top}px` }}
       className={`bg-no-repeat ${className}`}
     />

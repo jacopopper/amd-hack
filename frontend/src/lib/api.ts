@@ -3,9 +3,9 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
   if (options.body && !(options.body instanceof FormData)) headers.set("Content-Type", "application/json");
   const response = await fetch(`/api${path}`, { ...options, headers });
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Servizio non disponibile" }));
-    const message = error.error ?? error.detail ?? `Errore ${response.status}`;
-    throw new Error(response.status === 409 ? `${message} Ricarica prima di riprovare.` : message);
+    const error = await response.json().catch(() => ({ error: "Service unavailable" }));
+    const message = error.error ?? error.detail ?? `Error ${response.status}`;
+    throw new Error(response.status === 409 ? `${message} Reload before trying again.` : message);
   }
   return response.json();
 }

@@ -1,38 +1,38 @@
 import type { Priority } from "./types";
 
 export const categoryLabel: Record<string, string> = {
-  rug: "Tappeto",
-  cable: "Cavo a terra",
-  path: "Ostacolo sul percorso",
-  lighting: "Illuminazione",
-  bathroom: "Bagno",
-  stairs: "Scale e gradini",
-  reach: "Oggetti fuori portata",
+  rug: "Rug",
+  cable: "Floor cable",
+  path: "Obstacle in the walkway",
+  lighting: "Lighting",
+  bathroom: "Bathroom",
+  stairs: "Stairs and steps",
+  reach: "Items out of reach",
 };
 
 export const priorityMeta: Record<Priority, { label: string; color: string; rank: number }> = {
-  urgent: { label: "Urgente", color: "var(--urgent)", rank: 0 },
-  important: { label: "Importante", color: "var(--important)", rank: 1 },
-  recommended: { label: "Consigliato", color: "var(--recommended)", rank: 2 },
+  urgent: { label: "Urgent", color: "var(--urgent)", rank: 0 },
+  important: { label: "Important", color: "var(--important)", rank: 1 },
+  recommended: { label: "Recommended", color: "var(--recommended)", rank: 2 },
 };
 
 export const statusLabel: Record<string, string> = {
-  draft: "Da completare",
-  queued: "In coda",
-  processing: "In elaborazione",
-  review_ready: "Da revisionare",
-  report_drafting: "Bozza in preparazione",
-  report_ready: "Bozza pronta",
-  released: "Rilasciato",
-  failed: "Elaborazione fallita",
+  draft: "To complete",
+  queued: "Queued",
+  processing: "Processing",
+  review_ready: "To review",
+  report_drafting: "Drafting report",
+  report_ready: "Draft ready",
+  released: "Released",
+  failed: "Processing failed",
 };
 
 export const stageLabel: Record<string, string> = {
-  prepare: "Preparazione foto",
-  jev: "Pericoli nelle foto",
-  reconstruct: "Ricostruzione 3D",
-  geometry: "Geometria e scala",
-  gemma: "Valutazione sul paziente",
-  avatar: "Avatar del paziente",
-  report: "Report e PDF",
+  prepare: "Preparing photos",
+  jev: "Hazards in the photos",
+  reconstruct: "3D reconstruction",
+  geometry: "Geometry and scale",
+  gemma: "Assessment for the patient",
+  avatar: "Patient avatar",
+  report: "Report and PDF",
 };
