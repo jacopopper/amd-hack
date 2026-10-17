@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, ExternalLink, Loader2, Send, ShieldOff } from "lucide-react";
+import { Check, Copy, ExternalLink, Loader2, Send, ShieldOff, X } from "lucide-react";
 import { api, json } from "@/lib/api";
 import type { Assessment, Report } from "@/lib/types";
 
 const date = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("it-IT", { day: "numeric", month: "long" }) : "");
 
-// Final step: the reviewer checks the draft, releases it, and hands the family a link shown only once.
+// Final step: the reviewer reads the draft next to the decision, releases it, and hands the family a link shown only once.
 export default function ReleaseDialog({ assessment, report, reload, onClose }: { assessment: Assessment; report: Report; reload: () => Promise<unknown>; onClose: () => void }) {
   const [checked, setChecked] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -46,8 +46,12 @@ export default function ReleaseDialog({ assessment, report, reload, onClose }: {
     });
 
   return (
-    <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 backdrop-blur-sm">
-      <div className="glass w-[480px] rounded-2xl p-6">
+    <div className="absolute inset-0 z-20 flex items-center justify-center gap-4 bg-black/60 p-6 backdrop-blur-sm">
+      <iframe src={report.html_url} title="Anteprima del report per la famiglia" className="h-full max-h-[900px] min-w-0 max-w-[820px] flex-1 rounded-2xl bg-white shadow-2xl" />
+      <div className="glass relative w-[420px] shrink-0 rounded-2xl p-6">
+        <button onClick={onClose} className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white" aria-label="Chiudi">
+          <X className="h-4 w-4" />
+        </button>
         <h2 className="text-xl font-semibold">{link ? "Report rilasciato" : released ? "Report per la famiglia" : "Rilascia alla famiglia"}</h2>
 
         <div className="mt-4 flex gap-2">
@@ -64,6 +68,9 @@ export default function ReleaseDialog({ assessment, report, reload, onClose }: {
             <p className="text-sm leading-relaxed text-white/70">
               Copia il link adesso: <span className="text-white">non verrà più mostrato</span>. Dà accesso solo al report e scade il {date(link.expires)}.
             </p>
+            <a href={link.url} target="_blank" rel="noreferrer" className="flex h-11 items-center justify-center gap-2 rounded-xl bg-white text-sm font-medium text-black hover:bg-white/90">
+              Apri il link della famiglia <ExternalLink className="h-4 w-4" />
+            </a>
             <div className="flex gap-2">
               <input readOnly value={link.url} onFocus={(e) => e.target.select()} className="h-10 min-w-0 flex-1 rounded-xl bg-black/30 px-3 font-mono text-xs text-white/80 outline-none ring-1 ring-white/15" />
               <button
@@ -71,7 +78,7 @@ export default function ReleaseDialog({ assessment, report, reload, onClose }: {
                   await navigator.clipboard.writeText(link.url);
                   setCopied(true);
                 }}
-                className="flex h-10 items-center gap-1.5 rounded-xl bg-white px-3 text-sm font-medium text-black"
+                className="flex h-10 items-center gap-1.5 rounded-xl bg-white/10 px-3 text-sm font-medium hover:bg-white/15"
               >
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {copied ? "Copiato" : "Copia"}
               </button>
@@ -95,7 +102,7 @@ export default function ReleaseDialog({ assessment, report, reload, onClose }: {
             Chiudi
           </button>
           {!released && (
-            <button disabled={!checked || busy} onClick={release} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-medium text-black disabled:opacity-40">
+            <button disabled={!checked || busy} onClick={release} className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-medium text-black disabled:opacity-40 ${checked && !busy ? "pulse-cta" : ""}`}>
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Rilascia
             </button>
           )}

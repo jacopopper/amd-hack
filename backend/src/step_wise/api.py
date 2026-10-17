@@ -13,7 +13,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from step_wise import db
+from step_wise import db, snapshot
 from step_wise.config import Settings
 from step_wise.models import AssessmentBundle, AssessmentEdit, AvatarArtifact, AssessmentInput, CalibrationInput, Hazard, ProfileConfirmation, ReviewInput, Revisions, SceneLinkInput
 from step_wise.pipeline.photos import ingest
@@ -89,13 +89,18 @@ class UploadLimit:
         return await self.app(scope, bounded_receive, send)
 
 
+# The only mutations a public demo visitor can make on their private copy.
+DEMO_MUTATIONS = re.compile(r"^/api/(demo/session|assessments/[^/]+/(reviews/[^/]+|reports)|reports/[^/]+/(release|revoke))$")
+
+
 INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S | re.I)
 
 
 def content_security_policy(script_hashes=()):
-    scripts = " ".join(["'self'", *(f"'sha256-{h}'" for h in script_hashes)])
+    # The capture viewer sorts Gaussian splats in a blob: worker that compiles WebAssembly.
+    scripts = " ".join(["'self'", "'wasm-unsafe-eval'", *(f"'sha256-{h}'" for h in script_hashes)])
     return ("default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; "
-            f"script-src {scripts}; connect-src 'self' blob:; object-src 'none'; frame-ancestors 'self'; base-uri 'none'")
+            f"script-src {scripts}; worker-src 'self' blob:; connect-src 'self' blob:; object-src 'none'; frame-ancestors 'self'; base-uri 'none'")
 
 
 @lru_cache(maxsize=64)
@@ -125,6 +130,8 @@ def create_app(settings=None):
             same_origin = not origin or (urlsplit(origin).scheme, urlsplit(origin).netloc) == (request.url.scheme, request.url.netloc) or origin.rstrip("/") in settings.allowed_origins
             if request.headers.get("sec-fetch-site") == "cross-site" or not same_origin:
                 return JSONResponse({"error": "Cross-origin mutation denied"}, status_code=403)
+            if settings.demo and not DEMO_MUTATIONS.match(request.url.path):
+                return JSONResponse({"error": "Nella demo pubblica si possono solo revisionare i pericoli e rilasciare il report."}, status_code=403)
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -167,7 +174,7 @@ def create_app(settings=None):
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "schema_version": 3, "modes": settings.modes(), "staged_data_only": True,
+        return {"status": "ok", "schema_version": 3, "modes": settings.modes(), "staged_data_only": True, "demo": settings.demo,
                 "photo_limits": {"max_photos": settings.max_photos, "max_file_bytes": settings.max_file_bytes,
                                  "frame_cap": settings.frame_cap}}
 
@@ -175,8 +182,18 @@ def create_app(settings=None):
     def create(payload: AssessmentInput, identity=Depends(reviewer)):
         return {"id": db.create_assessment(settings, payload.model_dump(mode="json"))}
 
+    @app.post("/api/demo/session", status_code=201)
+    def demo_session():
+        if not settings.demo:
+            raise db.Missing("Demo mode is off")
+        snapshot.prune(settings)
+        return {"id": snapshot.clone_case(settings)}
+
     @app.get("/api/assessments")
     def listing(identity=Depends(reviewer)):
+        # Visitor copies are private: knowing an ID is the only way into one.
+        if settings.demo:
+            return []
         with db.connect(settings) as conn:
             return [{"id": r["id"], "label": json.loads(r["input_json"])["label"], "status": r["status"], "created_at": r["created_at"]} for r in conn.execute("SELECT * FROM assessments ORDER BY created_at DESC LIMIT 100")]
 

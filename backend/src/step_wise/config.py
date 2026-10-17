@@ -83,6 +83,8 @@ class Settings:
     web_dist: Path = ROOT / "frontend/out"  # Next.js static export (npm --prefix frontend run build)
     # Extra same-site origins allowed to mutate, e.g. a frontend dev server proxying /api.
     allowed_origins: tuple[str, ...] = ()
+    # Public demo: visitors review private copies of the frozen case in demo/snapshot; nothing else mutates.
+    demo: bool = False
 
     @property
     def db_path(self):
@@ -157,4 +159,5 @@ class Settings:
             max_assessment_bytes=int(_project_env("MAX_ASSESSMENT_BYTES", str(200 * 1024 * 1024))),
             max_pixels=int(_project_env("MAX_PIXELS", "40000000")),
             allowed_origins=tuple(o.strip().rstrip("/") for o in _project_env("ALLOWED_ORIGINS", "").split(",") if o.strip()),
+            demo=_project_env("DEMO", "false").lower() == "true",
         )

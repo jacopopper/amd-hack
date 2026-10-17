@@ -2,28 +2,33 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Box, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
+import { currentCopy } from "@/lib/demo";
 import { effective } from "@/lib/hazards";
 import { priorityMeta, statusLabel } from "@/lib/labels";
-import type { Assessment, Findings, Listing, Priority } from "@/lib/types";
+import type { Assessment, Findings, Health, Listing, Priority } from "@/lib/types";
 import Brand from "@/components/Brand";
 
 type Row = { assessment: Assessment; findings: Findings | null };
 
 export default function PatientsPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [demo, setDemo] = useState(false);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
-      const list = await api<Listing>("/assessments");
+      const health = await api<Health>("/health");
+      setDemo(health.demo);
+      // The public demo shows only this browser's copy of the case.
+      const ids = health.demo ? [await currentCopy()] : (await api<Listing>("/assessments")).map((item) => item.id);
       setRows(
         await Promise.all(
-          list.map(async (item) => ({
-            assessment: await api<Assessment>(`/assessments/${item.id}`),
-            findings: await api<Findings>(`/assessments/${item.id}/findings`).catch(() => null),
+          ids.map(async (id) => ({
+            assessment: await api<Assessment>(`/assessments/${id}`),
+            findings: await api<Findings>(`/assessments/${id}/findings`).catch(() => null),
           })),
         ),
       );
@@ -41,9 +46,11 @@ export default function PatientsPage() {
             <Search className="h-4 w-4" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca un paziente" className="w-full bg-transparent text-white outline-none placeholder:text-white/40" />
           </label>
-          <Link href="/pazienti/nuovo" className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90">
-            <Plus className="h-4 w-4" /> Nuovo paziente
-          </Link>
+          {!demo && (
+            <Link href="/pazienti/nuovo" className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90">
+              <Plus className="h-4 w-4" /> Nuovo paziente
+            </Link>
+          )}
         </div>
       </header>
 
@@ -70,6 +77,9 @@ export default function PatientsPage() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-xs backdrop-blur">{statusLabel[a.status] ?? a.status}</span>
+                  <span className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-black shadow-lg transition group-hover:scale-105">
+                    <Box className="h-3.5 w-3.5" /> Apri la casa in 3D
+                  </span>
                   <div className="absolute bottom-3 left-3 flex gap-1.5">
                     {(["urgent", "important", "recommended"] as Priority[]).map((p) => {
                       const n = live.filter((h) => effective(h).priority === p).length;

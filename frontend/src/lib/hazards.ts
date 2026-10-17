@@ -16,5 +16,8 @@ export const answers = {
 } as const;
 export type Answer = keyof typeof answers;
 
+// How a saved decision reads back to the reviewer, as on the review slide.
+export const decisionLabel: Record<Decision, string> = { approve: "Confermato", edit: "Corretto e confermato", reject: "Escluso", defer: "Da verificare" };
+
 export const answerOf = (decision?: Decision): Answer | null =>
   decision === "approve" || decision === "edit" ? "confirm" : decision === "reject" ? "dismiss" : decision === "defer" ? "verify" : null;

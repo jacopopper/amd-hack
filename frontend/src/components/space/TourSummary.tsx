@@ -8,17 +8,18 @@ import type { Hazard } from "@/lib/types";
 // End of the guided review: what goes into the plan, and what the photos could not show.
 export default function TourSummary({ hazards, unassessed, followUps, canDraft, drafting, onDraft, onClose }: { hazards: Hazard[]; unassessed: string[]; followUps: string[]; canDraft: boolean; drafting: boolean; onDraft: () => void; onClose: () => void }) {
   const count = (a: string) => hazards.filter((h) => answerOf(h.review?.decision) === a).length;
+  const corrected = hazards.filter((h) => h.review?.decision === "edit").length;
   const rows = [
-    { icon: Check, label: "Confermati, nel piano d’azione", n: count("confirm") },
-    { icon: HelpCircle, label: "Da verificare", n: count("verify") },
-    { icon: X, label: "Esclusi", n: count("dismiss") },
+    { icon: Check, label: corrected ? `Nel piano d’azione (${corrected} corrett${corrected === 1 ? "o" : "i"} da te)` : "Nel piano d’azione", n: count("confirm") },
+    { icon: HelpCircle, label: "Da verificare alla prima visita", n: count("verify") },
+    { icon: X, label: "Esclusi, non arrivano alla famiglia", n: count("dismiss") },
   ];
   const open = hazards.length - rows.reduce((s, r) => s + r.n, 0);
   return (
     <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 backdrop-blur-sm">
       <div className="glass w-[440px] rounded-2xl p-6">
         <h2 className="text-xl font-semibold">{open ? "Revisione in sospeso" : "Revisione completata"}</h2>
-        <p className="mt-1 text-sm text-white/55">{open ? `Restano ${open} pericoli senza risposta.` : "Tutti i pericoli hanno una risposta."}</p>
+        <p className="mt-1 text-sm text-white/55">{open ? `Restano ${open} pericoli senza risposta.` : "Il report conterrà solo i pericoli confermati."}</p>
         <ul className="mt-5 space-y-2">
           {rows.map((r) => (
             <li key={r.label} className="flex items-center gap-3 rounded-xl bg-white/[0.05] px-3 py-2.5 text-sm">
@@ -43,7 +44,7 @@ export default function TourSummary({ hazards, unassessed, followUps, canDraft, 
           <button onClick={onClose} className="flex-1 rounded-xl py-2.5 text-sm text-white/70 hover:bg-white/5">
             Torna alla casa
           </button>
-          <button disabled={!canDraft || drafting} onClick={onDraft} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-medium text-black disabled:opacity-40">
+          <button disabled={!canDraft || drafting} onClick={onDraft} className={`flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-medium text-black disabled:opacity-40 ${canDraft && !drafting ? "pulse-cta" : ""}`}>
             {drafting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />} Prepara il report
           </button>
         </div>

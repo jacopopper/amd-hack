@@ -2,11 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
+import { Box, Camera, FileText, Images, Loader2, Map as MapIcon, Ruler } from "lucide-react";
 import { api, json } from "@/lib/api";
 import { byPriority, effective, sceneOf } from "@/lib/hazards";
-import type { Anchor, Assessment, Findings, Modes, PhotoLimits, Report, Scene } from "@/lib/types";
+import type { Anchor, Assessment, Findings, Health, Modes, PhotoLimits, Report, Scene } from "@/lib/types";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
 import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
 import AvatarViewer from "@/components/space/AvatarViewer";
@@ -23,16 +24,17 @@ const ACTIVE = ["queued", "processing", "report_drafting"];
 const PREPARING = ["draft", "failed"];
 type View = ViewMode | "photos";
 
-function ToolButton({ active, disabled, title, onClick, children }: { active?: boolean; disabled?: boolean; title: string; onClick: () => void; children: React.ReactNode }) {
+function ToolButton({ active, disabled, title, label, onClick, children }: { active?: boolean; disabled?: boolean; title: string; label?: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       title={title}
       aria-label={title}
       disabled={disabled}
       onClick={onClick}
-      className={`grid h-11 w-11 place-items-center rounded-xl transition disabled:opacity-30 ${active ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
+      className={`flex w-14 flex-col items-center justify-center gap-0.5 rounded-xl transition disabled:opacity-30 ${label ? "h-14" : "h-11"} ${active ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
     >
       {children}
+      {label && <span className="text-[11px] font-medium">{label}</span>}
     </button>
   );
 }
@@ -56,6 +58,7 @@ export default function PatientSpace({ id }: { id: string }) {
   const [releasing, setReleasing] = useState(false);
   const [modes, setModes] = useState<Modes | null>(null);
   const [photoLimits, setPhotoLimits] = useState<PhotoLimits | null>(null);
+  const [demo, setDemo] = useState(false);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -71,8 +74,8 @@ export default function PatientSpace({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    api<{ modes: Modes; photo_limits: PhotoLimits }>("/health")
-      .then((h) => { setModes(h.modes); setPhotoLimits(h.photo_limits); })
+    api<Health>("/health")
+      .then((h) => { setModes(h.modes); setPhotoLimits(h.photo_limits); setDemo(h.demo); })
       .catch(() => undefined);
   }, []);
 
@@ -126,13 +129,14 @@ export default function PatientSpace({ id }: { id: string }) {
     select(ordered[(i + d + ordered.length) % ordered.length].id);
   };
 
-  function startTour() {
+  const startTour = useCallback(() => {
     const next = ordered.find((h) => !h.review) ?? ordered[0];
     if (!next) return;
     setTouring(true);
     setView("dollhouse");
     select(next.id);
-  }
+  }, [ordered, select]);
+
 
   async function saveReview(payload: ReviewPayload) {
     if (!assessment || !hazard) return;
@@ -173,7 +177,20 @@ export default function PatientSpace({ id }: { id: string }) {
   }
 
   if (!assessment || !findings) {
-    return <div className="grid h-full place-items-center bg-[#0a0b0d] text-sm text-white/50">{error || "Apertura della casa…"}</div>;
+    return (
+      <div className="grid h-full place-items-center bg-[#0a0b0d] text-sm text-white/50">
+        {error ? (
+          <div className="text-center">
+            <p>{error}</p>
+            <Link href="/" className="mt-4 inline-block rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black">
+              Torna ai pazienti
+            </Link>
+          </div>
+        ) : (
+          "Apertura della casa…"
+        )}
+      </div>
+    );
   }
 
   if (PREPARING.includes(assessment.status) && !editingPhotos) {
@@ -193,6 +210,9 @@ export default function PatientSpace({ id }: { id: string }) {
   const roomPhotos = assessment.photos.filter((p) => p.scene_id === sceneId);
   const unassessed = [...new Set(findings.coverage.filter((c) => c.coverage !== "visible").map((c) => c.category))];
   const calibrated = scene?.scale_state === "metric_calibrated";
+  const drafting = assessment.status === "report_drafting";
+  // The one action that moves the case forward pulses; everything else stays quiet.
+  const next = released ? null : reportCurrent ? "release" : decided === hazards.length && !busy ? "report" : decided < hazards.length ? "review" : null;
 
   return (
     <div className="relative h-full overflow-hidden bg-[#0a0b0d] text-white">
@@ -208,7 +228,7 @@ export default function PatientSpace({ id }: { id: string }) {
 
       {/* Top-left: whose home this is */}
       <div className="absolute left-4 top-4 z-10">
-        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment}>
+        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={demo ? undefined : deleteAssessment}>
           <AvatarViewer assessmentId={assessment.id} refreshKey={`${assessment.input_revision}-${assessment.jobs[0]?.id}-${assessment.jobs[0]?.status}`} />
         </PatientChip>
       </div>
@@ -246,14 +266,22 @@ export default function PatientSpace({ id }: { id: string }) {
               {decided} di {hazards.length}
             </span>
           </div>
-          {!released && !busy && (
+          {!demo && !released && !busy && (
             <button onClick={() => setEditingPhotos(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
               <Camera className="h-4 w-4" /> Foto
             </button>
           )}
           {reportCurrent ? (
-            <button onClick={() => setReleasing(true)} className="flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
+            <button onClick={() => setReleasing(true)} className={`flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black ${next === "release" ? "pulse-cta" : ""}`}>
               <FileText className="h-4 w-4" /> {released ? "Report rilasciato" : "Rivedi e rilascia"}
+            </button>
+          ) : drafting ? (
+            <span className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm text-white/70">
+              <Loader2 className="h-4 w-4 animate-spin" /> Report in preparazione
+            </span>
+          ) : next === "report" ? (
+            <button onClick={() => setSummary(true)} className="pulse-cta flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
+              <FileText className="h-4 w-4" /> Prepara il report
             </button>
           ) : (
             <button onClick={() => setSummary(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
@@ -298,13 +326,13 @@ export default function PatientSpace({ id }: { id: string }) {
 
       {/* Bottom-left: views and tools */}
       <div className="glass absolute bottom-4 left-4 z-10 flex flex-col gap-1 rounded-2xl p-1.5">
-        <ToolButton title="Casa in 3D" active={view === "dollhouse"} onClick={() => setView("dollhouse")}>
+        <ToolButton title="Casa in 3D" label="3D" active={view === "dollhouse"} onClick={() => setView("dollhouse")}>
           <Box className="h-5 w-5" />
         </ToolButton>
-        <ToolButton title="Pianta dall’alto" active={view === "plan"} onClick={() => setView("plan")}>
+        <ToolButton title="Pianta dall’alto" label="Pianta" active={view === "plan"} onClick={() => setView("plan")}>
           <MapIcon className="h-5 w-5" />
         </ToolButton>
-        <ToolButton title="Foto della stanza" active={view === "photos"} onClick={() => setView("photos")}>
+        <ToolButton title="Foto della stanza" label="Foto" active={view === "photos"} onClick={() => setView("photos")}>
           <Images className="h-5 w-5" />
         </ToolButton>
         <span className="mx-2 my-0.5 h-px bg-white/10" />
@@ -319,9 +347,9 @@ export default function PatientSpace({ id }: { id: string }) {
       </div>
 
       {/* Bottom: highlight reel of this room */}
-      <div className={`absolute bottom-4 left-[84px] z-10 flex ${hazard ? "right-[432px]" : "right-4"} justify-center`}>
+      <div className={`absolute bottom-4 left-[96px] z-10 flex ${hazard ? "right-[432px]" : "right-4"} justify-center`}>
         <div className="max-w-full">
-          <Reel hazards={roomHazards} photos={assessment.photos} selectedId={selected} decided={decided} total={hazards.length} onSelect={select} onPlay={startTour} />
+          <Reel hazards={roomHazards} photos={assessment.photos} selectedId={selected} decided={decided} total={hazards.length} pulse={next === "review" && !hazard} onSelect={select} onPlay={startTour} />
         </div>
       </div>
 
@@ -348,7 +376,7 @@ export default function PatientSpace({ id }: { id: string }) {
           unassessed={unassessed}
           followUps={findings.follow_up_requests}
           canDraft={decided === hazards.length && !released && !busy}
-          drafting={assessment.status === "report_drafting"}
+          drafting={drafting}
           onDraft={async () => {
             await draftReport();
             setSummary(false);

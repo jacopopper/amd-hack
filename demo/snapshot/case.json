@@ -1,0 +1,159 @@
+{
+ "schema_version": 3,
+ "exported_at": "2026-10-17T16:47:00.754324+00:00",
+ "assessment": {
+  "id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+  "input_json": "{\"external_processing_consent\":false,\"label\":\"Maria R. · 84 anni\",\"processing_consent\":true,\"profile\":{\"aid_width_m\":0.62,\"daily_routes\":[\"camera → bagno (notte)\",\"camera → cucina\"],\"description\":\"Rientro a domicilio dopo frattura di femore. Vive sola, la figlia è fuori città. Si alza spesso di notte per andare in bagno.\",\"mobility_aid\":\"deambulatore\",\"relevant_history\":\"Frattura di femore (settembre 2026)\",\"support_needs\":\"Badante 3 ore al mattino\",\"vision\":\"Cataratta, vista ridotta con poca luce\"},\"profile_confirmed\":true,\"staged_data_confirmed\":true}",
+  "status": "report_ready",
+  "input_revision": 3,
+  "review_revision": 8,
+  "analysis_job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+  "created_at": "2026-10-16T18:30:17.215985+00:00",
+  "updated_at": "2026-10-16T18:55:59.357468+00:00"
+ },
+ "scenes": [
+  {
+   "id": "790a0ed7-4cf6-4c20-88c9-5e9e9057d504",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "label": "Camera",
+   "payload": "{\"bounds\":[[-2.0,0.0,-1.5],[2.0,2.5,1.5]],\"calibration\":null,\"cameras\":[],\"coordinate_convention\":\"synthetic x-right y-up z-back; raw relative units\",\"display_transform\":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]],\"id\":\"790a0ed7-4cf6-4c20-88c9-5e9e9057d504\",\"images\":[],\"measurements\":[],\"ply_asset_id\":\"d08ac8b1-f239-45b3-976f-c9b10f677211\",\"ply_path\":\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/790a0ed7-4cf6-4c20-88c9-5e9e9057d504-synthetic.ply\",\"provenance\":\"fixture\",\"scale_factor\":null,\"scale_state\":\"unknown\",\"selected_photo_ids\":[\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"],\"status\":\"ready\",\"warning\":\"Synthetic viewer geometry; not reconstructed from photos\"}"
+  }
+ ],
+ "assets": [
+  {
+   "id": "a6b3bba0-4f41-41ee-be09-3e9141ee24e2",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "path": "assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/uploads/a6b3bba0-4f41-41ee-be09-3e9141ee24e2.jpg",
+   "media_type": "image/jpeg",
+   "byte_size": 33944,
+   "sha256": "671750a4a647ce1f9307d4d4b34a4c38480d37bcf610c6646d5dd3510dc2d4bd",
+   "provenance": "upload",
+   "scope": "source"
+  },
+  {
+   "id": "96b12521-e1ad-4529-8664-b3050303e16a",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "path": "assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/uploads/96b12521-e1ad-4529-8664-b3050303e16a.jpg",
+   "media_type": "image/jpeg",
+   "byte_size": 33790,
+   "sha256": "b18be3e5164b9907ee6853baac0e07df149eefde86401106cd14a19030814585",
+   "provenance": "upload",
+   "scope": "source"
+  },
+  {
+   "id": "d08ac8b1-f239-45b3-976f-c9b10f677211",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "path": "assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/790a0ed7-4cf6-4c20-88c9-5e9e9057d504-synthetic.ply",
+   "media_type": "application/octet-stream",
+   "byte_size": 40678,
+   "sha256": "3c8dc6daa407916dbd7c8c21aa3150b91a0d9b5c9496da0bd9d7d0cbb09e4dc6",
+   "provenance": "fixture",
+   "scope": "derived"
+  }
+ ],
+ "photos": [
+  {
+   "id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "scene_id": "790a0ed7-4cf6-4c20-88c9-5e9e9057d504",
+   "asset_id": "a6b3bba0-4f41-41ee-be09-3e9141ee24e2",
+   "role": "overview",
+   "payload": "{\"exif_orientation_applied\":1,\"height\":640,\"raw_sha256\":\"91a4c00cd1685afdcb2ec7395529362d2c00085dce35c8133dda7af857e73139\",\"raw_size\":[960,640],\"upright_sha256\":\"671750a4a647ce1f9307d4d4b34a4c38480d37bcf610c6646d5dd3510dc2d4bd\",\"upright_size\":[960,640],\"width\":960}",
+   "active": 1
+  },
+  {
+   "id": "b9dbe26f-434a-491d-b3cd-916b8ab45df5",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "scene_id": "790a0ed7-4cf6-4c20-88c9-5e9e9057d504",
+   "asset_id": "96b12521-e1ad-4529-8664-b3050303e16a",
+   "role": "overview",
+   "payload": "{\"exif_orientation_applied\":1,\"height\":640,\"raw_sha256\":\"8509ad7d106ecf2f0b47f9348a3f34c76586ef61ce32d923fb3ac133c93c47a6\",\"raw_size\":[960,640],\"upright_sha256\":\"b18be3e5164b9907ee6853baac0e07df149eefde86401106cd14a19030814585\",\"upright_size\":[960,640],\"width\":960}",
+   "active": 1
+  }
+ ],
+ "jobs": [
+  {
+   "id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "kind": "analyze",
+   "status": "succeeded",
+   "input_revision": 3,
+   "review_revision": 0,
+   "parent_id": null,
+   "stage": "gemma",
+   "stages": "{\"gemma\":{\"artifacts\":{\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-prepared.jpg\":\"631a3977b8468a9ec5a07bf64718abab05261b3100d47dcf178c6bed8f5e39c6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-thumb.jpg\":\"9a7b2c92e7f4dac1722edf063938229505632b97bf04fca106a0548cbd00e50f\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/790a0ed7-4cf6-4c20-88c9-5e9e9057d504-synthetic.ply\":\"3c8dc6daa407916dbd7c8c21aa3150b91a0d9b5c9496da0bd9d7d0cbb09e4dc6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-prepared.jpg\":\"f14390fc58dc72c014ef72e1083da5b5dca50bc1391c0c8b7e68edec00fc0b58\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-thumb.jpg\":\"2fd0858a8689d1d0aaf4d962afea1080b3c37751d6d25851c6153e8cbdbf2791\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/stages/gemma/output.json\":\"7a07f4bbce6b4a5a21637c0c7a10cba1f70eb2aa93f37c5f52dc9cbc876772c2\"},\"dependencies\":[\"prepare\",\"jev\",\"geometry\"],\"elapsed_seconds\":0.0008050079995882697,\"fingerprint\":\"d22abd9ee6db4828eb40d7fbf93fd524fcdd33e99c0fd8cec4256ebf1045ab4a\",\"finished_at\":\"2026-10-16T18:30:17.542270+00:00\",\"provenance\":\"fixture\",\"schema_version\":1,\"stage\":\"gemma\",\"started_at\":\"2026-10-16T18:30:17.541465+00:00\",\"status\":\"succeeded\",\"warnings\":[]},\"geometry\":{\"artifacts\":{\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-prepared.jpg\":\"631a3977b8468a9ec5a07bf64718abab05261b3100d47dcf178c6bed8f5e39c6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-thumb.jpg\":\"9a7b2c92e7f4dac1722edf063938229505632b97bf04fca106a0548cbd00e50f\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/790a0ed7-4cf6-4c20-88c9-5e9e9057d504-synthetic.ply\":\"3c8dc6daa407916dbd7c8c21aa3150b91a0d9b5c9496da0bd9d7d0cbb09e4dc6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-prepared.jpg\":\"f14390fc58dc72c014ef72e1083da5b5dca50bc1391c0c8b7e68edec00fc0b58\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-thumb.jpg\":\"2fd0858a8689d1d0aaf4d962afea1080b3c37751d6d25851c6153e8cbdbf2791\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/stages/geometry/output.json\":\"63a4beff605cd4fd60affbb3e2e0480730f4d7a9fe2abf3065d3662665c2d17b\"},\"dependencies\":[\"prepare\",\"jev\",\"reconstruct\"],\"elapsed_seconds\":0.0010271310020470992,\"fingerprint\":\"364ee24b8778e5c1cb06780cbfa86d3fdd3c53fc30bcaba822ff115bdc5fcc29\",\"finished_at\":\"2026-10-16T18:30:17.536103+00:00\",\"provenance\":\"fixture\",\"schema_version\":1,\"stage\":\"geometry\",\"started_at\":\"2026-10-16T18:30:17.535076+00:00\",\"status\":\"succeeded\",\"warnings\":[\"Metric scale unknown; no dimensions are claimed\"]},\"jev\":{\"artifacts\":{\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-prepared.jpg\":\"631a3977b8468a9ec5a07bf64718abab05261b3100d47dcf178c6bed8f5e39c6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-thumb.jpg\":\"9a7b2c92e7f4dac1722edf063938229505632b97bf04fca106a0548cbd00e50f\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-prepared.jpg\":\"f14390fc58dc72c014ef72e1083da5b5dca50bc1391c0c8b7e68edec00fc0b58\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-thumb.jpg\":\"2fd0858a8689d1d0aaf4d962afea1080b3c37751d6d25851c6153e8cbdbf2791\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/stages/jev/output.json\":\"37cad0da97184d40e734afe201c56886e70a8c252e1a36a1bd73f21e14a4ec6d\"},\"dependencies\":[\"prepare\"],\"elapsed_seconds\":0.0017563309957040474,\"fingerprint\":\"16699c6e58aacbadff7325049d5ada5ef571e587f55d6ee558cc8201649d6d16\",\"finished_at\":\"2026-10-16T18:30:17.514470+00:00\",\"provenance\":\"fixture\",\"schema_version\":1,\"stage\":\"jev\",\"started_at\":\"2026-10-16T18:30:17.512715+00:00\",\"status\":\"succeeded\",\"warnings\":[]},\"prepare\":{\"artifacts\":{\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-prepared.jpg\":\"631a3977b8468a9ec5a07bf64718abab05261b3100d47dcf178c6bed8f5e39c6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-thumb.jpg\":\"9a7b2c92e7f4dac1722edf063938229505632b97bf04fca106a0548cbd00e50f\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-prepared.jpg\":\"f14390fc58dc72c014ef72e1083da5b5dca50bc1391c0c8b7e68edec00fc0b58\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-thumb.jpg\":\"2fd0858a8689d1d0aaf4d962afea1080b3c37751d6d25851c6153e8cbdbf2791\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/stages/prepare/output.json\":\"d9ca071040f40940c51073e2d5d3522bdae6b8c6b059f0531858100f9838c45e\"},\"dependencies\":[],\"elapsed_seconds\":0.051868176997231785,\"fingerprint\":\"3c52a67c2a3cb202a74a8264305a6cc538aa6d54be996f23c4ea9c7b938ffcb3\",\"finished_at\":\"2026-10-16T18:30:17.505151+00:00\",\"provenance\":\"fixture\",\"schema_version\":1,\"stage\":\"prepare\",\"started_at\":\"2026-10-16T18:30:17.453283+00:00\",\"status\":\"succeeded\",\"warnings\":[]},\"reconstruct\":{\"artifacts\":{\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-prepared.jpg\":\"631a3977b8468a9ec5a07bf64718abab05261b3100d47dcf178c6bed8f5e39c6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/59e5b8a6-e464-4441-815d-e021e21033a6-thumb.jpg\":\"9a7b2c92e7f4dac1722edf063938229505632b97bf04fca106a0548cbd00e50f\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/790a0ed7-4cf6-4c20-88c9-5e9e9057d504-synthetic.ply\":\"3c8dc6daa407916dbd7c8c21aa3150b91a0d9b5c9496da0bd9d7d0cbb09e4dc6\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-prepared.jpg\":\"f14390fc58dc72c014ef72e1083da5b5dca50bc1391c0c8b7e68edec00fc0b58\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/assets/b9dbe26f-434a-491d-b3cd-916b8ab45df5-thumb.jpg\":\"2fd0858a8689d1d0aaf4d962afea1080b3c37751d6d25851c6153e8cbdbf2791\",\"assessments/29f3ff7b-845f-4ff2-ab1d-a14dade4d031/jobs/5f3a2fd2-0f6c-4306-a261-8fdca4ab871c/stages/reconstruct/output.json\":\"1ec2ec93fcf7b1348cf1ca3ed5a32db629132bfc725f0cbae3345d656d8da04a\"},\"dependencies\":[\"prepare\"],\"elapsed_seconds\":0.009720973001094535,\"fingerprint\":\"d268053f205e2821c34d87de5f9de417afae69a522f567c3a02c25b18ba43a85\",\"finished_at\":\"2026-10-16T18:30:17.529385+00:00\",\"provenance\":\"fixture\",\"schema_version\":1,\"stage\":\"reconstruct\",\"started_at\":\"2026-10-16T18:30:17.519663+00:00\",\"status\":\"succeeded\",\"warnings\":[]}}",
+   "output": "{\"coverage\":[{\"category\":\"rug\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"cable\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"path\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"lighting\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"bathroom\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"stairs\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"reach\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},{\"category\":\"rug\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"cable\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"path\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"lighting\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"bathroom\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"stairs\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"},{\"category\":\"reach\",\"coverage\":\"unknown\",\"note\":\"Fixture: questo controllo non è stato eseguito da un modello.\",\"photo_id\":\"b9dbe26f-434a-491d-b3cd-916b8ab45df5\"}],\"follow_up_requests\":[\"Acquisire immagini sovrapposte reali; verificare di persona le aree non visibili.\"],\"hazards\":[{\"anchor\":null,\"category\":\"rug\",\"evidence\":[{\"box\":[288.0,409.6,691.1999999999999,550.4],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"Controllo sintetico: tappeto visibile, fissaggio sconosciuto.\",\"priority\":\"important\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare il fissaggio del tappeto; valutare rimozione o supporto antiscivolo.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"},{\"anchor\":null,\"category\":\"path\",\"evidence\":[{\"box\":[76.8,384.0,220.8,531.1999999999999],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"floor-path\"],\"measurement_ids\":[],\"observation\":\"Controllo sintetico: oggetto nel passaggio.\",\"priority\":\"important\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Liberare il percorso dagli oggetti e verificare il passaggio di persona.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"},{\"anchor\":null,\"category\":\"lighting\",\"evidence\":[{\"box\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"night-light\"],\"measurement_ids\":[],\"observation\":\"Percorso notturno fuori inquadratura: illuminazione da verificare.\",\"priority\":\"recommended\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare di notte l’illuminazione del percorso e valutare una luce notturna.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"},{\"anchor\":null,\"category\":\"bathroom\",\"evidence\":[{\"box\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"bath-support\"],\"measurement_ids\":[],\"observation\":\"Bagno fuori inquadratura: supporti non valutabili.\",\"priority\":\"recommended\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare con un professionista il bisogno di supporti in bagno e la loro installazione.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"}],\"modes\":{\"gemma\":\"fixture\",\"jev\":\"disabled\",\"reconstruction\":\"fixture\"},\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\"}",
+   "heartbeat": "2026-10-16T18:30:17.538740+00:00",
+   "error": null,
+   "created_at": "2026-10-16T18:30:17.284079+00:00",
+   "finished_at": "2026-10-16T18:30:17.545219+00:00"
+  }
+ ],
+ "candidates": [
+  {
+   "id": "58a5b8f9-0072-483e-b4b8-e531d51dd45b",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "photo_id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "payload": "{\"attachment\":\"unknown\",\"category\":\"rug\",\"coverage\":\"visible\",\"evidence\":{\"box\":[288.0,409.6,691.1999999999999,550.4],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"presence\":\"present\",\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\",\"provider_response\":{\"attachment\":\"unknown\",\"box\":[0.3,0.64,0.72,0.86],\"category\":\"rug\",\"coverage\":\"visible\",\"presence\":\"present\"},\"question_id\":\"rug\"}"
+  },
+  {
+   "id": "a15335cb-21a8-47ba-852e-fbf8dabb8594",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "photo_id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "payload": "{\"attachment\":\"unknown\",\"category\":\"cable\",\"coverage\":\"visible\",\"evidence\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"presence\":\"absent\",\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\",\"provider_response\":{\"attachment\":\"loose\",\"box\":[0.1,0.2,0.3,0.4],\"category\":\"cable\",\"coverage\":\"visible\",\"presence\":\"absent\"},\"question_id\":\"cable\"}"
+  },
+  {
+   "id": "7ccd421b-9e6f-4882-ac22-b30d9d2c6d23",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "photo_id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "payload": "{\"attachment\":\"unknown\",\"category\":\"path\",\"coverage\":\"partial\",\"evidence\":{\"box\":[76.8,384.0,220.8,531.1999999999999],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"},\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"presence\":\"present\",\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\",\"provider_response\":{\"attachment\":\"unknown\",\"box\":[0.08,0.6,0.23,0.83],\"category\":\"path\",\"coverage\":\"partial\",\"presence\":\"present\"},\"question_id\":\"path\"}"
+  },
+  {
+   "id": "156c77b8-de56-4777-ab3e-77acc0564489",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "photo_id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "payload": "{\"attachment\":\"unknown\",\"category\":\"lighting\",\"coverage\":\"out_of_frame\",\"evidence\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"presence\":\"unknown\",\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\",\"provider_response\":{\"attachment\":\"unknown\",\"box\":null,\"category\":\"lighting\",\"coverage\":\"out_of_frame\",\"presence\":\"unknown\"},\"question_id\":\"lighting\"}"
+  },
+  {
+   "id": "7d697b7e-bcdd-4622-91b1-dbd9f9669c99",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "photo_id": "59e5b8a6-e464-4441-815d-e021e21033a6",
+   "payload": "{\"attachment\":\"unknown\",\"category\":\"bathroom\",\"coverage\":\"out_of_frame\",\"evidence\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\",\"presence\":\"unknown\",\"producer\":\"synthetic-contract-fixture-v1\",\"provenance\":\"fixture\",\"provider_response\":{\"attachment\":\"unknown\",\"box\":null,\"category\":\"bathroom\",\"coverage\":\"out_of_frame\",\"presence\":\"unknown\"},\"question_id\":\"bathroom\"}"
+  }
+ ],
+ "hazards": [
+  {
+   "id": "e3a166de-1859-4800-80b6-fbe9bfc265be",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "payload": "{\"anchor\":null,\"category\":\"rug\",\"evidence\":[{\"box\":[288.0,409.6,691.1999999999999,550.4],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"Controllo sintetico: tappeto visibile, fissaggio sconosciuto.\",\"priority\":\"important\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare il fissaggio del tappeto; valutare rimozione o supporto antiscivolo.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"}"
+  },
+  {
+   "id": "c59d88de-e0bb-4b02-bb21-0ff7f7f853b1",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "payload": "{\"anchor\":null,\"category\":\"path\",\"evidence\":[{\"box\":[76.8,384.0,220.8,531.1999999999999],\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"floor-path\"],\"measurement_ids\":[],\"observation\":\"Controllo sintetico: oggetto nel passaggio.\",\"priority\":\"important\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Liberare il percorso dagli oggetti e verificare il passaggio di persona.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"}"
+  },
+  {
+   "id": "f034715c-b0c5-4cd4-bf13-9eb6e95fc7aa",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "payload": "{\"anchor\":null,\"category\":\"lighting\",\"evidence\":[{\"box\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"night-light\"],\"measurement_ids\":[],\"observation\":\"Percorso notturno fuori inquadratura: illuminazione da verificare.\",\"priority\":\"recommended\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare di notte l’illuminazione del percorso e valutare una luce notturna.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"}"
+  },
+  {
+   "id": "a1aaff3a-8a02-4c49-8120-68c5a146a606",
+   "assessment_id": "29f3ff7b-845f-4ff2-ab1d-a14dade4d031",
+   "job_id": "5f3a2fd2-0f6c-4306-a261-8fdca4ab871c",
+   "payload": "{\"anchor\":null,\"category\":\"bathroom\",\"evidence\":[{\"box\":null,\"photo_id\":\"59e5b8a6-e464-4441-815d-e021e21033a6\"}],\"guidance_ids\":[\"bath-support\"],\"measurement_ids\":[],\"observation\":\"Bagno fuori inquadratura: supporti non valutabili.\",\"priority\":\"recommended\",\"profile_fields\":[\"description\"],\"profile_relevance\":\"Esempio di sviluppo; rilevanza da verificare sul profilo confermato.\",\"suggested_action\":\"Verificare con un professionista il bisogno di supporti in bagno e la loro installazione.\",\"uncertainty\":\"Fixture, non inferenza. Nessuna verifica di sicurezza o misura metrica.\"}"
+  }
+ ],
+ "measurements": [],
+ "scene_links": [],
+ "clinical_documents": [],
+ "clinical_profile_drafts": []
+}

@@ -1,0 +1,12 @@
+# Local run of the exact image deployed for the judges: docker compose -f compose.demo.yaml up --build
+services:
+  demo:
+    build:
+      context: .
+      dockerfile: Dockerfile.demo
+    ports: ["127.0.0.1:${STEP_WISE_PORT:-8000}:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)"]
+      interval: 15s
+      timeout: 6s
+      retries: 3

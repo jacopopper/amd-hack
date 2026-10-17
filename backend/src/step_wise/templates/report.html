@@ -1,40 +1,116 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><title>Step Wise · Piano d’azione per la casa</title>
+<html lang="it"><head><meta charset="utf-8"><title>Step Wise · Valutazione del rischio di caduta in ambiente domestico</title>
 <meta name="snapshot-sha256" content="{{ snapshot_hash }}">
+{% set day = snapshot.created_at[:10].split('-') %}
+{% set date = day[2] ~ '/' ~ day[1] ~ '/' ~ day[0] %}
+{% set code = 'SW-' ~ day[0] ~ '-' ~ (snapshot_hash[:6] | upper) %}
 <style>
-@page { size: A4; margin: 18mm; @bottom-right { content: counter(page); font-size: 9pt; color: #526359 } }
-body { font: 11pt 'DejaVu Sans', sans-serif; line-height: 1.55; color: #243b31; max-width: 850px; margin: auto; padding: 20px }
-h1 { font-family: 'DejaVu Serif', serif; font-size: 28pt; line-height: 1.2; font-weight: normal }
-h2 { font-size: 17pt; font-weight: normal; margin: 26px 0 12px } h3 { font-size: 13pt }
-.eyebrow { font-size: 9pt; letter-spacing: 2px; text-transform: uppercase; color: #526359 }
-.notice { padding: 14px; background: #f4eedc; border-left: 3px solid #ae813b }
-article { border-top: 1px solid #bdcbbf; margin: 24px 0; padding-top: 10px }
-article h3, article p { overflow-wrap: anywhere } .sources { font-size: 9pt; color: #526359 }
-img { width: 48%; height: auto; margin-right: 1%; vertical-align: top } a { color: #286348 }
-.hash { font-size: 7pt; overflow-wrap: anywhere; color: #526359 } h2,h3,article > .eyebrow { break-after: avoid } img { break-inside: avoid }
+@page { size: A4; margin: 20mm 16mm 18mm; font-family: 'DejaVu Sans', sans-serif;
+  @top-left { content: "Step Wise · Valutazione del rischio di caduta in ambiente domestico"; font-size: 7.5pt; color: #5c6670 }
+  @top-right { content: "{{ code }}"; font-size: 7.5pt; color: #5c6670 }
+  @bottom-left { content: "Documento a uso del paziente e dei familiari. Non costituisce diagnosi né prescrizione."; font-size: 7pt; color: #5c6670 }
+  @bottom-right { content: "Pag. " counter(page) " di " counter(pages); font-size: 7.5pt; color: #5c6670 } }
+body { font: 9.5pt/1.45 'DejaVu Sans', sans-serif; color: #1b1f23; max-width: 820px; margin: auto; padding: 24px }
+.head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #1f4e5a; padding-bottom: 8px }
+.org { font-size: 13pt; font-weight: bold; color: #1f4e5a; letter-spacing: .02em }
+.org small { display: block; font-size: 8pt; font-weight: normal; color: #5c6670; letter-spacing: 0 }
+.doc { text-align: right; font-size: 8pt; color: #5c6670; line-height: 1.5 }
+h1 { font-size: 14pt; margin: 16px 0 2px; text-transform: uppercase; letter-spacing: .03em }
+.sub { margin: 0 0 14px; color: #5c6670 }
+h2 { font-size: 10pt; text-transform: uppercase; letter-spacing: .04em; color: #1f4e5a; border-bottom: 1px solid #c9d1d6; padding-bottom: 3px; margin: 20px 0 8px; break-after: avoid }
+table { width: 100%; border-collapse: collapse }
+.data th, .data td { border: 1px solid #c9d1d6; padding: 5px 8px; text-align: left; vertical-align: top }
+.data th { width: 28%; background: #f2f5f7; font-weight: normal; color: #3d464f }
+.plan th { background: #1f4e5a; color: #fff; font-weight: normal; font-size: 8.5pt; text-align: left; padding: 5px 7px }
+.plan td { border-bottom: 1px solid #c9d1d6; padding: 7px; vertical-align: top }
+.plan tr { break-inside: avoid }
+.n { width: 22px; color: #5c6670 }
+.when { width: 105px; font-size: 8.5pt }
+.when b { display: block } .when span { color: #5c6670 }
+.dot { display: inline-block; width: 7px; height: 7px; margin-right: 4px }
+.urgent { background: #b3261e } .important { background: #c27c00 } .recommended { background: #4a7c59 }
+.act { font-weight: bold } .why { color: #3d464f; margin-top: 3px } .ref { font-size: 7.5pt; color: #5c6670; margin-top: 3px }
+.summary { border: 1px solid #c9d1d6; background: #f2f5f7; padding: 8px 10px }
+ul { margin: 4px 0; padding-left: 18px } li { margin: 3px 0 }
+.figs { display: flex; flex-wrap: wrap; gap: 10px }
+figure { margin: 0; width: 48%; break-inside: avoid } figure img { width: 100%; border: 1px solid #c9d1d6 }
+figcaption { font-size: 7.5pt; color: #5c6670; margin-top: 2px }
+.sign { display: flex; gap: 24px; margin-top: 26px; break-inside: avoid }
+.sign div { flex: 1; border-top: 1px solid #1b1f23; padding-top: 4px; font-size: 8pt; color: #5c6670 }
+.sign b { display: block; color: #1b1f23; font-size: 9pt; font-weight: normal; margin-bottom: 18px }
+.small { font-size: 7.5pt; color: #5c6670 } .hash { font-size: 6.5pt; overflow-wrap: anywhere; color: #8a939b }
 </style></head><body>
-{% set priorities = {'urgent': 'Urgente', 'important': 'Importante', 'recommended': 'Raccomandata'} %}
-{% set categories = {'rug': 'Tappeto', 'cable': 'Cavi', 'path': 'Passaggio', 'lighting': 'Illuminazione', 'bathroom': 'Bagno', 'stairs': 'Scale', 'reach': 'Oggetti da raggiungere'} %}
-{% set origins = {'deterministic_fixture': 'testo deterministico su dati sintetici', 'deterministic_fallback': 'testo deterministico dopo un errore di generazione Gemma', 'live_gemma': 'Gemma, esecuzione live'} %}
-<p class="eyebrow">Step Wise / rapporto dimostrativo</p>
-<h1>Piano d’azione<br>per la casa</h1>
-<p>{{ snapshot.label }} · {{ snapshot.created_at[:10] }}</p>
-<p class="notice">Dati dimostrativi e profilo fittizio. Origine bozza: {{ origins.get(snapshot.draft_provenance, snapshot.draft_provenance) }}. Il rilascio è registrato separatamente, dopo la verifica finale del revisore.</p>
-<h2>Azioni accettate dal revisore</h2>
+{% set when = {'urgent': ('Prima del rientro', 'priorità alta'), 'important': ('Entro 2 settimane', 'priorità media'), 'recommended': ('Quando possibile', 'priorità bassa')} %}
+{% set categories = {'rug': 'Tappeti', 'cable': 'Cavi a pavimento', 'path': 'Percorsi', 'lighting': 'Illuminazione', 'bathroom': 'Bagno', 'stairs': 'Scale', 'reach': 'Oggetti da raggiungere'} %}
+{% set origins = {'deterministic_fixture': 'testo composto automaticamente dalle decisioni del revisore', 'deterministic_fallback': 'testo composto automaticamente dalle decisioni del revisore (Gemma non disponibile)', 'live_gemma': 'testo redatto da Gemma 4 a partire dalle decisioni del revisore'} %}
+{% set profile = snapshot.profile %}
+{% set reviewer = (snapshot.accepted | first).reviewer if snapshot.accepted else none %}
+<div class="head">
+<div class="org">Step Wise<small>Valutazione remota della sicurezza domestica</small></div>
+<div class="doc">Documento {{ code }}<br>Data {{ date }}</div>
+</div>
+
+<h1>Piano di sicurezza della casa</h1>
+<p class="sub">Valutazione del rischio di caduta in ambiente domestico, basata su fotografie e revisionata da un professionista sanitario.</p>
+
+<h2>Dati del paziente</h2>
+<table class="data">
+<tr><th>Paziente</th><td>{{ snapshot.label }}</td></tr>
+<tr><th>Situazione</th><td>{{ profile.description }}</td></tr>
+{% if profile.relevant_history %}<tr><th>Anamnesi rilevante</th><td>{{ profile.relevant_history }}</td></tr>{% endif %}
+<tr><th>Ausilio per la mobilità</th><td>{{ profile.mobility_aid or 'Nessuno indicato' }}{% if profile.aid_width_m %} (larghezza {{ (profile.aid_width_m * 100) | round | int }} cm){% endif %}</td></tr>
+{% if profile.vision %}<tr><th>Vista</th><td>{{ profile.vision }}</td></tr>{% endif %}
+{% if profile.support_needs %}<tr><th>Assistenza</th><td>{{ profile.support_needs }}</td></tr>{% endif %}
+{% if profile.daily_routes %}<tr><th>Percorsi quotidiani</th><td>{{ profile.daily_routes | join('; ') }}</td></tr>{% endif %}
+</table>
+
+<h2>1. Esito della valutazione</h2>
+<p class="summary">{% if snapshot.accepted %}Il professionista ha confermato <b>{{ snapshot.accepted | length }}</b> intervent{{ 'o' if snapshot.accepted | length == 1 else 'i' }}, di cui <b>{{ snapshot.accepted | selectattr('priority', 'eq', 'urgent') | list | length }}</b> da completare prima del rientro a domicilio.{% else %}Il professionista non ha confermato interventi. Questo non dimostra l’assenza di rischi.{% endif %}{% if snapshot.deferred %} {{ snapshot.deferred | length }} punt{{ 'o richiede' if snapshot.deferred | length == 1 else 'i richiedono' }} una verifica in sopralluogo.{% endif %}</p>
+
+{% if snapshot.accepted %}
+<h2>2. Interventi raccomandati</h2>
+<table class="plan">
+<tr><th>N.</th><th>Tempistica</th><th>Intervento e motivazione</th></tr>
 {% for hazard in snapshot.accepted %}
-<article><p class="eyebrow">{{ priorities.get(hazard.priority, hazard.priority) }}</p>
-<h3>{{ categories.get(hazard.category, hazard.category) }}</h3>
-<p><strong>Osservazione:</strong> {{ hazard.observation }}</p><p><strong>Azione:</strong> {{ hazard.suggested_action }}</p>
-<p>{{ hazard.profile_relevance }}</p><p><strong>Da verificare:</strong> {{ hazard.uncertainty }}</p>
-{% for image in hazard.evidence_thumbnails %}<img src="{{ image }}" alt="Evidenza fotografica approvata">{% endfor %}
-<p class="sources">Verifica: {{ hazard.reviewer }} · {{ hazard.reviewed_at[:10] }}<br>
-{% for g in hazard.guidance %}<a href="{{ g.source.url }}">{{ g.source.title }}</a> · {{ g.id }}. {{ g.source.applicability }}<br>{% endfor %}</p></article>
-{% else %}<p>Nessuna azione accettata. Questo non dimostra l’assenza di rischi.</p>{% endfor %}
-<h2>Limiti e prossimi controlli</h2><ul>
-{% for limit in snapshot.limitations %}<li>{{ limit }}</li>{% endfor %}
-{% for item in snapshot.deferred %}<li>Rinviato: {{ item.note }}</li>{% endfor %}
+<tr>
+<td class="n">{{ loop.index }}</td>
+<td class="when"><b><span class="dot {{ hazard.priority }}"></span>{{ when[hazard.priority][0] }}</b><span>{{ when[hazard.priority][1] }}</span></td>
+<td><div class="act">{{ hazard.suggested_action }}</div>
+<div class="why">{{ hazard.observation }} {{ hazard.profile_relevance }}</div>
+<div class="ref">{{ categories.get(hazard.category, hazard.category) }}{% if hazard.evidence_thumbnails %} · Fig. {{ loop.index }}{% endif %}{% for g in hazard.guidance %} · {{ g.id }}{% endfor %}</div></td>
+</tr>
+{% endfor %}
+</table>
+{% endif %}
+
+<h2>{{ '3' if snapshot.accepted else '2' }}. Da verificare in sopralluogo</h2>
+<ul>
+{% for item in snapshot.deferred %}<li>{{ item.note }}</li>{% endfor %}
 {% for item in snapshot.follow_up_requests %}<li>{{ item }}</li>{% endfor %}
+<li>Aree non visibili nelle fotografie ({{ snapshot.coverage | selectattr('coverage', 'ne', 'visible') | list | length }} controlli): non valutate.</li>
 </ul>
-<p>Aree senza copertura completa: {{ snapshot.coverage | selectattr('coverage', 'ne', 'visible') | list | length }} controlli. Le aree non visibili restano non valutate.</p>
-<p class="hash">Snapshot condiviso da HTML e PDF: {{ snapshot_hash }}</p>
+
+{% if snapshot.accepted %}
+<h2>4. Allegato fotografico</h2>
+<div class="figs">
+{% for hazard in snapshot.accepted %}{% set n = loop.index %}{% for image in hazard.evidence_thumbnails[:1] %}
+<figure><img src="{{ image }}" alt="Fotografia relativa all’intervento {{ n }}"><figcaption>Fig. {{ n }}. Intervento {{ n }}: {{ categories.get(hazard.category, hazard.category) | lower }}.{% if hazard.evidence[0].box %} Il riquadro indica l’area interessata.{% endif %}</figcaption></figure>
+{% endfor %}{% endfor %}
+</div>
+{% endif %}
+
+<h2>Note e limiti</h2>
+<ul class="small">
+<li>La valutazione si basa su fotografie inviate dalla famiglia e non sostituisce una visita domiciliare.</li>
+{% for limit in snapshot.limitations %}<li>{{ limit }}</li>{% endfor %}
+{% set sources = snapshot.accepted | map(attribute='guidance') | sum(start=[]) | map(attribute='source') | unique(attribute='url') | list %}
+{% if sources %}<li>Riferimenti: {% for s in sources %}{{ s.title }}{% if not loop.last %}; {% endif %}{% endfor %}.</li>{% endif %}
+<li>Origine del testo: {{ origins.get(snapshot.draft_provenance, snapshot.draft_provenance) }}.</li>
+</ul>
+
+<div class="sign">
+<div><b>{{ reviewer or '—' }}</b>Professionista revisore</div>
+<div><b>{{ date }}</b>Data della revisione</div>
+</div>
+<p class="hash">Impronta del documento (identica in HTML e PDF): {{ snapshot_hash }}</p>
 </body></html>

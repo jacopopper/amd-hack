@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Check, ChevronLeft, ChevronRight, Crosshair, HelpCircle, Loader2, Pencil, X } from "lucide-react";
 import { categoryLabel, priorityMeta } from "@/lib/labels";
-import { answerOf, answers, effective, type Answer } from "@/lib/hazards";
+import { answerOf, answers, decisionLabel, effective, type Answer } from "@/lib/hazards";
 import type { Anchor, Decision, Hazard, Photo, Priority } from "@/lib/types";
 import EvidenceThumb from "./EvidenceThumb";
 
@@ -46,10 +46,12 @@ export default function HazardCard({
   const current = effective(hazard);
   const meta = priorityMeta[current.priority];
   const answered = answerOf(hazard.review?.decision);
-  const [editing, setEditing] = useState(false);
+  // What the footer is asking for: one of the answers, a correction, or what to verify.
+  const [mode, setMode] = useState<"answer" | "edit" | "verify">("answer");
+  const editing = mode === "edit";
+  const verifying = mode === "verify";
   const [action, setAction] = useState(current.suggested_action);
   const [priority, setPriority] = useState<Priority>(current.priority);
-  const [verifying, setVerifying] = useState(false);
   const [note, setNote] = useState(hazard.review?.note ?? "");
   const [busy, setBusy] = useState<Answer | "place" | null>(null);
   const [error, setError] = useState("");
@@ -70,6 +72,8 @@ export default function HazardCard({
 
   const confirm = () =>
     submit("confirm", changed ? { decision: "edit", note, observation: current.observation, suggested_action: action, priority } : { decision: "approve", note });
+  const decision = hazard.review?.decision;
+  const decisionColor = decision === "reject" ? "text-white/60" : decision === "defer" ? "text-[var(--important)]" : "text-[#7ddc9b]";
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -118,17 +122,10 @@ export default function HazardCard({
         <h3 className="mt-5 text-[13px] font-medium text-white/50">Perché conta per {patientName}</h3>
         <p className="mt-1 text-[15px] leading-relaxed text-white/90">{current.profile_relevance}</p>
 
-        <div className="mt-5 flex items-center justify-between">
-          <h3 className="text-[13px] font-medium text-white/50">Cosa fare</h3>
-          {!editing && !disabled && (
-            <button onClick={() => setEditing(true)} className="flex items-center gap-1 text-xs text-white/45 hover:text-white">
-              <Pencil className="h-3 w-3" /> Modifica
-            </button>
-          )}
-        </div>
+        <h3 className="mt-5 text-[13px] font-medium text-white/50">{editing ? "Correggi l’azione e la priorità" : "Cosa fare"}</h3>
         {editing ? (
           <div className="mt-1.5 space-y-2">
-            <textarea value={action} onChange={(e) => setAction(e.target.value)} rows={3} className="w-full resize-none rounded-lg border border-white/15 bg-black/30 p-2.5 text-sm outline-none focus:border-white/40" />
+            <textarea autoFocus value={action} onChange={(e) => setAction(e.target.value)} rows={3} className="w-full resize-none rounded-lg border border-white/25 bg-black/30 p-2.5 text-sm outline-none focus:border-white/60" />
             <div className="flex gap-1.5">
               {(["urgent", "important", "recommended"] as Priority[]).map((p) => (
                 <button key={p} onClick={() => setPriority(p)} className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs transition ${priority === p ? "bg-white/15 text-white" : "text-white/50 hover:bg-white/5"}`}>
@@ -174,12 +171,13 @@ export default function HazardCard({
       </div>
 
       <footer className="border-t border-white/10 p-3">
-        {answered && !verifying ? (
-          <p className="mb-2 px-1 text-[13px] text-white/55">
-            Hai risposto: <span className="text-white">{answers[answered].label}</span>
-            {hazard.review?.note && <> · “{hazard.review.note}”</>}
+        {decision && mode === "answer" && (
+          <p className="mb-2 flex items-center gap-1.5 px-1 text-[13px] text-white/55">
+            <span className={`font-medium ${decisionColor}`}>{decisionLabel[decision]}</span>
+            {hazard.review?.note && <span className="truncate">· “{hazard.review.note}”</span>}
+            <span className="ml-auto text-xs text-white/35">puoi cambiare idea</span>
           </p>
-        ) : null}
+        )}
         {verifying ? (
           <div className="space-y-2">
             <textarea
@@ -191,7 +189,7 @@ export default function HazardCard({
               className="w-full resize-none rounded-lg border border-white/15 bg-black/30 p-2.5 text-sm outline-none placeholder:text-white/35 focus:border-white/40"
             />
             <div className="flex gap-2">
-              <button onClick={() => setVerifying(false)} className="flex-1 rounded-xl py-2.5 text-sm text-white/60 hover:bg-white/5">
+              <button onClick={() => setMode("answer")} className="flex-1 rounded-xl py-2.5 text-sm text-white/60 hover:bg-white/5">
                 Annulla
               </button>
               <button
@@ -199,33 +197,62 @@ export default function HazardCard({
                 onClick={() => submit("verify", { decision: "defer", note })}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm font-medium text-black disabled:opacity-40"
               >
-                {busy === "verify" && <Loader2 className="h-4 w-4 animate-spin" />} Invia
+                {busy === "verify" && <Loader2 className="h-4 w-4 animate-spin" />} Segna da verificare
               </button>
             </div>
+          </div>
+        ) : editing ? (
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setMode("answer");
+                setAction(current.suggested_action);
+                setPriority(current.priority);
+              }}
+              className="flex-1 rounded-xl py-3 text-sm text-white/60 hover:bg-white/5"
+            >
+              Annulla
+            </button>
+            <button
+              disabled={!changed || !action.trim() || !!busy}
+              onClick={confirm}
+              className="flex flex-[2] items-center justify-center gap-2 rounded-xl bg-white py-3 text-[15px] font-medium text-black disabled:opacity-40"
+            >
+              {busy === "confirm" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} Conferma con la correzione
+            </button>
           </div>
         ) : (
           <div className="space-y-1.5">
             <button
               disabled={disabled || !!busy}
               onClick={confirm}
-              className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-medium transition disabled:opacity-40 ${answered === "confirm" ? "bg-white/15 text-white ring-1 ring-white/40" : "bg-white text-black hover:bg-white/90"}`}
+              title={answers.confirm.hint}
+              className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[15px] font-medium transition disabled:opacity-40 ${decision === "approve" ? "bg-white/15 text-white ring-1 ring-white/40" : "bg-white text-black hover:bg-white/90"}`}
             >
               {busy === "confirm" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               {answers.confirm.label}
-              {changed && <span className="text-xs opacity-60">con modifiche</span>}
             </button>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                disabled={disabled || !!busy}
+                onClick={() => setMode("edit")}
+                title="Il pericolo è reale ma l’azione o la priorità vanno cambiate"
+                className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition disabled:opacity-40 ${decision === "edit" ? "bg-white/15 text-white ring-1 ring-white/40" : "bg-white/[0.06] text-white/80 hover:bg-white/10"}`}
+              >
+                <Pencil className="h-4 w-4" /> Correggi
+              </button>
               {(["dismiss", "verify"] as Answer[]).map((a) => {
                 const Icon = answerIcon[a];
                 return (
                   <button
                     key={a}
                     disabled={disabled || !!busy}
-                    onClick={() => (a === "verify" ? setVerifying(true) : submit("dismiss", { decision: "reject", note }))}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm transition disabled:opacity-40 ${answered === a ? "bg-white/15 text-white ring-1 ring-white/40" : "bg-white/[0.06] text-white/80 hover:bg-white/10"}`}
+                    title={answers[a].hint}
+                    onClick={() => (a === "verify" ? setMode("verify") : submit("dismiss", { decision: "reject", note }))}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl px-1 py-2.5 text-sm leading-tight transition disabled:opacity-40 ${answered === a ? "bg-white/15 text-white ring-1 ring-white/40" : "bg-white/[0.06] text-white/80 hover:bg-white/10"}`}
                   >
-                    {busy === a ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-                    {answers[a].label}
+                    {busy === a ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" /> : <Icon className="h-4 w-4 shrink-0" />}
+                    {a === "dismiss" ? "Escludi" : "Da verificare"}
                   </button>
                 );
               })}

@@ -32,6 +32,16 @@ body {
     0 12px 40px rgb(0 0 0 / 35%);
 }
 
+/* The single next step of the case breathes until it is taken. */
+@keyframes pulse-cta {
+  0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 55%); }
+  70% { box-shadow: 0 0 0 12px rgb(255 255 255 / 0%); }
+  100% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0%); }
+}
+.pulse-cta {
+  animation: pulse-cta 1.8s ease-out infinite;
+}
+
 /* Larger reading panels need more opacity than floating controls. */
 .glass-solid {
   background: rgb(20 22 26 / 94%);

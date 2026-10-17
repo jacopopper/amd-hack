@@ -9,10 +9,10 @@ import EvidenceThumb from "./EvidenceThumb";
 const answerBadge = { confirm: Check, dismiss: X, verify: HelpCircle };
 
 // Highlight reel: the findings of this room in review order; play starts the guided review.
-export default function Reel({ hazards, photos, selectedId, decided, total, onSelect, onPlay }: { hazards: Hazard[]; photos: Photo[]; selectedId?: string; decided: number; total: number; onSelect: (id: string) => void; onPlay: () => void }) {
+export default function Reel({ hazards, photos, selectedId, decided, total, pulse, onSelect, onPlay }: { hazards: Hazard[]; photos: Photo[]; selectedId?: string; decided: number; total: number; pulse?: boolean; onSelect: (id: string) => void; onPlay: () => void }) {
   return (
     <div className="glass flex items-center gap-3 rounded-2xl p-2">
-      <button onClick={onPlay} className="flex h-[76px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white px-4 text-black transition hover:bg-white/90">
+      <button onClick={onPlay} className={`flex h-[76px] shrink-0 flex-col items-center justify-center gap-1 rounded-xl bg-white px-4 text-black transition hover:bg-white/90 ${pulse ? "pulse-cta" : ""}`}>
         <Play className="h-5 w-5 fill-black" />
         <span className="text-xs font-medium">{decided === 0 ? "Avvia revisione" : decided < total ? "Continua" : "Rivedi"}</span>
       </button>

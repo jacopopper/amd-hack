@@ -275,11 +275,11 @@ class Workflow(unittest.TestCase):
             self.assertEqual(client.get("/").text, "home")
             page = client.get("/pazienti?id=abc")
             self.assertTrue(page.text.endswith("space"))
-            # Only this page's inline bootstrap is admitted, by hash; API responses keep script-src 'self'.
+            # Only this page's inline bootstrap is admitted, by hash; API responses keep script-src 'self' plus WebAssembly for the splat viewer.
             inline = base64.b64encode(hashlib.sha256(b"boot()").digest()).decode()
-            self.assertIn(f"script-src 'self' 'sha256-{inline}';", page.headers["content-security-policy"])
+            self.assertIn(f"script-src 'self' 'wasm-unsafe-eval' 'sha256-{inline}';", page.headers["content-security-policy"])
             self.assertNotIn("unsafe-inline';", page.headers["content-security-policy"].split("script-src")[1].split(";")[0])
-            self.assertIn("script-src 'self';", client.get("/api/health").headers["content-security-policy"])
+            self.assertIn("script-src 'self' 'wasm-unsafe-eval';", client.get("/api/health").headers["content-security-policy"])
             self.assertEqual(client.get("/pazienti/nuovo").text, "intake")
             self.assertEqual(client.head("/pazienti/nuovo").status_code, 200)
             self.assertEqual(client.get("/_next/app.js").text, "js")

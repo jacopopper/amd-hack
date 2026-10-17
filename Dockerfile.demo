@@ -1,0 +1,26 @@
+# Public judge demo: one container with the reviewer app, the API and the report worker.
+# It serves the frozen case in demo/snapshot, calls no external model and needs no keys.
+FROM node:22.22.3-bookworm-slim@sha256:e21fc383b50d5347dc7a9f1cae45b8f4e2f0d39f7ade28e4eef7d2934522b752 AS frontend
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+FROM python:3.12.3-slim-bookworm@sha256:afc139a0a640942491ec481ad8dda10f2c5b753f5c969393b12480155fe15a63
+RUN apt-get update && apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY requirements.lock ./
+RUN pip install --no-cache-dir -r requirements.lock
+COPY pyproject.toml ./
+COPY backend/ backend/
+COPY guidance/ guidance/
+COPY demo/snapshot/ demo/snapshot/
+RUN pip install --no-deps -e .
+COPY --from=frontend /frontend/out frontend/out/
+ENV PYTHONUNBUFFERED=1 STEP_WISE_DATA=/data STEP_WISE_DEMO=true \
+    RECON_BACKEND=fixture GEMMA_BACKEND=fixture AVATAR_BACKEND=fixture JEV_ENABLED=false \
+    REVIEWER_IDENTITY="Infermiera di dimissione"
+EXPOSE 8000
+# Visitor copies live in /data and are disposable; Render supplies $PORT.
+CMD ["sh", "-c", "python -m step_wise.worker & exec uvicorn step_wise.api:create_app --factory --host 0.0.0.0 --port ${PORT:-8000} --no-access-log"]

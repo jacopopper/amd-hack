@@ -1,0 +1,10 @@
+# Render Blueprint for the public judge demo (Dockerfile.demo). No secrets: the demo calls no external model.
+services:
+  - type: web
+    name: step-wise-demo
+    runtime: docker
+    dockerfilePath: ./Dockerfile.demo
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: false

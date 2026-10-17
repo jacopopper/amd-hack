@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from step_wise import cases, db, worker
+from step_wise import cases, db, snapshot, worker
 from step_wise.config import ROOT, Settings
 from step_wise.demo import generate_controls, load_case, seed_case
 
@@ -17,6 +17,8 @@ def main(argv=None):
     seed.add_argument("--case", type=Path, default=ROOT / "demo/cases/room-001.json")
     reset = commands.add_parser("reset", help="Delete only an explicitly selected synthetic development assessment")
     reset.add_argument("--assessment", required=True)
+    export = commands.add_parser("export-demo", help="Freeze an analysed assessment as the public demo case in demo/snapshot")
+    export.add_argument("--assessment", required=True)
     work = commands.add_parser("worker")
     work.add_argument("--once", action="store_true")
     cleanup = commands.add_parser("cleanup", help="Dry run unless --execute is supplied")
@@ -64,6 +66,8 @@ def main(argv=None):
                     raise ValueError("Selected assessment is not the seeded synthetic development dataset")
             db.delete_assessment(settings, args.assessment)
             result = {"status": "deleted", "assessment_id": args.assessment, "scope": "synthetic development only"}
+        elif args.command == "export-demo":
+            result = snapshot.export_case(settings, args.assessment)
         elif args.command == "worker":
             worker.run(settings, once=args.once)
             result = {"status": "worker stopped"}
