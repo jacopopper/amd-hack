@@ -1,136 +1,139 @@
-<div align="center">
-
-<img src="docs/readme/hero.jpg" alt="On Friday, Maria goes home. No one has ever seen the home she is going back to." width="100%">
-
 # Step Wise
 
-### Home fall-hazard review from phone photos, checked by a professional before discharge.
+Remote home fall-hazard assessment from phone photos, reviewed by a healthcare professional before the plan reaches the family.
 
-[![AMD Developer Hackathon: ACT III](https://img.shields.io/badge/AMD_Developer_Hackathon-ACT_III-ED1C24?style=for-the-badge&logo=amd&logoColor=white)](https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-iii)
-[![Track 2](https://img.shields.io/badge/Track_2-Health_%26_Wellbeing-111111?style=for-the-badge)](https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-iii)
-[![Gemma 4 on AMD](https://img.shields.io/badge/Gemma_4_31B-AMD_endpoint-F5C518?style=for-the-badge)](#why-amd)
-[![License: MIT](https://img.shields.io/badge/License-MIT-555555?style=for-the-badge)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-555)](LICENSE)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB)
+![Next.js 16](https://img.shields.io/badge/next.js-16-000)
+![Gemma 4 31B on AMD](https://img.shields.io/badge/Gemma_4_31B-AMD_endpoint-ED1C24)
 
-**[Pitch](pitch/index.html)** · **[Try the demo](#try-it)** · **[How it works](#how-it-works)** · **[Why AMD](#why-amd)** · **[Runtime evidence](docs/runtime.md)**
+<img src="docs/readme/app-review.jpg" alt="Reviewer app: Gaussian-splat reconstruction of a real kitchen with a hazard pin on a rug and the evidence card open" width="100%">
 
-</div>
+<sub>The reviewer app on a real room: Gaussian splats reconstructed from 39 phone photos, a hazard pin on the rug and its evidence card. The two hazards in this demo case were marked by hand; see <a href="#try-it">Try it</a>.</sub>
 
----
+A family member photographs the home room by room. The pipeline proposes candidate hazards, reconstructs the room in 3D and drafts an explanation tailored to the patient's confirmed functional profile (walker, night-time bathroom trips, low vision). A discharge nurse or occupational therapist confirms, edits or excludes each finding against the photo that supports it. Only reviewed findings go into the report, which is shared with the family through a private, expiring link.
 
-## On Friday, Maria goes home.
+Built for the [AMD Developer Hackathon: ACT III](https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-iii), Track 2 (Health & Wellbeing).
 
-Maria is 84. She fell in her hallway at night and broke her hip. On Friday she goes home with a walker.
+**Contents** · [Workflow](#workflow) · [Architecture](#architecture) · [Try it](#try-it) · [AMD deployment](#amd-deployment) · [Model outputs](#model-outputs) · [Evidence and limits](#evidence-and-limits) · [Development](#development) · [Hackathon deck (PDF)](pitch/step-wise-deck.pdf)
 
-**Nobody on her care team has ever seen that hallway.**
+### Background
 
-Step Wise changes that. Her grandson photographs the home with his phone. Three AI models turn those photos into hazards, a 3D room and a reason why each one matters *for Maria*. A discharge nurse reviews every finding next to the photo that proves it. Her family gets a plain-Italian plan before she comes home, not after the next fall.
-
-> *Maria is a fictional patient. Every number below is real and sourced.*
+In Italy 54% of falls among people over 65 happen at home, and only 11% of older adults report having been advised by a doctor on how to prevent them ([ISS, PASSI d'Argento 2023–2024](https://www.iss.it/en/-/almeno-una-caduta-nell-ultimo-anno-per-un-anziano-su-cinque-la-casa-e-il-luogo-dove-si-verificano-di-piu)). Expert home-hazard assessment with hazard removal reduces falls by 38% in high-risk older adults ([Cochrane CD013258, 2023](https://www.cochrane.org/evidence/CD013258_reducing-fall-hazards-within-environment)), but Italy has about 3,000 occupational therapists for 14.8 million people over 65 ([FNO TSRM e PSTRP, 2024](https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/)). Step Wise targets the gap at hospital discharge: the professional reviews the home remotely, from photos, instead of not at all.
 
 ---
 
-## The problem
-
-| | | |
-| ---: | --- | --- |
-| **~6,000** | deaths a year from home accidents in Italy, against 1,189 at work, where risk assessment is mandatory | [ISS](https://www.epicentro.iss.it/cong_leb/balducci) · [INAIL 2025](https://www.inail.it/content/dam/inail-hub-site/documenti/2026/09/relazione-annuale-inail-2025-nota-stampa-infortuni-mp.pdf) |
-| **54%** | of falls among people over 65 happen at home; only **11%** were advised by a doctor on how to avoid them | [ISS, PASSI d'Argento 2023–2024](https://www.iss.it/en/-/almeno-una-caduta-nell-ultimo-anno-per-un-anziano-su-cinque-la-casa-e-il-luogo-dove-si-verificano-di-piu) |
-| **−38%** | falls when an expert inspects the home and hazards are removed, in high-risk older adults | [Cochrane CD013258, 2023](https://www.cochrane.org/evidence/CD013258_reducing-fall-hazards-within-environment) |
-| **3,000** | occupational therapists in Italy, about one for every 5,000 people over 65 | [FNO TSRM e PSTRP, 2024](https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/) |
-
-The CDC already recommends the fallback at every discharge: *if an occupational therapy assessment is not available, review home hazards with the patient and family.* **Step Wise makes that review possible, with an expert's eye on the evidence.**
-
----
-
-## How it works
-
-Six steps, from phone photos to a plan the family can act on. The professional has the last word.
+## Workflow
 
 <table>
 <tr>
-<td width="55%"><img src="docs/readme/step-1-capture.jpg" alt="Step 1: capture"></td>
-<td>
-
-### 01 · Capture
-A family member photographs the home room by room, with overlapping shots. The nurse adds the patient's functional profile: walker, hip replacement, gets up at night.
-
-<sub>FastAPI · Pillow · NumPy: upright orientation, metadata stripping, canonical re-encoding</sub>
-
+<td width="50%" valign="top">
+<img src="docs/readme/capture.jpg" alt="A team member photographing the kitchen with a phone">
+<b>1 · Capture.</b> Overlapping phone photos, grouped by room. Uploads are re-oriented, stripped of EXIF/GPS metadata and re-encoded. The reviewer adds or confirms the patient's functional profile, optionally drafted from a clinical document with citations.
+</td>
+<td width="50%" valign="top">
+<img src="docs/readme/room-splats.jpg" alt="Gaussian-splat render of the living room reconstructed from 39 phone photos">
+<b>2 · Analysis.</b> TypeSafe Jev answers fixed object questions (rug, floor cable, bathtub, grab bar…). VGGT-1B recovers cameras, depth and points; Gaussian splats are trained on top. Gemma 4 31B ranks hazards for the confirmed profile. A 3D anchor is kept only when several views agree.
 </td>
 </tr>
 <tr>
-<td width="55%"><img src="docs/readme/step-2-detection.jpg" alt="Step 2: detection"></td>
-<td>
-
-### 02 · Detection
-**TypeSafe Jev 1.14** answers atomic visual questions: is there a rug, a floor cable, a bathtub, a grab bar? A box is kept only when presence is confirmed. What a photo cannot show stays *"to verify"*.
-
-<sub>Six fixed question pairs · presence and box gates</sub>
-
+<td width="50%" valign="top">
+<img src="docs/readme/app-room.jpg" alt="Room view with hazard pins and evidence thumbnails">
+<b>3 · Review.</b> Each finding opens with its photo, its position in the room, the reason and the proposed action. The reviewer chooses <i>Confirm</i>, <i>Edit</i>, <i>Exclude</i> or <i>Check in person</i>. Decisions are versioned.
+</td>
+<td width="50%" valign="top">
+<img src="docs/readme/app-summary.jpg" alt="Review summary dialog listing confirmed, excluded and to-verify findings">
+<b>4 · Summary.</b> Confirmed actions, items to verify at the first visit, excluded findings, and the areas the photos cannot assess (here: bathroom and bedroom were not photographed).
 </td>
 </tr>
 <tr>
-<td width="55%"><img src="docs/readme/room-splats.jpg" alt="Step 3: Gaussian-splat reconstruction of a real room from 39 phone photos"></td>
-<td>
-
-### 03 · 3D reconstruction
-**VGGT-1B** looks at all the photos at once and, in a single forward pass, recovers camera poses, per-pixel depth and 3D points. Gaussian splats trained on those cameras turn the room into a space the reviewer can walk through. A hazard gets a 3D anchor only when several views agree.
-
-<sub>Real render: an open-plan living room from 39 phone photos · VGGT-1B + gsplat · scale not calibrated</sub>
-
-</td>
-</tr>
-<tr>
-<td width="55%"><img src="docs/readme/step-4-reasoning.jpg" alt="Step 4: reasoning"></td>
-<td>
-
-### 04 · Reasoning
-**Gemma 4 31B** reads the evidence and the confirmed profile, ranks hazards by urgency and explains *why they matter for this patient*. Every sentence points to a photo and a guideline.
-
-<sub>Schema-validated JSON · CDC STEADI</sub>
-
-</td>
-</tr>
-<tr>
-<td width="55%"><img src="docs/readme/step-5-review.jpg" alt="Step 5: professional review"></td>
-<td>
-
-### 05 · Review
-The nurse sees each hazard with its photo, its place in the room and the reason. **Confirm**, **Edit**, **Exclude** or **Check in person**. Minutes, not a home visit.
-
-**Nothing reaches the family without their sign-off.**
-
-<sub>Next.js · three.js · versioned reviews, release blocked if a decision changes</sub>
-
-</td>
-</tr>
-<tr>
-<td width="55%"><img src="docs/readme/step-6-family.jpg" alt="Step 6: plan for the family"></td>
-<td>
-
-### 06 · Family plan
-The family receives the approved plan on their phone: actions by priority, in plain language, each with its photo. A private link that expires after 7 days and can be revoked.
-
-<sub>Jinja2 · WeasyPrint HTML/PDF</sub>
-
+<td colspan="2">
+<img src="docs/readme/app-release.jpg" alt="Generated home safety plan and the release dialog with the family link">
+<b>5 · Release.</b> An HTML/PDF plan built only from reviewed findings. The family link opens the report alone, expires after 7 days and can be revoked. Release is blocked if a review decision changes after the report was drafted.
 </td>
 </tr>
 </table>
 
-> [!NOTE]
-> The photographs remain the evidence. The 3D view helps the reviewer navigate the room; it is not a measurement. Slides are illustrations from the [pitch](pitch/index.html); real model outputs are [below](#real-model-outputs).
+The photographs remain the evidence. The 3D view helps the reviewer navigate the room; its scale is not calibrated and it is not a measurement.
 
 ---
 
-## Why AMD
+## Architecture
 
-Home photos and clinical data cannot go to just any cloud. The **192 GB of HBM3** on a single **AMD Instinct MI300X** hold both the 3D reconstruction and the model that reasons about the patient, so the whole pipeline can run inside the hospital network on an open ROCm stack.
+```mermaid
+flowchart LR
+    subgraph IN["Intake · FastAPI"]
+        direction TB
+        PH["Room photos"]
+        DOC["Clinical text / PDF"]
+        PRO["Functional profile<br/><i>confirmed by reviewer</i>"]
+        DOC -. cited draft .-> PRO
+    end
+
+    subgraph WK["Worker · persisted job queue (SQLite)"]
+        direction TB
+        PREP["prepare<br/><sub>orientation, metadata strip</sub>"]
+        JEV["jev<br/><sub>TypeSafe Jev 1.14</sub>"]
+        REC["reconstruct<br/><sub>VGGT-1B, isolated env</sub>"]
+        GEM["gemma<br/><sub>Gemma 4 31B · AMD</sub>"]
+        GEO["geometry<br/><sub>floor, multiview anchors</sub>"]
+        AV["avatar<br/><sub>Blender + MPFB2</sub>"]
+        PREP --> JEV --> GEM --> GEO
+        PREP --> REC --> GEO
+    end
+
+    subgraph RV["Reviewer app · Next.js + three.js"]
+        direction TB
+        DEC["Per-finding decision<br/><sub>photo · 3D · reason</sub>"]
+        RPT["report<br/><sub>Jinja2 + WeasyPrint</sub>"]
+        DEC --> RPT
+    end
+
+    FAM(["Family link<br/><sub>7-day token, revocable</sub>"])
+
+    PH --> PREP
+    PRO --> GEM
+    PRO --> AV
+    GEO --> DEC
+    AV --> DEC
+    RPT --> FAM
+
+    classDef ext fill:#fdecea,stroke:#ED1C24,color:#111
+    classDef local fill:#eef2f7,stroke:#5b6b7f,color:#111
+    classDef out fill:#e9f5ec,stroke:#2e7d32,color:#111
+    class JEV,GEM ext
+    class PREP,REC,GEO,AV,DEC,RPT,PH,DOC,PRO local
+    class FAM out
+    style IN fill:none,stroke:#9aa5b1,stroke-dasharray:4 3
+    style WK fill:none,stroke:#9aa5b1,stroke-dasharray:4 3
+    style RV fill:none,stroke:#9aa5b1,stroke-dasharray:4 3
+```
+
+<sub>Red: external model APIs, called only with the matching consent. Grey: runs locally. Jev never receives the patient profile or clinical text.</sub>
+
+- **Single worker, explicit stage graph.** Stages declare their dependencies; outputs are checksum-verified and reused when inputs have not changed. If one branch fails, independent stages keep their results (`failed_stages` on the job).
+- **Isolated GPU runtime.** VGGT runs in a separate Python environment with secrets removed from its environment, so the API process never imports PyTorch.
+- **Same-origin frontend.** The Next.js reviewer app is a static export served by FastAPI.
+- **Consent-gated egress.** External image and profile processing requires consent; new photos or documents invalidate it.
+
+| Stage | Purpose | Runs on | Recorded evidence |
+| --- | --- | --- | --- |
+| `prepare` | Upright orientation, metadata stripping, canonical re-encoding | CPU · Pillow | Bounded uploads; EXIF, padding and metadata tests |
+| `jev` | Six object question pairs with presence and box gates | TypeSafe Jev 1.14 API | Both rugs and the bathtub localized on the test photos; repeat box IoU 0.94–1.00 |
+| `reconstruct` | Poses, depth, point cloud and observed-surface mesh | VGGT-1B · NVIDIA RTX 5090 Laptop | 20 rendered views: 2.67 s forward pass, 9.68 GiB peak memory |
+| `gemma` | Full-image hazard sweep, personalized to the confirmed profile | Gemma-4-31B-IT · AMD endpoint | 1 image in 6.29 s, 4 images in 11.00 s (synthetic smoke) |
+| `geometry` | Floor and gravity estimate, multiview anchors or abstention | CPU · NumPy | Floor normal error 0.39–0.83° on rendered scenes |
+| `avatar` | Illustrative older-adult figure; walker only when confirmed | Blender 4.5.14 · MPFB2 2.0.18 | Rigged GLB in 2.0 s, no clinical text inside |
+| `report` | HTML/PDF from reviewed findings only | Jinja2 · WeasyPrint | 8-page long-text PDF inspected without clipping |
+
+Figures come from dated development runs in [runtime evidence](docs/runtime.md); they are not accuracy or clinical claims.
 
 | | |
 | --- | --- |
-| **Live today** | `Gemma-4-31B-IT` on AMD's OpenAI-compatible endpoint is the configured model for the hazard sweep and report drafting. Authenticated model discovery and image/strict-JSON smokes passed: **1 image in 6.29 s, 4 images in 11.00 s**. |
-| **Target** | One MI300X on-premise: VGGT on PyTorch-ROCm and Gemma on vLLM-ROCm, on the same GPU, one job at a time. [`compose.rocm.yaml`](compose.rocm.yaml) and [`Dockerfile.worker.rocm`](Dockerfile.worker.rocm) describe that worker. |
-| **Not yet established** | A complete room analysis through the AMD endpoint, any self-hosted ROCm run (the override has only passed configuration validation), and MI300X latency, memory and cost figures. VGGT currently runs on an NVIDIA RTX 5090 Laptop GPU. |
+| **Backend** | Python 3.12 · FastAPI · Pydantic 2 · SQLite · Pillow · NumPy · Jinja2 · WeasyPrint |
+| **Frontend** | Next.js 16 (static export) · React 19 · TypeScript · Tailwind CSS 4 · three.js |
+| **Models** | Gemma-4-31B-IT (AMD endpoint; Hugging Face optional) · TypeSafe Jev 1.14 · VGGT-1B (PyTorch 2.8, BF16) · gsplat 1.5.3 · MPFB2 |
+| **Ops** | CPU Docker images with pinned base digests · single-container demo · ROCm Compose override (configuration-validated only) |
 
 ---
 
@@ -142,7 +145,7 @@ Home photos and clinical data cannot go to just any cloud. The **192 GB of HBM3*
 docker compose -f compose.demo.yaml up --build
 ```
 
-Open <http://localhost:8000>. You open Maria's case and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
+Open <http://localhost:8000>. You open the demo case (Maria R., a fictional 84-year-old patient) and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
 
 > [!IMPORTANT]
 > The bundled case is a **real room**: 8 of the 39 phone photos and the offline VGGT + Gaussian-splat reconstruction. Its two hazards were **marked by hand by the team**, not detected by a model, and every finding says so. It demonstrates the review workflow on a real 3D room, not detection or clinical accuracy.
@@ -238,60 +241,32 @@ Send one generated, non-clinical test image to the configured Gemma endpoint:
 
 ---
 
-## Under the hood
+## AMD deployment
 
-Photos are uploaded room by room to a FastAPI backend, stored in SQLite and the local filesystem, and queued as a persisted job. One worker runs seven stages with explicit dependencies. Stage outputs are checksum-verified and reused when their inputs have not changed, and independent stages keep their results when another branch fails. VGGT runs in an isolated Python environment with secrets removed, so the API never imports PyTorch. The Next.js reviewer app is a static export served by FastAPI on the same origin.
+Home photos and clinical data should not leave the hospital network. A single **AMD Instinct MI300X** (192 GB HBM3) has room for both the reconstruction model and the reasoning model, so the target is one on-premise GPU running the whole pipeline on ROCm.
 
-```mermaid
-flowchart TD
-    PH["Room photos<br/>grouped by room"] --> API["FastAPI<br/>upload, consent, queue"]
-    DOC["Clinical text or PDF"] --> PROF["Cited profile draft"]
-    PROF --> CONF["Reviewer confirms profile"]
-    API --> PREP["prepare<br/>upright, metadata-free pixels"]
-    PREP --> JEV["jev<br/>TypeSafe Jev, 6 object checks"]
-    PREP --> VGGT["reconstruct<br/>VGGT-1B"]
-    JEV --> GEM["gemma<br/>Gemma-4-31B-IT, AMD endpoint"]
-    CONF --> GEM
-    GEM --> GEO["geometry<br/>multiview anchors or abstention"]
-    VGGT --> GEO
-    CONF --> AV["avatar<br/>Blender + MPFB2"]
-    GEO --> REV["Reviewer app<br/>photo, 3D view, decision"]
-    AV --> REV
-    REV --> RPT["report<br/>HTML/PDF"]
-    RPT --> FAM["Family link<br/>7-day token, revocable"]
-```
-
-| Stage | What it does | Runs on | Recorded evidence |
-| --- | --- | --- | --- |
-| `prepare` | Upright orientation, metadata stripping, canonical re-encoding | CPU · Pillow | Bounded uploads; EXIF, padding and metadata tests |
-| `jev` | Six object question pairs with presence and box gates | TypeSafe Jev 1.14 API | Pitch photos: both rugs and the bathtub localized; repeat box IoU 0.94–1.00 |
-| `reconstruct` | Poses, depth, point cloud and observed-surface mesh | VGGT-1B · NVIDIA RTX 5090 Laptop | 20 rendered views: 2.67 s forward pass, 9.68 GiB peak memory |
-| `gemma` | Full-image hazard sweep, personalized to the confirmed profile | Gemma-4-31B-IT · AMD endpoint | 1 image in 6.29 s, 4 images in 11.00 s (synthetic smoke) |
-| `geometry` | Floor and gravity estimate, multiview anchors or abstention | CPU · NumPy | Floor normal error 0.39–0.83° on rendered scenes |
-| `avatar` | Illustrative older-adult figure; walker only when confirmed | Blender 4.5.14 · MPFB2 2.0.18 | Rigged GLB in 2.0 s, no clinical text inside |
-| `report` | HTML/PDF from reviewed findings only | Jinja2 · WeasyPrint | 8-page long-text PDF inspected without clipping |
-
-All figures come from dated runs in [runtime evidence](docs/runtime.md). They are development measurements, not accuracy or clinical claims.
-
-**Backend** Python 3.12 · FastAPI · Pydantic 2 · SQLite · Pillow · NumPy · Jinja2 · WeasyPrint
-**Frontend** Next.js 16 (static export) · React 19 · TypeScript · Tailwind CSS 4 · three.js
-**AI** Gemma-4-31B-IT (AMD endpoint; Hugging Face optional) · TypeSafe Jev 1.14 · VGGT-1B (PyTorch 2.8, BF16, isolated worker) · MPFB2 on Blender
-**Ops** CPU Docker images with pinned base digests · single-container judge demo · ROCm Compose override (configuration-validated only)
+| Status | |
+| --- | --- |
+| **Working today** | `Gemma-4-31B-IT` on AMD's OpenAI-compatible endpoint is the configured model for the hazard sweep and report drafting. Authenticated model discovery and image/strict-JSON smokes passed: 1 image in 6.29 s, 4 images in 11.00 s. |
+| **Target** | One MI300X on-premise: VGGT on PyTorch-ROCm and Gemma on vLLM-ROCm, one job at a time. [`compose.rocm.yaml`](compose.rocm.yaml) and [`Dockerfile.worker.rocm`](Dockerfile.worker.rocm) describe that worker. |
+| **Not yet established** | A complete room analysis through the AMD endpoint, any self-hosted ROCm run (the override has only passed configuration validation), and MI300X latency, memory and cost figures. VGGT currently runs on an NVIDIA RTX 5090 Laptop GPU. |
 
 ---
 
-## Real model outputs
+## Model outputs
 
-### A real room, from 39 phone photos
+### Reconstruction of a real room
+
+<img src="docs/readme/capture-photos.jpg" alt="Four of the 39 phone photos of the open-plan kitchen and living room" width="100%">
 
 <table>
 <tr>
 <td width="50%"><img src="docs/readme/room-splats-kitchen.jpg" alt="Gaussian-splat render of the kitchen and living area"></td>
-<td width="50%"><img src="docs/readme/room-points.jpg" alt="Point cloud of the same room"></td>
+<td width="50%"><img src="docs/readme/room-points.jpg" alt="VGGT point cloud of the same room"></td>
 </tr>
 </table>
 
-VGGT-1B recovered the cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. Photos are EXIF/GPS-free and nothing left the machine. The scale is not calibrated, and the hazard pins in the judge demo's room view are hand-placed, not model output. The demo streams a 20 MB compressed copy of the splats (`.ksplat`, 651,321 Gaussians after the viewer's opacity cut). Details in [capture reconstruction](docs/capture-reconstruction.md).
+Input: 39 phone photos of an open-plan kitchen and living room (four shown above), EXIF/GPS-free, processed locally. VGGT-1B recovered cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. The scale is not calibrated. The demo streams a 20 MB compressed copy (`.ksplat`, 651,321 Gaussians). Details in [capture reconstruction](docs/capture-reconstruction.md).
 
 ### Object checks and avatar
 
@@ -303,7 +278,7 @@ VGGT-1B recovered the cameras, depth and points for all 39 views; [gsplat](https
 </td>
 <td width="42%" valign="top">
 <img src="pitch/jev-results/2026-10-17/optimization/objects-v2/bagno-jev.jpg" alt="Bathroom photo with a Jev box around the bathtub">
-<sub><b>Jev · bathroom.</b> Bathtub: presence 0.97, box 0.84. Locating it is separate from deciding it is a hazard; that belongs to Gemma and the professional. Nothing is boxed as a "missing grab bar". Photo: Point3D Commercial Imaging Ltd. / Unsplash.</sub>
+<sub><b>Jev · bathroom.</b> Bathtub: presence 0.97, box 0.84. Locating it is separate from deciding it is a hazard; that belongs to Gemma and the reviewer. Nothing is boxed as a "missing grab bar". Photo: Point3D Commercial Imaging Ltd. / Unsplash.</sub>
 </td>
 <td width="16%" valign="top">
 <img src="demo/artifacts/avatar-style-2026-10-17/avatar-preview.png" alt="Illustrative older woman with a walker">
@@ -318,13 +293,15 @@ A repeated run on the same photos matched closely (box IoU 0.94–1.00): a consi
 
 ## Evidence and limits
 
-**Verified so far.** The full intake → analysis → review → PDF → release → revocation lifecycle in fixture mode and in a headless browser · a live four-screenshot run (local VGGT, Jev, Gemma via Hugging Face, MPFB2 avatar, unreleased Gemma-drafted PDF) · a five-photo real-room analysis with four provisional findings · VGGT resource scaling to 20 views · AMD-hosted Gemma vision/strict-JSON smokes.
+**Verified.** The full intake → analysis → review → PDF → release → revocation lifecycle in fixture mode and in a headless browser · a live four-screenshot run (local VGGT, Jev, Gemma via Hugging Face, MPFB2 avatar, unreleased Gemma-drafted PDF) · a five-photo real-room analysis with four provisional findings · VGGT resource scaling to 20 views · AMD-hosted Gemma vision/strict-JSON smokes.
 
 **Not yet established.** A guided, independently measured room capture · real-room centimetre accuracy · validated 3D hazard anchors on real scenes · a full analysis through the AMD endpoint · self-hosted ROCm · clinical accuracy, fall reduction or reviewer-time benefit.
 
 Run IDs, dates and open gates are in [runtime evidence](docs/runtime.md).
 
 ---
+
+## Development
 
 <details>
 <summary><b>Development and checks</b></summary>
@@ -463,10 +440,3 @@ Code is released under the [MIT License](LICENSE). Third-party material keeps it
 
 > [!CAUTION]
 > Step Wise is a hackathon prototype. It is not a medical device, has no clinical validation, and must not be used for real patient intake. Use staged homes and fictional profiles.
-
-<div align="center">
-<br>
-
-***On Friday, Maria goes home. This time, someone looked at the hallway.***
-
-</div>
