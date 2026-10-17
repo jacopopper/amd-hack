@@ -4,6 +4,8 @@ export type Decision = "approve" | "edit" | "reject" | "defer";
 export type Profile = { description: string; mobility_aid: string | null; aid_width_m: number | null; vision: string | null; support_needs: string | null; relevant_history: string | null; daily_routes: string[] };
 export type ClinicalClaim = { field: string; value: string | number | boolean | null; status: "current" | "historical" | "negated" | "unknown"; source_document_id: string | null; page: number | null; quote: string | null; origin: "document" | "manual"; reviewer_confirmed: boolean };
 export type Inputs = { label: string; profile: Profile; profile_confirmed: boolean; staged_data_confirmed: true; processing_consent: true; external_processing_consent: boolean; clinical_external_processing_consent: boolean; clinical_facts: ClinicalClaim[] };
+// GET /api/assessments/{id}/avatar. Every field is null until an avatar has been generated.
+export type Avatar = { status: string | null; reason: string | null; has_walker: boolean | null; preview_url: string | null; preview_width: number | null; preview_height: number | null; glb_url: string | null; illustrative_only: boolean | null };
 export type Modes = { reconstruction: string; gemma: string; avatar: string; jev: string };
 export type Photo = { id: string; scene_id: string; role: "overview" | "detail"; asset_url: string; width: number; height: number };
 export type JobSummary = { id: string; kind: string; status: string; stage: string | null; error: string | null };

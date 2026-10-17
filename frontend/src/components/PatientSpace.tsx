@@ -10,6 +10,7 @@ import type { Anchor, Assessment, Findings, Modes, Report, Scene } from "@/lib/t
 import { useAuthGuard } from "@/lib/useAuthGuard";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
 import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
+import AvatarViewer from "@/components/space/AvatarViewer";
 import PatientChip from "@/components/space/PatientChip";
 import PhotoView from "@/components/space/PhotoView";
 import Reel from "@/components/space/Reel";
@@ -207,7 +208,9 @@ export default function PatientSpace({ id }: { id: string }) {
 
       {/* Top-left: whose home this is */}
       <div className="absolute left-4 top-4 z-10">
-        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment} />
+        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment}>
+          <AvatarViewer assessmentId={assessment.id} refreshKey={`${assessment.input_revision}-${assessment.jobs[0]?.id}-${assessment.jobs[0]?.status}`} />
+        </PatientChip>
       </div>
 
       {/* Top-center: rooms */}

@@ -13,7 +13,7 @@ const rows: [keyof Profile, string][] = [
 ];
 
 // Top-left identity of the space: who lives here, expandable to the full profile.
-export default function PatientChip({ name, profile, onDelete }: { name: string; profile: Profile; onDelete?: () => Promise<void> }) {
+export default function PatientChip({ name, profile, onDelete, children }: { name: string; profile: Profile; onDelete?: () => Promise<void>; children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -58,6 +58,7 @@ export default function PatientChip({ name, profile, onDelete }: { name: string;
             <dt className="text-white/45">Percorsi</dt>
             <dd>{profile.daily_routes.join(", ") || <span className="text-white/35">Non indicati</span>}</dd>
           </dl>
+          {children}
           {onDelete && (
             <div className="mt-4 border-t border-white/10 pt-3">
               {confirming ? (
