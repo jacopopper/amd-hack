@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def _project_env(name, default=None):
+def _project_env(name: str, default: str = "") -> str:
     return os.getenv(f"STEP_WISE_{name}", os.getenv(f"SAFE_HOME_{name}", default))
 
 
@@ -82,6 +82,8 @@ class Settings:
     max_pixels: int = 40_000_000
     frame_cap: int = 20
     web_dist: Path = ROOT / "web/dist"
+    # Extra same-site origins allowed to mutate, e.g. a frontend dev server proxying /api.
+    allowed_origins: tuple[str, ...] = ()
 
     @property
     def db_path(self):
@@ -156,4 +158,5 @@ class Settings:
             max_file_bytes=int(_project_env("MAX_FILE_BYTES", str(20 * 1024 * 1024))),
             max_assessment_bytes=int(_project_env("MAX_ASSESSMENT_BYTES", str(200 * 1024 * 1024))),
             max_pixels=int(_project_env("MAX_PIXELS", "40000000")),
+            allowed_origins=tuple(o.strip().rstrip("/") for o in _project_env("ALLOWED_ORIGINS", "").split(",") if o.strip()),
         )

@@ -102,7 +102,8 @@ def create_app(settings=None):
             if (settings.data / "baseline.json").exists() and request.url.path not in {"/api/login", "/api/logout"}:
                 return JSONResponse({"error": "Frozen baseline is read-only; create a new case attempt"}, status_code=409)
             origin = request.headers.get("origin")
-            if request.headers.get("sec-fetch-site") == "cross-site" or (origin and (urlsplit(origin).scheme, urlsplit(origin).netloc) != (request.url.scheme, request.url.netloc)):
+            same_origin = not origin or (urlsplit(origin).scheme, urlsplit(origin).netloc) == (request.url.scheme, request.url.netloc) or origin.rstrip("/") in settings.allowed_origins
+            if request.headers.get("sec-fetch-site") == "cross-site" or not same_origin:
                 return JSONResponse({"error": "Cross-origin mutation denied"}, status_code=403)
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"

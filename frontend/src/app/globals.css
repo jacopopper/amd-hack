@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --urgent: #ff6b5e;
+  --important: #f5b54a;
+  --recommended: #6cb2ff;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  background: #0a0b0d;
+  color: #fff;
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Translucent panels floating over the 3D space. */
+.glass {
+  background: rgb(22 24 28 / 78%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 8%),
+    0 12px 40px rgb(0 0 0 / 35%);
+}
+
+/* Larger reading panels need more opacity than floating controls. */
+.glass-solid {
+  background: rgb(20 22 26 / 94%);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 15%);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

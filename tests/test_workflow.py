@@ -249,6 +249,14 @@ class Workflow(unittest.TestCase):
         job_id = db.enqueue(live, aid, "analyze", current["input_revision"], current["review_revision"])
         self.assertTrue(job_id)
 
+    def test_configured_dev_origin_may_mutate_but_others_may_not(self):
+        settings = replace(self.settings, allowed_origins=("http://127.0.0.1:3010",))
+        with TestClient(create_app(settings)) as client:
+            client.auth = ("reviewer", "fixture-testing-password")
+            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3010"}).status_code, 200)
+            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3011"}).status_code, 403)
+            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3010", "Sec-Fetch-Site": "cross-site"}).status_code, 403)
+
     def test_backend_change_cannot_turn_a_queued_fixture_into_live_calls(self):
         aid = self.create()
         self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("control.png", picture())})
