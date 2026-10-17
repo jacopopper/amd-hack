@@ -1,62 +1,54 @@
 # Step Wise
 
-Remote home fall-hazard assessment from phone photos, reviewed by a healthcare professional before the plan reaches the family.
-
-[![License: MIT](https://img.shields.io/badge/license-MIT-555)](LICENSE)
-![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB)
-![Next.js 16](https://img.shields.io/badge/next.js-16-000)
-![Gemma 4 31B on AMD](https://img.shields.io/badge/Gemma_4_31B-AMD_endpoint-ED1C24)
+Step Wise helps a discharge nurse or occupational therapist check a patient's home for fall hazards remotely, using phone photos taken by the family. A model pipeline proposes candidate hazards and rebuilds the room in 3D. The professional confirms, edits or rejects each one, and only reviewed findings reach the family's safety plan.
 
 <img src="docs/readme/app-review.jpg" alt="Reviewer app: Gaussian-splat reconstruction of a real kitchen with a hazard pin on a rug and the evidence card open" width="100%">
 
-<sub>The reviewer app on a real room: Gaussian splats reconstructed from 39 phone photos, a hazard pin on the rug and its evidence card. The two hazards in this demo case were marked by hand; see <a href="#try-it">Try it</a>.</sub>
+> [!CAUTION]
+> Research prototype built in a hackathon. It is not a medical device and has no clinical validation. Use staged homes and fictional patients only.
 
-A family member photographs the home room by room. The pipeline proposes candidate hazards, reconstructs the room in 3D and drafts an explanation tailored to the patient's confirmed functional profile (walker, night-time bathroom trips, low vision). A discharge nurse or occupational therapist confirms, edits or excludes each finding against the photo that supports it. Only reviewed findings go into the report, which is shared with the family through a private, expiring link.
+## Why
 
-Built for the [AMD Developer Hackathon: ACT III](https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-iii), Track 2 (Health & Wellbeing).
+Most falls among older adults happen at home. An expert home assessment, followed by removing the hazards it finds, reduces falls by 38% in high-risk patients ([Cochrane CD013258, 2023](https://www.cochrane.org/evidence/CD013258_reducing-fall-hazards-within-environment)). Few patients get one: Italy has roughly 3,000 occupational therapists for 14.8 million people over 65 ([FNO TSRM e PSTRP, 2024](https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/)). Step Wise targets the moment of hospital discharge, when a remote review from photos is better than no review at all.
 
-**Contents** · [Workflow](#workflow) · [Architecture](#architecture) · [Try it](#try-it) · [AMD deployment](#amd-deployment) · [Model outputs](#model-outputs) · [Evidence and limits](#evidence-and-limits) · [Development](#development) · [Hackathon deck (PDF)](pitch/step-wise-deck.pdf)
-
-### Background
-
-In Italy 54% of falls among people over 65 happen at home, and only 11% of older adults report having been advised by a doctor on how to prevent them ([ISS, PASSI d'Argento 2023–2024](https://www.iss.it/en/-/almeno-una-caduta-nell-ultimo-anno-per-un-anziano-su-cinque-la-casa-e-il-luogo-dove-si-verificano-di-piu)). Expert home-hazard assessment with hazard removal reduces falls by 38% in high-risk older adults ([Cochrane CD013258, 2023](https://www.cochrane.org/evidence/CD013258_reducing-fall-hazards-within-environment)), but Italy has about 3,000 occupational therapists for 14.8 million people over 65 ([FNO TSRM e PSTRP, 2024](https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/)). Step Wise targets the gap at hospital discharge: the professional reviews the home remotely, from photos, instead of not at all.
-
----
-
-## Workflow
+## How it works
 
 <table>
 <tr>
 <td width="50%" valign="top">
-<img src="docs/readme/capture.jpg" alt="A team member photographing the kitchen with a phone">
-<b>1 · Capture.</b> Overlapping phone photos, grouped by room. Uploads are re-oriented, stripped of EXIF/GPS metadata and re-encoded. The reviewer adds or confirms the patient's functional profile, optionally drafted from a clinical document with citations.
+<img src="docs/readme/capture.jpg" alt="Photographing the kitchen with a phone">
+<b>1 · Capture.</b> The family photographs each room with overlapping shots. Uploads are re-oriented, stripped of EXIF/GPS and re-encoded. The reviewer confirms the patient's functional profile (walker, night-time bathroom trips, low vision…), which can be drafted from a clinical document with citations.
 </td>
 <td width="50%" valign="top">
 <img src="docs/readme/room-splats.jpg" alt="Gaussian-splat render of the living room reconstructed from 39 phone photos">
-<b>2 · Analysis.</b> TypeSafe Jev answers fixed object questions (rug, floor cable, bathtub, grab bar…). VGGT-1B recovers cameras, depth and points; Gaussian splats are trained on top. Gemma 4 31B ranks hazards for the confirmed profile. A 3D anchor is kept only when several views agree.
+<b>2 · Analysis.</b> An object detector checks for known items (rugs, floor cables, bathtubs, grab bars). VGGT recovers cameras and depth, and Gaussian splats are trained on top. Gemma ranks the hazards against the confirmed profile. A 3D anchor is kept only when several views agree.
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 <img src="docs/readme/app-room.jpg" alt="Room view with hazard pins and evidence thumbnails">
-<b>3 · Review.</b> Each finding opens with its photo, its position in the room, the reason and the proposed action. The reviewer chooses <i>Confirm</i>, <i>Edit</i>, <i>Exclude</i> or <i>Check in person</i>. Decisions are versioned.
+<b>3 · Review.</b> Each finding shows its photo, its place in the room, the reason and a proposed action. The reviewer can <i>Confirm</i>, <i>Edit</i>, <i>Exclude</i> or mark it <i>Check in person</i>. Every decision is versioned.
 </td>
 <td width="50%" valign="top">
-<img src="docs/readme/app-summary.jpg" alt="Review summary dialog listing confirmed, excluded and to-verify findings">
-<b>4 · Summary.</b> Confirmed actions, items to verify at the first visit, excluded findings, and the areas the photos cannot assess (here: bathroom and bedroom were not photographed).
-</td>
-</tr>
-<tr>
-<td colspan="2">
 <img src="docs/readme/app-release.jpg" alt="Generated home safety plan and the release dialog with the family link">
-<b>5 · Release.</b> An HTML/PDF plan built only from reviewed findings. The family link opens the report alone, expires after 7 days and can be revoked. Release is blocked if a review decision changes after the report was drafted.
+<b>4 · Release.</b> The HTML/PDF plan is built only from reviewed findings and lists the areas the photos could not cover. The family gets a link that opens only the report, expires after 7 days and can be revoked.
 </td>
 </tr>
 </table>
 
-The photographs remain the evidence. The 3D view helps the reviewer navigate the room; its scale is not calibrated and it is not a measurement.
+The photos are the evidence. The 3D view is for orientation: its scale is not calibrated, so it cannot be used for measurements.
 
----
+## Quick start
+
+The demo needs no API keys and makes no external model calls:
+
+```bash
+docker compose -f compose.demo.yaml up --build
+```
+
+Open <http://localhost:8000> and follow the reviewer's part of the flow on a fictional patient, Maria R., 84: **review the hazards → prepare the report → release it to the family**. Each visitor gets a private copy of the same pre-analysed case. The same image deploys to Render through [`render.yaml`](render.yaml).
+
+The demo room is real: 39 phone photos reconstructed offline with VGGT and Gaussian splats. Its two hazards were **marked by hand by the team**, and the app labels them that way. The demo shows the review workflow; it says nothing about detection accuracy.
 
 ## Architecture
 
@@ -72,10 +64,10 @@ flowchart LR
 
     subgraph WK["Worker · persisted job queue (SQLite)"]
         direction TB
-        PREP["prepare<br/><sub>orientation, metadata strip</sub>"]
-        JEV["jev<br/><sub>TypeSafe Jev 1.14</sub>"]
-        REC["reconstruct<br/><sub>VGGT-1B, isolated env</sub>"]
-        GEM["gemma<br/><sub>Gemma 4 31B · AMD</sub>"]
+        PREP["prepare"]
+        JEV["jev<br/><sub>object checks</sub>"]
+        REC["reconstruct<br/><sub>VGGT-1B</sub>"]
+        GEM["gemma<br/><sub>hazard ranking</sub>"]
         GEO["geometry<br/><sub>floor, multiview anchors</sub>"]
         AV["avatar<br/><sub>Blender + MPFB2</sub>"]
         PREP --> JEV --> GEM --> GEO
@@ -84,7 +76,7 @@ flowchart LR
 
     subgraph RV["Reviewer app · Next.js + three.js"]
         direction TB
-        DEC["Per-finding decision<br/><sub>photo · 3D · reason</sub>"]
+        DEC["Per-finding decision"]
         RPT["report<br/><sub>Jinja2 + WeasyPrint</sub>"]
         DEC --> RPT
     end
@@ -109,61 +101,42 @@ flowchart LR
     style RV fill:none,stroke:#9aa5b1,stroke-dasharray:4 3
 ```
 
-<sub>Red: external model APIs, called only with the matching consent. Grey: runs locally. Jev never receives the patient profile or clinical text.</sub>
+<sub>Red: external model APIs, called only after the matching consent. Grey: local.</sub>
 
-- **Single worker, explicit stage graph.** Stages declare their dependencies; outputs are checksum-verified and reused when inputs have not changed. If one branch fails, independent stages keep their results (`failed_stages` on the job).
-- **Isolated GPU runtime.** VGGT runs in a separate Python environment with secrets removed from its environment, so the API process never imports PyTorch.
-- **Same-origin frontend.** The Next.js reviewer app is a static export served by FastAPI.
-- **Consent-gated egress.** External image and profile processing requires consent; new photos or documents invalidate it.
+| Stage | What it does | Model / library |
+| --- | --- | --- |
+| `prepare` | Upright orientation, metadata stripping, canonical re-encoding | Pillow |
+| `jev` | Asks fixed yes/no object questions per photo and returns boxes that pass presence and localization gates | TypeSafe Jev 1.14 (API) |
+| `reconstruct` | Camera poses, depth, point cloud and observed-surface mesh | [VGGT-1B](https://github.com/facebookresearch/vggt), in an isolated PyTorch env |
+| `gemma` | Full-image hazard sweep, written for the confirmed profile | Gemma-4-31B-IT, OpenAI-compatible endpoint |
+| `geometry` | Floor and gravity estimate; places a 3D anchor only when several views agree, otherwise abstains | NumPy |
+| `avatar` | Illustrative figure of the patient, with a walker only if one is confirmed | Blender 4.5 + MPFB2 |
+| `report` | HTML/PDF plan from reviewed findings only | Jinja2 + WeasyPrint |
 
-| Stage | Purpose | Runs on | Recorded evidence |
-| --- | --- | --- | --- |
-| `prepare` | Upright orientation, metadata stripping, canonical re-encoding | CPU · Pillow | Bounded uploads; EXIF, padding and metadata tests |
-| `jev` | Six object question pairs with presence and box gates | TypeSafe Jev 1.14 API | Both rugs and the bathtub localized on the test photos; repeat box IoU 0.94–1.00 |
-| `reconstruct` | Poses, depth, point cloud and observed-surface mesh | VGGT-1B · NVIDIA RTX 5090 Laptop | 20 rendered views: 2.67 s forward pass, 9.68 GiB peak memory |
-| `gemma` | Full-image hazard sweep, personalized to the confirmed profile | Gemma-4-31B-IT · AMD endpoint | 1 image in 6.29 s, 4 images in 11.00 s (synthetic smoke) |
-| `geometry` | Floor and gravity estimate, multiview anchors or abstention | CPU · NumPy | Floor normal error 0.39–0.83° on rendered scenes |
-| `avatar` | Illustrative older-adult figure; walker only when confirmed | Blender 4.5.14 · MPFB2 2.0.18 | Rigged GLB in 2.0 s, no clinical text inside |
-| `report` | HTML/PDF from reviewed findings only | Jinja2 · WeasyPrint | 8-page long-text PDF inspected without clipping |
+Design choices:
 
-Figures come from dated development runs in [runtime evidence](docs/runtime.md); they are not accuracy or clinical claims.
+- **One worker with an explicit stage graph.** Stages declare their dependencies. Outputs are checksum-verified and reused when their inputs have not changed. If one branch fails, the independent stages keep their results (`failed_stages` on the job).
+- **GPU code runs in its own process.** VGGT runs in a separate Python environment with secrets stripped from it, so the API never imports PyTorch.
+- **Consent-gated egress.** Photos and the profile go to an external model only with consent, and new photos or documents invalidate that consent. Jev never receives the profile or the clinical text.
+- **Stale releases are blocked.** If a review decision changes after the report was drafted, the report cannot be released.
+- **Same origin.** The reviewer app is a static Next.js export served by FastAPI.
 
-| | |
-| --- | --- |
-| **Backend** | Python 3.12 · FastAPI · Pydantic 2 · SQLite · Pillow · NumPy · Jinja2 · WeasyPrint |
-| **Frontend** | Next.js 16 (static export) · React 19 · TypeScript · Tailwind CSS 4 · three.js |
-| **Models** | Gemma-4-31B-IT (AMD endpoint; Hugging Face optional) · TypeSafe Jev 1.14 · VGGT-1B (PyTorch 2.8, BF16) · gsplat 1.5.3 · MPFB2 |
-| **Ops** | CPU Docker images with pinned base digests · single-container demo · ROCm Compose override (configuration-validated only) |
+**Stack:** Python 3.12, FastAPI, Pydantic 2, SQLite · Next.js 16, React 19, TypeScript, Tailwind 4, three.js · PyTorch 2.8, gsplat 1.5.3 · Docker.
 
----
+## Running on AMD
 
-## Try it
+Home photos and clinical data should stay inside the hospital network. The deployment target is a single **AMD Instinct MI300X** (192 GB HBM3) on-premise. Its memory is large enough for both VGGT (PyTorch on ROCm) and Gemma 4 31B (vLLM on ROCm), processing one job at a time. [`compose.rocm.yaml`](compose.rocm.yaml) and [`Dockerfile.worker.rocm`](Dockerfile.worker.rocm) describe that worker.
 
-### Judge demo · one command, no keys
+Today Gemma is called through AMD's hosted OpenAI-compatible endpoint (`Gemma-4-31B-IT`), and VGGT runs on a local NVIDIA GPU. The ROCm override has passed configuration validation but has not been run on AMD hardware yet.
 
-```bash
-docker compose -f compose.demo.yaml up --build
-```
-
-Open <http://localhost:8000>. You open the demo case (Maria R., a fictional 84-year-old patient) and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
-
-> [!IMPORTANT]
-> The bundled case is a **real room**: 8 of the 39 phone photos and the offline VGGT + Gaussian-splat reconstruction. Its two hazards were **marked by hand by the team**, not detected by a model, and every finding says so. It demonstrates the review workflow on a real 3D room, not detection or clinical accuracy.
+## Development
 
 <details>
-<summary><b>Full local setup (fixture pipeline, API + worker)</b></summary>
+<summary><b>Local setup with fixture models</b></summary>
 
 <br>
 
-| Tool | Version | Why |
-| --- | --- | --- |
-| Python | 3.12.3 | Backend runtime (pinned in `requirements.lock`) |
-| Node.js | 22.22.3 | Builds the reviewer app |
-| Pango, HarfBuzz, DejaVu fonts | see [`Dockerfile.worker`](Dockerfile.worker) | PDF rendering |
-| Blender + MPFB2 | 4.5.14 / 2.0.18 | Optional: live avatar (`AVATAR_BACKEND`) |
-| CUDA GPU + VGGT runtime | PyTorch 2.8, checksum-verified checkpoint | Optional: live reconstruction (`RECON_BACKEND=vggt`) |
-
-**1. Install**
+Requires Python 3.12 and Node.js 22. Rendering the PDF also needs Pango, HarfBuzz and DejaVu fonts (see [`Dockerfile.worker`](Dockerfile.worker)).
 
 ```bash
 python3 -m venv .venv
@@ -173,40 +146,25 @@ npm --prefix frontend ci
 npm --prefix frontend run build
 ```
 
-**2. Configure the fixture backends** in both the API and the worker terminal. The separate data directory keeps the demo apart from existing assessments. Fixture findings and geometry are fixed controls, even when you upload arbitrary photos.
+Fixture backends return fixed findings and geometry, whatever photos you upload. Export these in both terminals:
 
 ```bash
 export STEP_WISE_DATA="$PWD/data/fixture-demo"
 export STEP_WISE_DATABASE="$STEP_WISE_DATA/assessment.sqlite3"
 export RECON_BACKEND=fixture GEMMA_BACKEND=fixture AVATAR_BACKEND=fixture JEV_ENABLED=false
-```
 
-**3. Initialize and generate the synthetic upload images**
-
-```bash
 .venv/bin/python -m step_wise.cli init
-.venv/bin/python -m step_wise.cli seed-controls
+.venv/bin/python -m step_wise.cli seed-controls   # writes data/demo/synthetic-*.png
 ```
-
-**4. Start the API and the worker**
 
 ```bash
 # terminal 1
 .venv/bin/uvicorn step_wise.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log
-
-# terminal 2, same settings
+# terminal 2
 .venv/bin/python -m step_wise.worker
 ```
 
-**5. Walk the flow** at <http://localhost:8000>:
-
-1. **New patient** → fill in a fictional profile under **Mobility and needs**.
-2. Upload `data/demo/synthetic-1.png` and `synthetic-2.png` to one room as **Overview**.
-3. **Start analysis** and follow the stage status.
-4. Open the room; each pin and photo box opens its evidence card. Confirm, dismiss or flag, and edit the action if needed.
-5. **Prepare report** → check the HTML/PDF → **Review and release** → **Release**. **Revoke link** disables it.
-
-For hot reload and the `/api` proxy, see the [frontend README](frontend/README.md). The fixture demo needs no keys.
+At <http://localhost:8000>, create a patient, upload `data/demo/synthetic-1.png` and `synthetic-2.png` to one room as **Overview**, then start the analysis, review, prepare the report and release it. For hot reload, see the [frontend README](frontend/README.md).
 
 > [!WARNING]
 > The reviewer API has no login. Keep it on loopback unless an external access-control layer is in place.
@@ -214,22 +172,22 @@ For hot reload and the `/api` proxy, see the [frontend README](frontend/README.m
 </details>
 
 <details>
-<summary><b>Live models: Gemma on AMD, Jev, VGGT</b></summary>
+<summary><b>Live models</b></summary>
 
 <br>
 
-The Python app loads a local `.env`; already-exported variables take precedence. Set `RECON_BACKEND`, `GEMMA_BACKEND`, `JEV_ENABLED` and `AVATAR_BACKEND` explicitly, and restart the API and worker together after changing them. A worker with a different configuration refuses a queued attempt. All settings are documented in [`.env.example`](.env.example). Keys are read server-side and never sent to the browser.
+Settings are read from `.env` (exported variables take precedence); all of them are documented in [`.env.example`](.env.example). Set `RECON_BACKEND`, `GEMMA_BACKEND`, `JEV_ENABLED` and `AVATAR_BACKEND` explicitly, and restart the API and worker together after changing them. A worker with a different configuration refuses queued jobs. Keys stay server-side.
 
 | Variable | Used for |
 | --- | --- |
-| `GEMMA_API_KEY` | AMD hosted endpoint or another OpenAI-compatible Gemma endpoint |
+| `GEMMA_API_KEY` | AMD hosted endpoint or any OpenAI-compatible Gemma endpoint |
 | `JEV_API_KEY` | TypeSafe Jev, when `JEV_ENABLED=true` |
 | `HF_TOKEN` | Only when `GEMMA_BASE_URL` is the Hugging Face router |
 
 - **Gemma on AMD:** `GEMMA_BASE_URL=https://developer.amd.com.cn/radeon/api/v1`, `GEMMA_MODEL=Gemma-4-31B-IT`, `GEMMA_PROVIDER=amd`.
-- **Gemma on Hugging Face (optional):** `GEMMA_BASE_URL=https://router.huggingface.co/v1`, `HF_TOKEN` and an explicit `GEMMA_PROVIDER`. Only this router appends `:provider` to the model name.
-- **VGGT:** requires an explicitly installed runtime, the pinned source commit and a checksum-verified local checkpoint. Weights are never downloaded implicitly.
-- **Consent:** external image and profile processing is consent-gated; new photos or documents invalidate the matching consent.
+- **Gemma on Hugging Face:** `GEMMA_BASE_URL=https://router.huggingface.co/v1`, `HF_TOKEN` and an explicit `GEMMA_PROVIDER`.
+- **VGGT** (`RECON_BACKEND=vggt`): needs a separately installed runtime (`VGGT_PYTHON`), the pinned source commit and a checksum-verified local checkpoint. Weights are never downloaded automatically.
+- **Avatar** (`AVATAR_BACKEND`): needs Blender 4.5 with MPFB2 2.0.
 
 Send one generated, non-clinical test image to the configured Gemma endpoint:
 
@@ -239,72 +197,8 @@ Send one generated, non-clinical test image to the configured Gemma endpoint:
 
 </details>
 
----
-
-## AMD deployment
-
-Home photos and clinical data should not leave the hospital network. A single **AMD Instinct MI300X** (192 GB HBM3) has room for both the reconstruction model and the reasoning model, so the target is one on-premise GPU running the whole pipeline on ROCm.
-
-| Status | |
-| --- | --- |
-| **Working today** | `Gemma-4-31B-IT` on AMD's OpenAI-compatible endpoint is the configured model for the hazard sweep and report drafting. Authenticated model discovery and image/strict-JSON smokes passed: 1 image in 6.29 s, 4 images in 11.00 s. |
-| **Target** | One MI300X on-premise: VGGT on PyTorch-ROCm and Gemma on vLLM-ROCm, one job at a time. [`compose.rocm.yaml`](compose.rocm.yaml) and [`Dockerfile.worker.rocm`](Dockerfile.worker.rocm) describe that worker. |
-| **Not yet established** | A complete room analysis through the AMD endpoint, any self-hosted ROCm run (the override has only passed configuration validation), and MI300X latency, memory and cost figures. VGGT currently runs on an NVIDIA RTX 5090 Laptop GPU. |
-
----
-
-## Model outputs
-
-### Reconstruction of a real room
-
-<img src="docs/readme/capture-photos.jpg" alt="Four of the 39 phone photos of the open-plan kitchen and living room" width="100%">
-
-<table>
-<tr>
-<td width="50%"><img src="docs/readme/room-splats-kitchen.jpg" alt="Gaussian-splat render of the kitchen and living area"></td>
-<td width="50%"><img src="docs/readme/room-points.jpg" alt="VGGT point cloud of the same room"></td>
-</tr>
-</table>
-
-Input: 39 phone photos of an open-plan kitchen and living room (four shown above), EXIF/GPS-free, processed locally. VGGT-1B recovered cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. The scale is not calibrated. The demo streams a 20 MB compressed copy (`.ksplat`, 651,321 Gaussians). Details in [capture reconstruction](docs/capture-reconstruction.md).
-
-### Object checks and avatar
-
-<table>
-<tr>
-<td width="42%" valign="top">
-<img src="pitch/jev-results/2026-10-17/optimization/objects-v2/corridoio-jev.jpg" alt="Corridor photo with Jev boxes around the nearest rug and the farther rug">
-<sub><b>Jev · corridor.</b> Live <code>jev-1.14.0</code> call, 17 Oct 2026. Nearest rug: presence 0.99, box 0.70. Farther rug: presence 0.95, box 0.91. The footstool stayed below the presence gate (0.42) and is withheld. Photo: Thomas Würth / Unsplash.</sub>
-</td>
-<td width="42%" valign="top">
-<img src="pitch/jev-results/2026-10-17/optimization/objects-v2/bagno-jev.jpg" alt="Bathroom photo with a Jev box around the bathtub">
-<sub><b>Jev · bathroom.</b> Bathtub: presence 0.97, box 0.84. Locating it is separate from deciding it is a hazard; that belongs to Gemma and the reviewer. Nothing is boxed as a "missing grab bar". Photo: Point3D Commercial Imaging Ltd. / Unsplash.</sub>
-</td>
-<td width="16%" valign="top">
-<img src="demo/artifacts/avatar-style-2026-10-17/avatar-preview.png" alt="Illustrative older woman with a walker">
-<sub><b>Avatar.</b> Generated headlessly with Blender + MPFB2. The walker appears only when the reviewer confirms one.</sub>
-</td>
-</tr>
-</table>
-
-A repeated run on the same photos matched closely (box IoU 0.94–1.00): a consistency check on two images, not accuracy validation. The [before/after comparison](pitch/jev-results/2026-10-17/optimization/index.html) keeps the original open-ended prompt, which boxed a wall painting instead of the rug. Gates (presence ≥ 0.75, box ≥ 0.50) are provisional and uncalibrated.
-
----
-
-## Evidence and limits
-
-**Verified.** The full intake → analysis → review → PDF → release → revocation lifecycle in fixture mode and in a headless browser · a live four-screenshot run (local VGGT, Jev, Gemma via Hugging Face, MPFB2 avatar, unreleased Gemma-drafted PDF) · a five-photo real-room analysis with four provisional findings · VGGT resource scaling to 20 views · AMD-hosted Gemma vision/strict-JSON smokes.
-
-**Not yet established.** A guided, independently measured room capture · real-room centimetre accuracy · validated 3D hazard anchors on real scenes · a full analysis through the AMD endpoint · self-hosted ROCm · clinical accuracy, fall reduction or reviewer-time benefit.
-
-Run IDs, dates and open gates are in [runtime evidence](docs/runtime.md).
-
----
-
-## Development
-
 <details>
-<summary><b>Development and checks</b></summary>
+<summary><b>Tests and checks</b></summary>
 
 <br>
 
@@ -313,48 +207,27 @@ Run IDs, dates and open gates are in [runtime evidence](docs/runtime.md).
 .venv/bin/python eval/jev/evaluate.py self-check
 npm --prefix frontend run typecheck
 npm --prefix frontend run lint
-npm --prefix frontend run build
 ```
 
-With the fixture API and worker running, the HTTP smoke test exercises simulated review, report release, stale-release protection and family-link access on a separate synthetic assessment:
+With the fixture API and worker running:
 
 ```bash
 .venv/bin/python scripts/smoke_e2e.py --mode fixture --base-url http://localhost:8000
+.venv/bin/python scripts/browser_smoke.py --base-url http://localhost:8000   # needs playwright + chromium
 ```
 
-Optional headless UI check:
-
-```bash
-.venv/bin/pip install playwright
-.venv/bin/python -m playwright install chromium
-.venv/bin/python scripts/browser_smoke.py --base-url http://localhost:8000
-```
-
-Reproducible case runs and cleanup (cleanup is a dry run unless explicitly executed; stop the ordinary worker first, it holds a shared lock):
+Reproducible case runs and data cleanup (stop the normal worker first; cleanup is a dry run without `--execute`):
 
 ```bash
 .venv/bin/python -m step_wise.cli case run demo/cases/room-001.json --mode fixture
-.venv/bin/python -m step_wise.cli case check --run RUN_ID
+.venv/bin/python -m step_wise.cli case check --run RUN_ID   # exit 4 = manual checks pending
 .venv/bin/python -m step_wise.cli cleanup --older-than-days 30
 ```
 
-Exit code `4` from `case check` means manual checks remain pending, not an execution failure.
-
 </details>
 
 <details>
-<summary><b>Real photos: the Monolocale study</b></summary>
-
-<br>
-
-The **Monolocale WhatsApp** study starts from five real photos and VGGT geometry. Its optional `photo_completed` presentation keeps the photographic textures and adds manually fitted floor, walls, ceiling and selected furniture, window and door surfaces. **Completed reconstruction** and **Original surfaces** switch between the completion and the captured surfaces.
-
-Missing surfaces are inferred: completion creates no validated hazard anchors or measurements, and the original photos and raw reconstruction stay available. To add photos, upload **12–20 overlapping overviews in total** to the exact existing room label (**Soggiorno**) as **Overview**, then re-run the analysis; `VGGT_FRAME_CAP` (default 20) is checked before queueing, and nothing is silently dropped. Adding photos invalidates the analysis, review, calibration and manual completion. The [completion script](scripts/complete_monolocale.py) is authored for the original five-image set; attach new output with [`attach_room_presentation.py`](scripts/attach_room_presentation.py), which checks it against the current revision and source hashes.
-
-</details>
-
-<details>
-<summary><b>API surface</b></summary>
+<summary><b>API</b></summary>
 
 <br>
 
@@ -371,72 +244,50 @@ Missing surfaces are inferred: completion creates no validated hazard anchors or
 | `GET` | `/api/assessments/{id}/bundle` | Versioned bundle: findings, rooms, geometry, avatar |
 | `PUT` | `/api/assessments/{id}/reviews/{hazard_id}` | Record a review decision |
 | `PUT` · `DELETE` | `/api/assessments/{id}/scenes/{scene_id}/calibration` | Set or clear metric calibration |
-| `PUT` · `DELETE` | `/api/assessments/{id}/scene-links/{from}/{to}` | Confirm or remove a room link |
+| `PUT` · `DELETE` | `/api/assessments/{id}/scene-links/{from}/{to}` | Confirm or remove a link between rooms |
 | `POST` | `/api/assessments/{id}/reports` | Draft a report from reviewed findings |
 | `POST` | `/api/reports/{id}/release` · `/revoke` | Release to the family or revoke the link |
 | `GET` | `/api/family/{token}` | Family view of the released report |
-| `GET` · `POST` | `/api/demo` · `/api/demo/session` | Judge demo: case summary and a private visitor copy |
+| `GET` · `POST` | `/api/demo` · `/api/demo/session` | Demo case summary and a private visitor copy |
 
 </details>
 
 <details>
-<summary><b>Project structure</b></summary>
+<summary><b>Repository layout</b></summary>
 
 <br>
 
 ```
-amd-hack/
-├── backend/src/step_wise/
-│   ├── api.py                   # FastAPI routes: intake, jobs, review, reports, family links, demo
-│   ├── worker.py                # Persisted queue, seven-stage pipeline, checksum-verified reuse
-│   ├── snapshot.py              # Judge demo: frozen case, private copy per visitor
-│   ├── db.py · schema.sql       # SQLite storage and schema upgrades
-│   ├── models.py                # Versioned AssessmentBundle and public DTOs
-│   ├── validation.py            # Checks model findings against photos, scenes and profile
-│   ├── cli.py · cases.py        # init, seed-controls, cleanup, reproducible case runs
-│   ├── pipeline/
-│   │   ├── photos.py            # Upright, metadata-free canonical photos and box transforms
-│   │   ├── jev.py               # TypeSafe Jev object checks and evidence gates
-│   │   ├── gemma.py · http.py   # OpenAI-compatible Gemma client, bounded streaming parser
-│   │   ├── reconstruction.py    # VGGT dispatch, point cloud and observed-surface mesh
-│   │   ├── vggt_worker.py       # Isolated GPU subprocess
-│   │   ├── geometry.py          # Floor estimate, multiview anchors, photo-surface markers
-│   │   ├── calibration.py       # Metric scale from tape measurements, with holdout check
-│   │   ├── registration.py      # Reviewer-confirmed links between rooms
-│   │   ├── clinical.py          # Clinical document intake and cited profile drafts
-│   │   ├── avatar*.py           # Blender/MPFB2 avatar generation
-│   │   └── reports.py           # Report drafting and release
-│   ├── prompts/                 # Gemma and Jev prompts
-│   └── templates/report.html    # HTML/PDF report template
-├── frontend/src/
-│   ├── app/                     # Patient list, intake, patient space
-│   ├── components/              # PatientSpace, ReleaseDialog, space/ (3D viewers, cards)
-│   └── lib/                     # API client, types, labels
-├── frontend/public/capture-data/ # Compressed room splats and cameras for the 3D room view
-├── scripts/                     # Smoke tests, capture reconstruction, Monolocale completion (archive/: one-offs)
-├── tests/                       # Python unittest suite
-├── eval/jev/                    # Jev evaluation harness and historical results
-├── demo/                        # Fixture cases, judge-demo snapshot, capture photos, dated artifacts
-├── docs/                        # Runtime evidence, capture reconstruction, product blueprint (archive/: old plans)
-└── pitch/                       # Pitch site, source captures, Jev results
+backend/src/step_wise/
+  api.py                 FastAPI routes
+  worker.py              Persisted queue and stage graph
+  snapshot.py            Frozen demo case, one private copy per visitor
+  validation.py          Checks model findings against photos, scenes and profile
+  pipeline/              photos, jev, gemma, reconstruction (+ vggt_worker), geometry,
+                         calibration, registration, clinical, avatar, reports
+  prompts/               Gemma and Jev prompts
+  templates/report.html  Report template
+frontend/                Next.js reviewer app
+scripts/                 Smoke tests and capture reconstruction tools
+tests/                   Python unittest suite
+eval/jev/                Jev evaluation harness
+demo/                    Fixture cases, demo snapshot, capture photos
+docs/                    Runtime evidence, capture reconstruction, product notes
+pitch/                   Hackathon slides and video
 ```
 
 </details>
 
----
+## Status
 
-## Team
+**Works end to end:** intake → analysis → review → PDF → release → revocation, in fixture mode and in a headless browser. It also ran with live models (local VGGT, Jev, Gemma, MPFB2 avatar) on a few real photo sets, and the AMD-hosted Gemma endpoint passed vision and strict-JSON smoke tests.
 
-<table>
-<tr>
-<td align="center"><a href="https://github.com/jacopopper"><img src="https://github.com/jacopopper.png" width="80" alt=""><br><b>@jacopopper</b></a></td>
-<td align="center"><a href="https://github.com/davideblesse"><img src="https://github.com/davideblesse.png" width="80" alt=""><br><b>@davideblesse</b></a></td>
-</tr>
-</table>
+**Not established yet:** detection accuracy, metric accuracy of the 3D anchors on real rooms, a full analysis through the AMD endpoint, self-hosted ROCm, and any clinical benefit. Detection thresholds are provisional and uncalibrated.
 
-## License
+Dated runs, timings and open gates are recorded in [docs/runtime.md](docs/runtime.md). The reconstruction of the demo room is described in [docs/capture-reconstruction.md](docs/capture-reconstruction.md).
 
-Code is released under the [MIT License](LICENSE). Third-party material keeps its own terms: pitch and evaluation photos from Unsplash are credited where they appear, source captures under `pitch/assets/sources/` belong to their publishers, the avatar uses a CC0 MPFB2 asset pack, and the VGGT-1B research checkpoint (non-commercial, not distributed here) must be obtained separately.
+## About
 
-> [!CAUTION]
-> Step Wise is a hackathon prototype. It is not a medical device, has no clinical validation, and must not be used for real patient intake. Use staged homes and fictional profiles.
+Built by [@jacopopper](https://github.com/jacopopper) and [@davideblesse](https://github.com/davideblesse) for the [AMD Developer Hackathon: ACT III](https://lablab.ai/ai-hackathons/amd-developer-hackathon-act-iii), Track 2 (Health & Wellbeing). The slides and video are in [`pitch/`](pitch/step-wise-deck.pdf).
+
+Code is [MIT](LICENSE)-licensed. Third-party material keeps its own terms: Unsplash photos are credited where they appear, the source captures in `pitch/assets/sources/` belong to their publishers, and the avatar uses a CC0 MPFB2 asset pack. The VGGT-1B checkpoint is non-commercial, is not distributed here, and has to be obtained separately.
