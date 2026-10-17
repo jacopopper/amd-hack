@@ -72,10 +72,10 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 .dark .src{box-shadow:0 30px 60px -20px rgb(0 0 0 / 75%)}
 
 /* 1 cover */
-#cover{padding:0;background:#000;color:#fff}
-#cover>img{position:absolute;top:0;right:0;height:100%;width:auto;max-width:62%;object-fit:cover;object-position:50% 30%;filter:grayscale(1) contrast(1.06);transform:scale(1.04);transition:transform 14s ease-out}
-#cover.on>img{transform:scale(1)}
-#cover:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#000 0%,#000 36%,rgb(0 0 0 / 70%) 46%,rgb(0 0 0 / 0%) 62%),linear-gradient(0deg,rgb(0 0 0 / 80%),transparent 32%)}
+#cover,#close{padding:0;background:#000;color:#fff}
+#cover>img,#close>img{position:absolute;top:0;right:0;height:100%;width:min(62%,95vh);object-fit:cover;object-position:50% 30%;filter:grayscale(1) contrast(1.06);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgb(0 0 0 / 35%) 22%,rgb(0 0 0 / 85%) 45%,#000 62%);mask-image:linear-gradient(90deg,transparent 0%,rgb(0 0 0 / 35%) 22%,rgb(0 0 0 / 85%) 45%,#000 62%);transform:scale(1.04);transition:transform 14s ease-out}
+#cover.on>img,#close.on>img{transform:scale(1)}
+#cover:after,#close:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgb(0 0 0 / 75%),transparent 30%),radial-gradient(120% 90% at 80% 40%,transparent 55%,rgb(0 0 0 / 55%))}
 #cover .in{position:relative;z-index:2;padding:0 var(--pad);max-width:1380px;width:100%;margin:0 auto}
 #cover .place{font:600 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#bdb6aa}
 #cover h1{font-size:clamp(64px,min(9.6vw,17vh),168px);line-height:.88;margin:2.6vh 0 0}
@@ -86,7 +86,7 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 #cover .brand svg{width:30px;height:30px}
 #cover .tag{font-size:15px;color:#c9c2b6;max-width:30em;margin:12px 0 0}
 .cred{position:absolute;right:16px;bottom:10px;z-index:3;font-size:10.5px;color:rgb(255 255 255 / 50%)}
-@media (max-width:960px){#cover>img{max-width:100%;width:100%;opacity:.5}}
+@media (max-width:960px){#cover>img,#close>img{width:100%;opacity:.45}}
 
 /* 2 law vs home */
 .vs{display:grid;grid-template-columns:1fr 1fr;margin-top:3.4vh;border-top:2px solid var(--ink)}
@@ -147,17 +147,16 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 #p-foto .in{position:relative;z-index:3;padding:0 var(--pad);max-width:1380px;width:100%;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:40px}
 #p-foto .txt{max-width:560px}
 @media (max-width:960px){#p-foto .in{flex-direction:column;align-items:flex-start}}
-.flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:4;pointer-events:none}
-.flash.go{animation:flash .6s ease-out}
-@keyframes flash{0%{opacity:.35}100%{opacity:0}}
-.shots{flex:none;width:min(500px,36vw)}
-.shots:has(.strip:empty){display:none}
-.shots p{margin:0 0 10px;font:500 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#d8d2c6}
-.shots p b{color:var(--hl);font-weight:600}
-.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.strip:empty{display:none}
-.strip i{aspect-ratio:3/4;border-radius:6px;background:#222 50%/cover;box-shadow:0 0 0 1px rgb(255 255 255 / 30%),0 14px 28px rgb(0 0 0 / 55%);opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s ease;transition-delay:calc(.9s + var(--i) * .25s)}
-.on .strip i{opacity:1;transform:none}
+.pflash{position:absolute;z-index:5;border-radius:6px;background:#fff;opacity:0;pointer-events:none;box-shadow:0 0 36px 10px rgb(255 255 255 / 55%)}
+.fly{position:absolute;z-index:6;border-radius:4px;background:#222 50%/cover;transform-origin:0 0;box-shadow:0 16px 34px rgb(0 0 0 / 60%),0 0 0 1px rgb(255 255 255 / 40%);pointer-events:none}
+.shots{position:absolute;z-index:4;right:var(--pad);bottom:8vh;width:min(520px,34vw)}
+@media (max-width:960px){.shots{left:20px;right:20px;width:auto;bottom:2vh}}
+.shots p{white-space:nowrap;margin:0 0 10px;font:500 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#d8d2c6}
+.shots p b{color:var(--hl);font-weight:600;font-size:15px}
+.shots p .zg{opacity:0;transition:opacity .6s}.shots p .zg.show{opacity:1}
+.strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.strip i{aspect-ratio:3/4;border-radius:4px;background:rgb(255 255 255 / 5%) 50%/cover;box-shadow:inset 0 0 0 1px rgb(255 255 255 / 16%);transition:box-shadow .3s}
+.strip i.got{box-shadow:0 0 0 1px rgb(255 255 255 / 40%),0 10px 20px rgb(0 0 0 / 50%)}
 
 /* P2 detection */
 .det{display:grid;grid-template-columns:1.25fr 1.08fr 1.5fr;gap:14px;align-items:start;max-width:min(1240px,165vh);margin:0 auto}
@@ -271,17 +270,19 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 @media (max-width:900px){.amd,.metrics{grid-template-columns:1fr 1fr}.rsn{grid-template-columns:1fr}.qa{grid-template-columns:1fr}}
 
 /* close */
-#close{background:var(--dark);color:#fff;padding:0}
+#close>img{opacity:.7}
 #close .in{position:relative;z-index:2;padding:0 var(--pad);max-width:1380px;width:100%;margin:0 auto}
-#close p{font:400 clamp(44px,min(6vw,10vh),104px)/1.02 var(--serif);margin:0;max-width:12em}
+#close h2{font-size:clamp(64px,min(9.6vw,17vh),168px);line-height:.88}
+#close .l2{font:400 clamp(30px,min(3.3vw,5.6vh),54px)/1.15 var(--serif);margin:5vh 0 0;max-width:20em}
+#close .brand{display:flex;align-items:center;gap:12px;margin-top:8vh;padding-top:2.4vh;border-top:1px solid rgb(255 255 255 / 18%);max-width:780px;font:600 21px/1 var(--sans)}
 
 /* sources */
-.srcs{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:3.4vh;align-items:start}
-.srcs>div{min-width:0}
-.srcs .who{font-size:12px;line-height:1.35;color:var(--muted);margin:8px 2px 0}
-.srcs .who b{color:var(--ink);font-weight:600}
-.srcs .src figcaption{font-size:11px;padding:6px 9px}.srcs .src .bar .url{font-size:10.5px}
-@media (max-width:960px){.srcs{grid-template-columns:1fr 1fr}}
+.srcs{list-style:none;margin:3vh 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:0 56px;max-width:1180px}
+.srcs li{display:grid;grid-template-columns:24px 1fr;gap:4px 10px;padding:1.8vh 0;border-top:1px solid var(--rule);font-size:16px;line-height:1.4}
+.srcs li span{grid-row:span 2;font:500 12px/1.9 var(--mono);color:var(--muted)}
+.srcs a{color:var(--muted);font-size:13px;text-decoration:none;word-break:break-all}
+.srcs a:hover{text-decoration:underline}
+@media (max-width:960px){.srcs{grid-template-columns:1fr}}
 
 .notes{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:36px;width:min(760px,92vw);z-index:70;background:#1d1b18;color:#e8e2d6;border-left:4px solid var(--hl);padding:12px 16px;font-size:14.5px;line-height:1.5;box-shadow:0 10px 30px rgb(0 0 0 / 35%)}
 .notes b{color:var(--hl)}
@@ -410,17 +411,16 @@ body.show-notes .s.cur>.notes{display:block}
 <!-- P1 · FOTO -->
 <section class="s dark" id="p-foto" data-step="1">
   <div class="bg"></div>
-  <div class="flash"></div>
   <div class="in">
     <div class="txt">
       <div class="step-n a">01 / 06 · ACQUISIZIONE</div>
-      <h2 class="a" style="--d:.1">Il cugino fotografa la casa.</h2>
+      <h2 class="a" style="--d:.1">Jacopo, il nipote, fotografa la casa.</h2>
       <p class="lede a" style="--d:.3;margin-top:2.4vh">Dal telefono, stanza per stanza: foto sovrapposte da più punti di vista. L'infermiera aggiunge il profilo di Maria: deambulatore, protesi d'anca, si alza di notte.</p>
       <div class="tech a" style="--d:.5"><b>Pillow · NumPy</b><b>orientamento EXIF</b><b>nitidezza e duplicati</b></div>
     </div>
-    <div class="shots"><p><b>40 foto</b> · tutta la zona giorno</p><div class="strip" id="strip"></div></div>
   </div>
-  <aside class="notes"><b>Pipeline · 10 s</b> "Tutto parte da foto normali, fatte dal telefono."</aside>
+  <div class="shots a" style="--d:.6"><p><b id="shot-n">0</b> foto <span class="zg">· tutta la zona giorno</span></p><div class="strip" id="strip"></div></div>
+  <aside class="notes"><b>Pipeline · 15 s</b> "Tutto parte da foto normali: Jacopo, il nipote, fotografa la casa col telefono." Lascia partire gli scatti. L'animazione riparte ogni volta che torni sulla slide.</aside>
 </section>
 
 <!-- P2 · RILEVAMENTO -->
@@ -521,8 +521,8 @@ body.show-notes .s.cur>.notes{display:block}
   <div class="wrap grid">
     <div class="c5">
       <div class="step-n a">06 / 06 · PIANO PER LA FAMIGLIA</div>
-      <h2 class="a" style="--d:.1;font-size:clamp(36px,min(4.2vw,7vh),70px)">Giulia, da Milano, sa cosa fare.</h2>
-      <p class="lede a" style="--d:.3;margin-top:2.4vh;font-size:clamp(16px,1.3vw,20px)">Azioni in ordine di priorità, in italiano semplice, con le fonti. Prima del rientro, non dopo la prossima caduta.</p>
+      <h2 class="a" style="--d:.1;font-size:clamp(36px,min(4.2vw,7vh),70px)">La famiglia sa cosa fare.</h2>
+      <p class="lede a" style="--d:.3;margin-top:2.4vh;font-size:clamp(16px,1.3vw,20px)">La figlia di Maria riceve sul telefono il piano approvato: azioni in ordine di priorità, in italiano semplice, con le fonti. Prima del rientro, non dopo la prossima caduta.</p>
       <div class="tech a" style="--d:.6"><b>HTML → PDF · WeasyPrint</b><b>link privato · scade in 7 giorni</b></div>
     </div>
     <div class="c7">
@@ -540,7 +540,7 @@ body.show-notes .s.cur>.notes{display:block}
       </div>
     </div>
   </div>
-  <aside class="notes"><b>Pipeline · 10 s</b> "E il piano arriva sul telefono di Giulia, prima che Maria torni a casa."</aside>
+  <aside class="notes"><b>Pipeline · 10 s</b> "E il piano arriva sul telefono della figlia, prima che Maria torni a casa."</aside>
 </section>
 
 <!-- PROTOTIPO -->
@@ -579,20 +579,20 @@ body.show-notes .s.cur>.notes{display:block}
 
 <!-- CHIUSURA -->
 <section class="s" id="close">
+  <img src="assets/photos/maria.jpg" alt="">
   <div class="in">
-    <p class="a" style="--d:.2">Venerdì Maria torna a casa.</p>
-    <p class="a" style="--d:1.1;margin-top:2vh;color:var(--hl)">Questa volta qualcuno ha guardato il corridoio.</p>
-    <div class="a" style="--d:2;display:flex;align-items:center;gap:12px;margin-top:7vh;font:600 21px/1 var(--sans)"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
+    <h2 class="a" style="--d:.3">Venerdì Maria<br>torna a casa.</h2>
+    <p class="l2 a" style="--d:1.4"><span class="hl" style="transition-delay:2s">Questa volta qualcuno ha guardato il corridoio.</span></p>
+    <div class="brand a" style="--d:3"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
   </div>
-  <aside class="notes"><b>2:50</b> Ultima frase, poi silenzio.</aside>
+  <aside class="notes"><b>2:50</b> Stessa immagine dell'inizio. Leggi la prima riga, pausa, poi la frase evidenziata. Silenzio.</aside>
 </section>
 
 <!-- FONTI -->
 <section class="s" id="fonti">
   <div class="wrap">
     <p class="k a">Fonti</p>
-    <h2 class="a" style="--d:.1;font-size:clamp(34px,min(3.6vw,6vh),60px)">Ogni dato, dalla sua fonte originale.</h2>
-    <div class="srcs" id="srcs"></div>
+    <ol class="srcs a" style="--d:.1" id="srcs"></ol>
   </div>
 </section>
 
@@ -618,7 +618,8 @@ const SRC = {
     return `<div class="bar"><span class="dots"><i></i><i></i><i></i></span><a class="url" href="${esc(s.url)}" target="_blank" rel="noopener">${lock}<b>${esc(s.host)}</b>${esc(path)}</a></div><img src="assets/sources/${id}.png" alt="Pagina originale di ${esc(s.org)} con la frase citata evidenziata"><figcaption><span><b>${esc(s.org)}</b> · ${esc(s.title)}</span><span class="ok">Fonte originale</span></figcaption>`;
   };
   $$('figure[data-src]').forEach(f => f.innerHTML = card(f.dataset.src));
-  $('#srcs').innerHTML = Object.keys(SRC).map((id, i) => `<div class="a" style="--d:${.25 + i * .08}"><figure class="src">${card(id)}</figure><p class="who"><b>${esc(SRC[id].org)}</b>: ${esc(SRC[id].who)}</p></div>`).join('');
+  const uniq = [...new Map(Object.values(SRC).map(x => [x.url, x])).values()];
+  $('#srcs').innerHTML = uniq.map((x, i) => `<li><span>${i + 1}</span><div><b>${esc(x.org)}</b> · ${esc(x.title.replace(/^(Terapisti occupazionali) in (Italia|Europa)/, '$1 in Italia e in Europa'))}</div><a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.host)}</a></li>`).join('');
   $$('.units,.ot .u').forEach(u => u.innerHTML = Array.from({ length: +u.dataset.n }, (_, i) => `<i style="--i:${i}"></i>`).join(''));
 
   /* pipeline tracker */
@@ -660,13 +661,43 @@ const SRC = {
     const video = $('video', v); video.addEventListener('loadedmetadata', () => v.classList.add('ready')); video.src = v.dataset.src;
   });
 
-  /* P1 · foto reali dell'appartamento (max 4), es. 'assets/photos/casa-1.jpg' */
-  const SHOTS = [1, 2, 3, 4].map(i => `assets/photos/casa/scatto-${i}.jpg`);
-  $('#strip').innerHTML = SHOTS.slice(0, 4).map((u, i) => `<i style="--i:${i};background-image:url('${esc(u)}')"></i>`).join('');
-  let flashed = false;
+  /* P1 · each shot leaves the phone screen and lands in the camera roll; replays on every visit */
+  const SHOTS = [1, 2, 3, 4, 5, 6, 7, 8].map(i => `assets/photos/casa/scatto-${i}.jpg`), TOTAL = 40;
+  const PHONE = { x: .515, y: .53, w: .043, h: .15 }; // phone screen in collega.jpg (2400×1500, bg 50% 30%)
+  const pf = $('#p-foto'), strip = $('#strip'), shotN = $('#shot-n'), zg = $('#p-foto .zg');
+  strip.innerHTML = SHOTS.map(() => '<i></i>').join('');
+  const slots = $$('i', strip);
+  let shotTimers = [];
+  const phoneRect = () => {
+    const W = pf.clientWidth, H = pf.clientHeight, k = Math.max(W / 2400, H / 1500), w = 2400 * k, h = 1500 * k;
+    const ox = (W - w) * .5, oy = (H - h) * .3, sw = PHONE.w * w, sh = sw * 4 / 3;
+    return { x: ox + PHONE.x * w, y: oy + (PHONE.y + PHONE.h / 2) * h - sh / 2, w: sw, h: sh, fh: PHONE.h * h, fy: oy + PHONE.y * h };
+  };
   const runShots = () => {
-    if (flashed || reduce) return; flashed = true;
-    setTimeout(() => $('#p-foto .flash').classList.add('go'), 700);
+    shotTimers.forEach(clearTimeout); shotTimers = []; $$('.fly,.pflash', pf).forEach(e => e.remove());
+    slots.forEach(sl => { sl.classList.remove('got'); sl.style.backgroundImage = ''; });
+    zg.classList.remove('show'); shotN.textContent = 0;
+    const fill = (i) => { slots[i].style.backgroundImage = `url('${SHOTS[i]}')`; slots[i].classList.add('got'); };
+    if (reduce) { slots.forEach((_, i) => fill(i)); shotN.textContent = TOTAL; zg.classList.add('show'); return; }
+    const at = (ms, fn) => shotTimers.push(setTimeout(fn, ms));
+    let t = 1300;
+    SHOTS.forEach((src, i) => {
+      at(t, () => {
+        const r = phoneRect(), pr = pf.getBoundingClientRect(), sr = slots[i].getBoundingClientRect();
+        const fl = document.createElement('i'); fl.className = 'pflash';
+        fl.style.cssText = `left:${r.x}px;top:${r.fy}px;width:${r.w}px;height:${r.fh}px`; pf.appendChild(fl);
+        fl.animate([{ opacity: .95 }, { opacity: 0 }], { duration: 380, easing: 'ease-out' }).onfinish = () => fl.remove();
+        const f = document.createElement('i'); f.className = 'fly';
+        f.style.cssText = `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;background-image:url('${src}')`; pf.appendChild(f);
+        const dx = sr.left - pr.left - r.x, dy = sr.top - pr.top - r.y, k = sr.width / r.w;
+        f.animate([{ transform: 'none', opacity: 0 }, { transform: 'scale(1.08)', opacity: 1, offset: .18 }, { transform: `translate(${dx}px,${dy}px) scale(${k})`, opacity: 1 }],
+          { duration: i < 2 ? 1100 : 800, easing: 'cubic-bezier(.55,0,.25,1)' }).onfinish = () => { fill(i); f.remove(); };
+        shotN.textContent = i + 1;
+      });
+      t += i < 2 ? 1150 : 480;
+    });
+    for (let n = SHOTS.length + 1; n <= TOTAL; n++) at(t + 400 + (n - SHOTS.length) * 34, () => { shotN.textContent = n; });
+    at(t + 500 + (TOTAL - SHOTS.length) * 34, () => zg.classList.add('show'));
   };
 
   /* P3 · real VGGT reconstruction */
