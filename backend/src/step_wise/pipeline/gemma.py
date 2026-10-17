@@ -13,7 +13,7 @@ from step_wise.pipeline.photos import canonical_box
 from step_wise.validation import OutputValidationFailure, validate_output
 
 
-def complete(settings, schema, prompt, content, validate=None, audit_directory=None):
+def complete(settings, schema, prompt, content, validate=None, audit_directory=None, reuse_directories=()):
     """One request, with one bounded schema repair; transport errors are never retried."""
     host = (urlsplit(settings.gemma_base_url).hostname or "").lower()
     hf_router = host == "router.huggingface.co"
@@ -25,6 +25,25 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
     headers = {"Authorization": "Bearer " + settings.hf_token} if hf_router else {}
     payload = {"model": request_model, "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": content}],
                "temperature": 0, "max_tokens": 4096, "response_format": {"type": "json_schema", "json_schema": {"name": schema.__name__, "schema": schema.model_json_schema(), "strict": True}}}
+    request_text = db.dumps(payload)
+    for source, source_job_id in reuse_directories:
+        try:
+            if (source / "request-1.json").read_text() != request_text:
+                continue
+            response_bytes = (source / "response-1.json").read_bytes()
+            record = json.loads(response_bytes)
+            if record.get("status") != "succeeded":
+                continue
+            value = schema.model_validate(record["validated_output"])
+            if validate:
+                validate(value)
+            attempt = {key: item for key, item in record.items() if key != "validated_output"}
+            attempt.update({"status": "reused", "origin_job_id": source_job_id,
+                            "origin_attempt": 1, "source_response_sha256": db.digest(response_bytes),
+                            "request_sha256": db.digest(request_text.encode())})
+            return value, [attempt]
+        except (OSError, ValueError, KeyError, TypeError):
+            continue  # Damaged or no longer valid audit evidence is never reused.
     attempts = []
     for attempt in range(2):
         if audit_directory:
@@ -72,6 +91,29 @@ def relevance(profile, fields):
     return "Profilo confermato: " + "; ".join(f"{name}={json.dumps(profile[name], ensure_ascii=False)}" for name in fields)
 
 
+def prior_batch_calls(context, batch_number):
+    """Audited calls from failed explicit attempts with this assessment and provider."""
+    job = context.get("job") or {}
+    if not job.get("id") or not job.get("assessment_id"):
+        return []
+    settings = context["settings"]
+    with db.connect(settings) as conn:
+        rows = conn.execute(
+            "SELECT id,output FROM jobs WHERE assessment_id=? AND kind='analyze' AND id<>? "
+            "AND status IN ('failed','interrupted') ORDER BY created_at DESC",
+            (job["assessment_id"], job["id"])).fetchall()
+    sources = []
+    for row in rows:
+        try:
+            if json.loads(row["output"] or "{}").get("requested_gemma") != settings.gemma_identity():
+                continue
+        except (ValueError, TypeError):
+            continue
+        sources.append((settings.data / "assessments" / job["assessment_id"] / "jobs" / row["id"] /
+                        "stages/gemma/calls" / f"batch-{batch_number}", row["id"]))
+    return sources
+
+
 def live_assess(context):
     settings = context["settings"]
     inputs = context["assessment_input"]
@@ -85,8 +127,9 @@ def live_assess(context):
     prompt = (Path(__file__).resolve().parents[1] / "prompts/assessment.txt").read_text()
     prompt += '\nSelect exactly one supplied guidance ID per hazard and only nonempty supplied profile_fields. Each evidence item contains photo_id and box_yxyx_1000: [ymin, xmin, ymax, xmax] normalized to 0..1000 in the supplied image, or null. Each coverage item contains photo_id, guidance_id, coverage and note; cite a supplied non-wildcard guidance ID, not a category label. The backend maps references to categories and boxes to upright original pixels, constructs suggested_action and profile_relevance, and attaches supported geometry. Do not return backend-owned fields or measurement IDs.'
     hazards, coverage, followups, calls = [], [], [], []
-    for index in range(0, len(prepared), 4):
-        batch = prepared[index:index + 4]
+    max_images = 1 if (urlsplit(settings.gemma_base_url).hostname or "").lower() == "router.huggingface.co" else 4
+    for index in range(0, len(prepared), max_images):
+        batch = prepared[index:index + max_images]
         ids = {p["photo_id"] for p in batch}
         metadata = {"profile": context["assessment_input"]["profile"], "photos": [{"photo_id": p["photo_id"], "upright_size": p["upright_size"], "input_transform": p["transform"], "role": p["role"]} for p in batch],
                     "candidates": [{key: value for key, value in c.items() if key != "provider_response"} for c in context["outputs"]["jev"]["candidates"] if c["photo_id"] in ids], "guidance": list(context["guidance"].values()), "measurements": [],
@@ -134,13 +177,16 @@ def live_assess(context):
                 raise OutputValidationFailure("Coverage cites an image outside this request")
             return resolved
 
-        proposal, attempts = complete(settings, VisualAssessmentProposal, prompt, content, materialize, context["directory"] / "stages/gemma/calls" / f"batch-{index // 4}")
+        batch_number = index // max_images
+        proposal, attempts = complete(settings, VisualAssessmentProposal, prompt, content, materialize,
+                                      context["directory"] / "stages/gemma/calls" / f"batch-{batch_number}",
+                                      prior_batch_calls(context, batch_number))
         value = materialize(proposal)
         hazards.extend(value.hazards)
         coverage.extend(value.coverage)
         followups.extend(value.follow_up_requests)
         calls.append({"photo_ids": sorted(ids), "image_sha256": [p["sha256"] for p in batch], "attempts": attempts,
-                      "validated_output": value.model_dump(mode="json"), "request_settings": {"temperature": 0, "max_tokens": 4096, "max_images": 4, "model_box_format": "yxyx_1000", "output_box_format": "upright_xyxy_pixels"},
+                      "validated_output": value.model_dump(mode="json"), "request_settings": {"temperature": 0, "max_tokens": 4096, "max_images": max_images, "model_box_format": "yxyx_1000", "output_box_format": "upright_xyxy_pixels"},
                       "prompt_sha256": db.digest(prompt.encode())})
     if not calls:
         raise ExternalFailure("No images were assessed")

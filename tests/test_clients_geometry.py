@@ -12,7 +12,7 @@ from PIL import Image
 from step_wise import db, worker
 from step_wise.config import ROOT, Settings
 from step_wise.demo import generate_controls, seed_case
-from step_wise.models import AssessmentOutput, Coverage, Evidence, Hazard, HazardProposal
+from step_wise.models import AssessmentOutput, Coverage, Evidence, Hazard, HazardProposal, VisualAssessmentProposal
 from step_wise.pipeline import gemma, geometry, jev, reconstruction
 from step_wise.pipeline.http import ExternalFailure, post_json
 from step_wise.validation import validate_hazard, validate_output
@@ -160,6 +160,51 @@ class ClientsGeometry(unittest.TestCase):
             with patch("step_wise.pipeline.gemma.post_json", return_value=body):
                 with self.assertRaises(ExternalFailure):
                     gemma.assess(context)
+
+    def test_huggingface_vision_sends_one_image_per_request(self):
+        with tempfile.TemporaryDirectory() as directory:
+            context = self.context(directory)
+            context["settings"] = replace(context["settings"], gemma_backend="http",
+                                          gemma_base_url="https://router.huggingface.co/v1", gemma_provider="novita")
+            context["assessment_input"]["external_processing_consent"] = True
+            context["assessment_input"]["clinical_external_processing_consent"] = True
+            empty = VisualAssessmentProposal(hazards=[], coverage=[], follow_up_requests=[])
+            with patch("step_wise.pipeline.gemma.complete", return_value=(empty, [])) as complete:
+                output = gemma.assess(context)
+            self.assertEqual(complete.call_count, len(context["photos"]))
+            self.assertTrue(all(len([item for item in call.args[3] if item["type"] == "image_url"]) == 1
+                                for call in complete.call_args_list))
+            self.assertTrue(all(call["request_settings"]["max_images"] == 1 for call in output["calls"]))
+
+    def test_explicit_retry_reuses_only_matching_validated_image_batches(self):
+        with tempfile.TemporaryDirectory() as directory:
+            context = self.context(directory)
+            settings = replace(context["settings"], gemma_backend="http",
+                               gemma_base_url="https://router.huggingface.co/v1", gemma_provider="novita",
+                               hf_token="synthetic-secret-for-test-only")
+            context["settings"] = settings
+            context["assessment_input"]["external_processing_consent"] = True
+            context["assessment_input"]["clinical_external_processing_consent"] = True
+            body = {"model": settings.gemma_model, "choices": [{"finish_reason": "stop", "message": {
+                "content": json.dumps({"hazards": [], "coverage": [], "follow_up_requests": []})}}]}
+            with patch("step_wise.pipeline.gemma.post_json", side_effect=[body, ExternalFailure("HTTP 504")]) as post:
+                with self.assertRaises(ExternalFailure):
+                    gemma.assess(context)
+                self.assertEqual(post.call_count, 2)
+            with db.connect(settings, write=True) as conn:
+                conn.execute("UPDATE jobs SET status='failed',output=? WHERE id=?",
+                             (db.dumps({"requested_gemma": settings.gemma_identity()}), context["job"]["id"]))
+            retry = {**context, "job": {**context["job"], "id": db.uid()}}
+            retry["directory"] = settings.data / "assessments" / context["job"]["assessment_id"] / "jobs" / retry["job"]["id"]
+            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+                output = gemma.assess(retry)
+                self.assertEqual(post.call_count, 1)
+            self.assertEqual([call["attempts"][0]["status"] for call in output["calls"]], ["reused", "succeeded"])
+            self.assertEqual(output["calls"][0]["attempts"][0]["origin_job_id"], context["job"]["id"])
+            changed = {**retry, "settings": replace(settings, gemma_provider="deepinfra")}
+            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+                gemma.assess(changed)
+                self.assertEqual(post.call_count, 2)
 
     def test_cross_scene_bounds_guidance_and_unknown_profile(self):
         with tempfile.TemporaryDirectory() as directory:

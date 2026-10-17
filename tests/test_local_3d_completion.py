@@ -314,7 +314,7 @@ class QueuedLocal3D(unittest.TestCase):
             self.assertEqual(result.status_code, 200, result.text)
 
         calls = []
-        def model(settings, schema, prompt, content, validate=None, audit_directory=None):
+        def model(settings, schema, prompt, content, validate=None, audit_directory=None, reuse_directories=()):
             calls.append(schema.__name__)
             if schema.__name__ == "ClinicalDraft":
                 claims = [{"field": field, "value": value, "status": status, "source_document_id": document_id,
