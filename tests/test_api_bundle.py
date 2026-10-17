@@ -11,13 +11,11 @@ from step_wise.api import create_app
 from step_wise import db, worker
 from step_wise.config import Settings
 
-
 def picture():
     image = Image.new("RGB", (32, 24), "#c1ad8d")
     stream = io.BytesIO()
     image.save(stream, "PNG")
     return stream.getvalue()
-
 
 class BundleTests(unittest.TestCase):
     def calibrate_fixture_scenes(self, settings, aid, rooms, scales):
@@ -50,9 +48,9 @@ class BundleTests(unittest.TestCase):
 
     def test_unregistered_rooms_remain_separate_in_house_bundle(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, _, rooms = self.make_two_rooms(client)
 
                 bundle = client.get(f"/api/assessments/{aid}/bundle")
@@ -68,9 +66,9 @@ class BundleTests(unittest.TestCase):
 
     def test_reviewer_link_connects_room_transforms_and_delete_restores_partial_house(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, photo_ids, rooms = self.make_two_rooms(client)
                 from_scene, to_scene = (room["id"] for room in rooms)
                 self.calibrate_fixture_scenes(settings, aid, rooms, (1, 2))
@@ -107,9 +105,9 @@ class BundleTests(unittest.TestCase):
 
     def test_bundle_preserves_producer_coverage_and_latest_reviewer_correction(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, _, _ = self.make_two_rooms(client)
                 queued = client.post(f"/api/assessments/{aid}/analyze", json={
                     "expected_input_revision": 3, "expected_review_revision": 0})
@@ -136,9 +134,9 @@ class BundleTests(unittest.TestCase):
 
     def test_room_links_require_both_calibrations_and_explicit_metric_coordinates(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, photo_ids, rooms = self.make_two_rooms(client)
                 path = f"/api/assessments/{aid}/scene-links/{rooms[0]['id']}/{rooms[1]['id']}"
                 payload = {"expected_input_revision": 3, "expected_review_revision": 0,
@@ -158,9 +156,9 @@ class BundleTests(unittest.TestCase):
 
     def test_legacy_links_need_review_and_changed_or_removed_calibrations_disconnect_rooms(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, photo_ids, rooms = self.make_two_rooms(client)
                 self.calibrate_fixture_scenes(settings, aid, rooms, (1, 2))
                 a, b = (room["id"] for room in rooms)
@@ -209,9 +207,9 @@ class BundleTests(unittest.TestCase):
 
     def test_empty_rooms_leave_current_bundle_and_worker_but_preserve_history(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, photo_ids, rooms = self.make_two_rooms(client)
                 queued = client.post(f"/api/assessments/{aid}/analyze", json={
                     "expected_input_revision": 3, "expected_review_revision": 0})
@@ -250,9 +248,9 @@ class BundleTests(unittest.TestCase):
 
     def test_metric_scale_requires_independent_holdout_and_is_reversible(self):
         with tempfile.TemporaryDirectory() as temporary:
-            settings = Settings(data=Path(temporary), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(temporary))
             with TestClient(create_app(settings)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 aid, photo_ids, rooms = self.make_two_rooms(client)
                 scene_id = rooms[0]["id"]
                 with db.connect(settings, write=True) as conn:
@@ -311,7 +309,6 @@ class BundleTests(unittest.TestCase):
                 self.assertEqual(conn.execute("SELECT version FROM schema_version").fetchone()[0], 3)
                 self.assertEqual(db.assessment(conn, aid)["input_json"], db.dumps({"label": "Legacy", "profile": {"description": "Test"}}))
                 self.assertIsNotNone(conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='scene_links'").fetchone())
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -65,7 +65,6 @@ CREATE TABLE IF NOT EXISTS reports(
  pdf_asset_id TEXT REFERENCES assets(id), status TEXT NOT NULL DEFAULT 'draft', approver TEXT, released_at TEXT,
  family_hash TEXT UNIQUE, family_expires_at TEXT, revoked INTEGER NOT NULL DEFAULT 0
 );
-CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, expires_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS clinical_documents(
  id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
  asset_id TEXT NOT NULL REFERENCES assets(id), format TEXT NOT NULL CHECK(format IN ('pdf','text')),

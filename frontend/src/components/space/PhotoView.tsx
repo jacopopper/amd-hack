@@ -27,7 +27,7 @@ export default function PhotoView({ photos, hazards, photoId, selectedId, panelO
   return (
     <div className={`absolute inset-0 flex items-center justify-center bg-[#0a0b0d] pb-36 pl-24 pt-20 transition-[padding] ${panelOpen ? "pr-[460px]" : "pr-24"}`}>
       <div className="relative max-h-full" style={{ aspectRatio: `${photo.width} / ${photo.height}` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element -- protected same-origin asset behind the session cookie */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API image */}
         <img src={photo.asset_url} alt={`Foto ${index + 1} della stanza`} className="max-h-[calc(100vh-14rem)] w-full rounded-lg object-contain" />
         <svg viewBox={`0 0 ${photo.width} ${photo.height}`} className="absolute inset-0 h-full w-full">
           {regions.map(({ h, box }) => {

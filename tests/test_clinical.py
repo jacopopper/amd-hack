@@ -15,15 +15,13 @@ from step_wise.config import Settings
 from step_wise.models import AssessmentInput, DocumentClaim, ClinicalDraft, Profile
 from step_wise.pipeline import clinical
 
-
 class ClinicalWorkflow(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.settings = Settings(data=Path(self.tmp.name), reviewer_password="fixture-testing-password",
+        self.settings = Settings(data=Path(self.tmp.name),
                                  gemma_backend="http", gemma_base_url="https://router.huggingface.co/v1",
                                  gemma_provider="test-provider", hf_token="synthetic-token")
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", "fixture-testing-password")
 
     def tearDown(self):
         self.client.close()
@@ -69,7 +67,6 @@ class ClinicalWorkflow(unittest.TestCase):
         current = self.client.get(f"/api/assessments/{aid}").json()
         source_url = current["clinical_documents"][0]["asset_url"]
         self.assertEqual(self.client.get(source_url).content, text.encode())
-        self.assertEqual(self.client.get(source_url, auth=("", "")).status_code, 401)
         self.assertFalse(current["inputs"]["clinical_external_processing_consent"])
         blocked = self.client.post(f"/api/assessments/{aid}/profile/draft", json={
             "expected_input_revision": current["input_revision"], "expected_review_revision": current["review_revision"],
@@ -155,7 +152,6 @@ class ClinicalWorkflow(unittest.TestCase):
                         {key: value for key, value in claim.items() if key != "source_document_id"}):
             with self.assertRaises(ValueError):
                 ClinicalDraft.model_validate({"claims": [changed]})
-
 
 class SchemaMigration(unittest.TestCase):
     def test_v1_database_keeps_assessment_rows_when_upgraded(self):

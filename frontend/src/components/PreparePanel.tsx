@@ -107,7 +107,7 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
             <div className="mt-2 grid grid-cols-5 gap-2">
               {r.photos.map((p) => (
                 <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg bg-white/5 ring-1 ring-white/10">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- protected same-origin asset behind the session cookie */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API image */}
                   <img src={p.asset_url} alt="" className="h-full w-full object-cover" />
                   {p.role === "detail" && <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 text-[10px]">dettaglio</span>}
                   <button disabled={busy} onClick={() => remove(p.id)} className="absolute right-1 top-1 hidden h-6 w-6 place-items-center rounded-md bg-black/70 text-white/80 hover:text-white group-hover:grid" aria-label="Rimuovi la foto">

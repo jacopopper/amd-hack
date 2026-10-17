@@ -1,23 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import { effective } from "@/lib/hazards";
 import { priorityMeta, statusLabel } from "@/lib/labels";
 import type { Assessment, Findings, Listing, Priority } from "@/lib/types";
-import { useAuthGuard } from "@/lib/useAuthGuard";
 import Brand from "@/components/Brand";
 
 type Row = { assessment: Assessment; findings: Findings | null };
 
 export default function PatientsPage() {
-  const router = useRouter();
-  const guard = useAuthGuard();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [query, setQuery] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -30,8 +27,8 @@ export default function PatientsPage() {
           })),
         ),
       );
-    })().catch(guard);
-  }, [guard]);
+    })().catch((e) => setError((e as Error).message));
+  }, []);
 
   const visible = rows?.filter((r) => r.assessment.inputs.label.toLowerCase().includes(query.toLowerCase()));
 
@@ -47,16 +44,6 @@ export default function PatientsPage() {
           <Link href="/pazienti/nuovo" className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90">
             <Plus className="h-4 w-4" /> Nuovo paziente
           </Link>
-          <button
-            title="Esci"
-            onClick={async () => {
-              await api("/logout", { method: "POST" }).catch(() => undefined);
-              router.replace("/login");
-            }}
-            className="grid h-10 w-10 place-items-center rounded-xl text-white/50 hover:bg-white/10 hover:text-white"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
         </div>
       </header>
 
@@ -64,7 +51,8 @@ export default function PatientsPage() {
         <h1 className="text-3xl font-semibold tracking-tight">Pazienti</h1>
         <p className="mt-1 text-white/50">Le case da valutare prima del rientro a domicilio.</p>
 
-        {rows === null && <p className="mt-10 text-sm text-white/50">Caricamento…</p>}
+        {error && <p className="mt-10 text-sm text-[var(--urgent)]" role="alert">{error}</p>}
+        {rows === null && !error && <p className="mt-10 text-sm text-white/50">Caricamento…</p>}
         {visible?.length === 0 && <p className="mt-10 text-sm text-white/50">Nessun paziente.</p>}
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {visible?.map(({ assessment: a, findings: f }) => {
@@ -77,7 +65,7 @@ export default function PatientsPage() {
               <Link key={a.id} href={`/pazienti?id=${a.id}`} className="group block">
                 <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 transition group-hover:ring-white/30">
                   {cover && (
-                    // eslint-disable-next-line @next/next/no-img-element -- protected same-origin asset behind the session cookie
+                    // eslint-disable-next-line @next/next/no-img-element -- same-origin API image
                     <img src={cover.asset_url} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />

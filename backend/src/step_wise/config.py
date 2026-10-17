@@ -50,8 +50,6 @@ class Settings:
     data: Path = ROOT / "data"
     database: Path | None = None
     worker_lock_path: Path | None = None
-    reviewer_user: str = "reviewer"
-    reviewer_password: str = ""
     reviewer_identity: str = "Team member — simulated reviewer"
     recon_backend: str = "fixture"
     gemma_backend: str = "fixture"
@@ -128,8 +126,6 @@ class Settings:
             data=Path(_project_env("DATA", str(ROOT / "data"))).resolve(),
             database=Path(_project_env("DATABASE")).resolve() if _project_env("DATABASE") else None,
             worker_lock_path=Path(_project_env("WORKER_LOCK")).resolve() if _project_env("WORKER_LOCK") else None,
-            reviewer_user=os.getenv("REVIEWER_USER", "reviewer"),
-            reviewer_password=os.getenv("REVIEWER_PASSWORD", ""),
             reviewer_identity=os.getenv("REVIEWER_IDENTITY", "Team member — simulated reviewer"),
             recon_backend=os.getenv("RECON_BACKEND", "vggt" if local_checkpoint else "fixture"),
             gemma_backend=os.getenv("GEMMA_BACKEND", "http" if os.getenv("HF_TOKEN") else "fixture"),

@@ -83,6 +83,8 @@ def init(settings):
                 statement = ""
         if statement.strip():
             raise RuntimeError("Incomplete database schema statement")
+        # Retire password-login sessions from existing v3 databases.
+        conn.execute("DROP TABLE IF EXISTS sessions")
         if [r[0] for r in conn.execute("SELECT version FROM schema_version")] != [3]:
             raise RuntimeError("Unsupported database schema; back up database and assets before migrating")
 

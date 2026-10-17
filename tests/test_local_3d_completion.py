@@ -24,19 +24,16 @@ from step_wise.pipeline.http import ExternalFailure
 from step_wise.pipeline.registration import bind_metric_link, compose_rooms
 from step_wise.validation import validate_hazard
 
-
 def picture():
     stream = io.BytesIO()
     Image.new("RGB", (96, 64), "#abbd92").save(stream, "PNG")
     return stream.getvalue()
 
-
 class QueuedLocal3D(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.settings = Settings(data=Path(self.temporary.name), reviewer_password="fixture-testing-password")
+        self.settings = Settings(data=Path(self.temporary.name))
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", self.settings.reviewer_password)
 
     def tearDown(self):
         self.client.close()
@@ -120,7 +117,6 @@ class QueuedLocal3D(unittest.TestCase):
         self.assertEqual(manifest.status_code, 200)
         self.assertEqual(manifest.json()["source_photos"][0]["sha256"],
                          self.assessment(aid)["photos"][0]["upright_sha256"])
-        self.assertEqual(self.client.get(room.manifest_url, auth=("", "")).status_code, 401)
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/reports", json=self.revisions(aid)).status_code, 409)
         with patch.object(reconstruction, "reconstruct", wraps=reconstruction.reconstruct) as recon:
             _, retried, stages = self.analyze(aid)
@@ -214,7 +210,7 @@ class QueuedLocal3D(unittest.TestCase):
         self.settings = replace(self.settings, max_assessment_bytes=1200, max_file_bytes=10_000)
         self.client.close()
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", self.settings.reviewer_password)
+
         created = self.client.post("/api/assessments", json={
             "label": "Synthetic limits", "profile": {"description": "Fictional"},
             "profile_confirmed": True, "staged_data_confirmed": True, "processing_consent": True})
@@ -270,7 +266,6 @@ class QueuedLocal3D(unittest.TestCase):
         spec.loader.exec_module(smoke)
         client, settings = self.client, self.settings
         class Session:
-            auth = None
             def request(self, method, url, **kwargs):
                 kwargs.pop("allow_redirects", None)
                 kwargs.pop("timeout", None)
@@ -278,12 +273,11 @@ class QueuedLocal3D(unittest.TestCase):
                     job = worker.claim(settings)
                     if job:
                         worker.process_job(settings, job)
-                return client.request(method, url, auth=self.auth, **kwargs)
+                return client.request(method, url, **kwargs)
             def post(self, url, **kwargs):
                 return self.request("POST", url, **kwargs)
-        with patch.dict(os.environ, {"REVIEWER_PASSWORD": self.settings.reviewer_password, "REVIEWER_USER": "reviewer"}), \
-                patch.object(smoke.requests, "Session", return_value=Session()), \
-                patch.object(smoke.requests, "get", side_effect=lambda url, **kw: client.get(url, auth=None)), \
+        with patch.object(smoke.requests, "Session", return_value=Session()), \
+                patch.object(smoke.requests, "get", side_effect=lambda url, **kw: client.get(url)), \
                 redirect_stdout(io.StringIO()):
             aid = smoke.run("http://testserver", "fixture")
         self.assertEqual(self.assessment(aid)["status"], "released")
@@ -297,7 +291,7 @@ class QueuedLocal3D(unittest.TestCase):
                                 gemma_provider="synthetic-provider", hf_token="synthetic-test-token")
         self.client.close()
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", self.settings.reviewer_password)
+
         aid = self.create()
         text = "Uses a walker. Previous hip fracture is healed. No current hip fracture."
         uploaded = self.client.post(f"/api/assessments/{aid}/clinical-documents",
@@ -367,7 +361,6 @@ class QueuedLocal3D(unittest.TestCase):
             self.assertEqual(report["status"], "draft")
             network.assert_not_called()
         self.assertEqual(calls, ["ClinicalDraft", "VisualAssessmentProposal", "DraftOutput"])
-
 
 class Local3DContracts(unittest.TestCase):
     def test_room_scales_are_applied_before_rotated_translated_composition(self):
@@ -506,7 +499,6 @@ class Local3DContracts(unittest.TestCase):
             settings = Settings(data=directory / "runtime")
             record, code = cases.run_case(settings, path, "fixture")
             self.assertEqual((record["status"], code), ("review_ready", 0), record)
-
 
 if __name__ == "__main__":
     unittest.main()

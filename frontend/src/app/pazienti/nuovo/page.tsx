@@ -6,7 +6,6 @@ import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { api, json } from "@/lib/api";
 import type { Profile } from "@/lib/types";
-import { useAuthGuard } from "@/lib/useAuthGuard";
 import Brand from "@/components/Brand";
 
 const field = "mt-1.5 w-full rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-[15px] text-white outline-none ring-1 ring-white/10 transition placeholder:text-white/30 focus:bg-white/10 focus:ring-white/30";
@@ -23,7 +22,6 @@ function Check({ name, required, children }: { name: string; required?: boolean;
 // Intake: who the person is and what they need. Photos are added on the next screen.
 export default function NewPatientPage() {
   const router = useRouter();
-  const guard = useAuthGuard();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -59,7 +57,7 @@ export default function NewPatientPage() {
       });
       router.replace(`/pazienti?id=${id}`);
     } catch (e) {
-      if (!guard(e)) setError((e as Error).message);
+      setError((e as Error).message);
       setBusy(false);
     }
   }

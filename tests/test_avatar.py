@@ -19,12 +19,10 @@ from step_wise.pipeline import avatar, avatar_blender
 AVATAR_MESHES = ("low-poly", "eyebrow001", "eyelashes01", "teeth_base", "tongue01", "bob02",
                  "female_elegantsuit01", "shoes02")
 
-
 def png_bytes(width=64, height=96):
     stream = io.BytesIO()
     Image.new("RGBA", (width, height), (0, 0, 0, 0)).save(stream, "PNG")
     return stream.getvalue()
-
 
 def glb_bytes(doc):
     payload = json.dumps(doc).encode()
@@ -32,11 +30,9 @@ def glb_bytes(doc):
     return (struct.pack("<4sII", b"glTF", 2, 20 + len(payload)) +
             struct.pack("<I4s", len(payload), b"JSON") + payload)
 
-
 def avatar_glb(*node_names):
     return glb_bytes({"asset": {"version": "2.0"}, "meshes": [{"name": name} for name in AVATAR_MESHES],
                       "skins": [{}], "nodes": [{"name": name} for name in node_names]})
-
 
 class AvatarWrapperTests(unittest.TestCase):
     def test_live_wrapper_uses_blender_without_forwarding_service_secrets(self):
@@ -165,13 +161,11 @@ class AvatarWrapperTests(unittest.TestCase):
             self.assertEqual(generate(context), {"status": "succeeded"})
         create.assert_called_once_with(context)
 
-
 class AvatarApiTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.settings = Settings(data=Path(self.temporary.name), reviewer_password="fixture-testing-password")
+        self.settings = Settings(data=Path(self.temporary.name))
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", self.settings.reviewer_password)
 
     def tearDown(self):
         self.client.close()
@@ -226,10 +220,8 @@ class AvatarApiTests(unittest.TestCase):
                          (200, "image/png", png_bytes()))
         glb = self.client.get(value.glb_url)
         self.assertEqual((glb.status_code, glb.headers["content-type"], glb.content[:4]), (200, "model/gltf-binary", b"glTF"))
-        self.assertEqual(self.client.get(value.preview_url, auth=("", "")).status_code, 401)
         bundle = AssessmentBundle.model_validate(self.client.get(f"/api/assessments/{aid}/bundle").json())
         self.assertEqual(bundle.avatar, value)
-
 
 if __name__ == "__main__":
     unittest.main()

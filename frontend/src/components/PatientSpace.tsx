@@ -7,7 +7,6 @@ import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-rea
 import { api, json } from "@/lib/api";
 import { byPriority, effective, sceneOf } from "@/lib/hazards";
 import type { Anchor, Assessment, Findings, Modes, Report, Scene } from "@/lib/types";
-import { useAuthGuard } from "@/lib/useAuthGuard";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
 import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
 import AvatarViewer from "@/components/space/AvatarViewer";
@@ -41,7 +40,6 @@ function ToolButton({ active, disabled, title, onClick, children }: { active?: b
 // The patient’s home: preparation while in draft, then the 3D review space.
 export default function PatientSpace({ id }: { id: string }) {
   const router = useRouter();
-  const guard = useAuthGuard();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [findings, setFindings] = useState<Findings | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -78,9 +76,9 @@ export default function PatientSpace({ id }: { id: string }) {
   }, []);
 
   useEffect(() => {
-    const initial = setTimeout(() => load().catch((e) => guard(e) || setError((e as Error).message)));
+    const initial = setTimeout(() => load().catch((e) => setError((e as Error).message)));
     return () => clearTimeout(initial);
-  }, [load, guard]);
+  }, [load]);
 
   useEffect(() => {
     if (!assessment || !ACTIVE.includes(assessment.status)) return;
@@ -192,7 +190,7 @@ export default function PatientSpace({ id }: { id: string }) {
   const scene = scenes.find((s) => s.id === sceneId);
   const roomPhotos = assessment.photos.filter((p) => p.scene_id === sceneId);
   const unassessed = [...new Set(findings.coverage.filter((c) => c.coverage !== "visible").map((c) => c.category))];
-  const calibrated = scene?.scale_state === "calibrated";
+  const calibrated = scene?.scale_state === "metric_calibrated";
 
   return (
     <div className="relative h-full overflow-hidden bg-[#0a0b0d] text-white">

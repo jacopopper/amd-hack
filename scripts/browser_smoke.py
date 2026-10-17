@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Optional isolated headless browser check of the Next.js reviewer app. Requires playwright, no external model calls."""
 import argparse
-import os
 import re
 
 from playwright.sync_api import expect, sync_playwright
@@ -24,10 +23,9 @@ def run(base_url, executable=None):
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
 
-        page.goto(base_url + "/login")
-        page.screenshot(path=str(output / "desktop-login.png"), full_page=True)
-        page.locator("input[name=password]").fill(os.environ["REVIEWER_PASSWORD"])
-        page.get_by_role("button", name="Accedi").click()
+        page.goto(base_url + "/")
+        page.wait_for_load_state("networkidle")
+        page.screenshot(path=str(output / "desktop-patients.png"), full_page=True)
         page.get_by_role("link", name="Nuovo paziente").click()
 
         page.locator("input[name=label]").fill("Browser smoke · profilo fittizio")

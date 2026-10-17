@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Explicit API integration check. Starts no services and performs no implicit model work."""
 import argparse
-import os
 import time
 from pathlib import Path
 
@@ -23,7 +22,6 @@ def run(base_url, mode, case_path=None, allow_external=False):
         profile = {"description": "Fictional smoke profile, not a real patient.", "mobility_aid": "walker",
                    "relevant_history": "Fictional healed previous hip fracture; no current hip fracture stated."}
     session = requests.Session()
-    session.auth = (os.getenv("REVIEWER_USER", "reviewer"), os.environ["REVIEWER_PASSWORD"])
 
     def call(method, path, **kwargs):
         response = session.request(method, base_url.rstrip("/") + "/api" + path,
@@ -127,9 +125,7 @@ def run(base_url, mode, case_path=None, allow_external=False):
     # Never print/store plaintext family capabilities in smoke logs.
     public = requests.get(base_url + "/api/family/" + capability["token"] + "?format=pdf", timeout=30)
     assert public.status_code == 200 and public.content.startswith(b"%PDF")
-    asset_url = assessment()["photos"][0]["asset_url"]
-    assert requests.get(base_url + asset_url, timeout=10).status_code == 401
-    assert requests.get(base_url + f"/api/reports/{rid}", timeout=10).status_code == 401
+    assert requests.get(base_url + "/api/family/invalid", timeout=10).status_code == 404
     print(f"PASS: {mode} API lifecycle; assessment={aid}; simulated review; real-model quality={'pending' if mode == 'fixture' else 'requires manual inspection'}")
     return aid
 

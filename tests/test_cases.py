@@ -12,7 +12,6 @@ from step_wise.api import create_app
 from step_wise.config import ROOT, Settings
 from step_wise.demo import generate_controls, load_case, seed_case
 
-
 class Cases(unittest.TestCase):
     def test_queued_provider_change_is_rejected_before_network_and_invalidates_only_model_cache(self):
         generate_controls()
@@ -83,7 +82,7 @@ class Cases(unittest.TestCase):
     def test_report_snapshot_rerun_and_frozen_baseline(self):
         generate_controls()
         with tempfile.TemporaryDirectory() as directory:
-            settings = Settings(data=Path(directory), reviewer_password="fixture-testing-password")
+            settings = Settings(data=Path(directory))
             path = ROOT / "demo/cases/room-001.json"
             first, _ = cases.run_case(settings, path, "fixture")
             local = cases.run_settings(settings, cases.find_run(settings, first["id"]))
@@ -93,7 +92,7 @@ class Cases(unittest.TestCase):
                         pass
             aid = first["assessment_id"]
             with TestClient(create_app(local)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 findings = client.get(f"/api/assessments/{aid}/findings").json()
                 for h in findings["hazards"]:
                     a = client.get(f"/api/assessments/{aid}").json()
@@ -104,7 +103,7 @@ class Cases(unittest.TestCase):
             self.assertEqual(reported["stages"]["report"]["status"], "succeeded")
             local = cases.run_settings(settings, cases.find_run(settings, reported["id"]))
             with TestClient(create_app(local)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 a = client.get(f"/api/assessments/{aid}").json()
                 response = client.post(f"/api/reports/{a['reports'][0]['id']}/release", json={"expected_input_revision": a["input_revision"], "expected_review_revision": a["review_revision"]})
                 self.assertEqual(response.status_code, 200, response.text)
@@ -114,7 +113,7 @@ class Cases(unittest.TestCase):
             self.assertEqual(baseline["mode"], "fixture")
             self.assertEqual(cases.check_run(local.data)[1], 0)
             with TestClient(create_app(local)) as client:
-                client.auth = ("reviewer", settings.reviewer_password)
+
                 self.assertEqual(client.delete(f"/api/assessments/{aid}").status_code, 409)
             self.assertEqual(cases.check_run(local.data)[1], 0)
             (local.data / "index.html").write_text("tampered")

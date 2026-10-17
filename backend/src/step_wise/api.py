@@ -2,35 +2,26 @@ import base64
 import hashlib
 import json
 import re
-import secrets
 import logging
 from functools import lru_cache
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from pydantic import Field
 
 from step_wise import db
 from step_wise.config import Settings
-from step_wise.models import AssessmentBundle, AssessmentEdit, AvatarArtifact, AssessmentInput, CalibrationInput, Hazard, ProfileConfirmation, ReviewInput, Revisions, SceneLinkInput, StrictModel
+from step_wise.models import AssessmentBundle, AssessmentEdit, AvatarArtifact, AssessmentInput, CalibrationInput, Hazard, ProfileConfirmation, ReviewInput, Revisions, SceneLinkInput
 from step_wise.pipeline.photos import ingest
 from step_wise.pipeline import clinical
 from step_wise.pipeline.registration import bind_metric_link, compose_rooms
 from step_wise.pipeline.http import ExternalFailure
 from step_wise.pipeline.reports import release
 from step_wise.validation import validate_hazard
-
-
-class Login(StrictModel):
-    username: str = Field(max_length=200)
-    password: str = Field(max_length=500)
 
 
 def current_findings(conn, job_id, output):
@@ -93,33 +84,19 @@ def page_script_hashes(path, modified_ns):
 
 def create_app(settings=None):
     settings = settings or Settings.from_env()
-    if len(settings.reviewer_password) < 12:
-        raise RuntimeError("Set REVIEWER_PASSWORD to at least 12 characters before starting the API")
     db.init(settings)
     logging.getLogger("uvicorn.error").info("Step Wise execution modes: %s", settings.modes())
     app = FastAPI(title="Step Wise", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.settings = settings
     app.add_middleware(UploadLimit, limit=settings.max_file_bytes + 512 * 1024)
-    basic = HTTPBasic(auto_error=False)
 
-    def credentials_ok(username, password):
-        return secrets.compare_digest(username.encode(), settings.reviewer_user.encode()) & secrets.compare_digest(password.encode(), settings.reviewer_password.encode())
-
-    async def reviewer(request: Request, credentials: HTTPBasicCredentials | None = Depends(basic)):
-        if credentials and credentials_ok(credentials.username, credentials.password):
-            return settings.reviewer_identity
-        cookie = request.cookies.get("step_wise_session")
-        if cookie:
-            with db.connect(settings) as conn:
-                session = conn.execute("SELECT 1 FROM sessions WHERE token_hash=? AND expires_at>?", (db.digest(cookie.encode()), db.now())).fetchone()
-            if session:
-                return settings.reviewer_identity
-        raise HTTPException(401, "Reviewer login required")
+    def reviewer():
+        return settings.reviewer_identity
 
     @app.middleware("http")
     async def boundary(request: Request, call_next):
         if request.method in {"POST", "PATCH", "PUT", "DELETE"}:
-            if (settings.data / "baseline.json").exists() and request.url.path not in {"/api/login", "/api/logout"}:
+            if (settings.data / "baseline.json").exists():
                 return JSONResponse({"error": "Frozen baseline is read-only; create a new case attempt"}, status_code=409)
             origin = request.headers.get("origin")
             same_origin = not origin or (urlsplit(origin).scheme, urlsplit(origin).netloc) == (request.url.scheme, request.url.netloc) or origin.rstrip("/") in settings.allowed_origins
@@ -168,24 +145,6 @@ def create_app(settings=None):
     @app.get("/api/health")
     def health():
         return {"status": "ok", "schema_version": 3, "modes": settings.modes(), "staged_data_only": True}
-
-    @app.post("/api/login")
-    def login(payload: Login, response: Response, request: Request):
-        if not credentials_ok(payload.username, payload.password):
-            raise HTTPException(401, "Invalid login")
-        token = secrets.token_urlsafe(32)
-        with db.connect(settings, write=True) as conn:
-            conn.execute("DELETE FROM sessions WHERE expires_at<=?", (db.now(),))
-            conn.execute("INSERT INTO sessions VALUES(?,?)", (db.digest(token.encode()), (datetime.now(timezone.utc) + timedelta(hours=8)).isoformat()))
-        response.set_cookie("step_wise_session", token, httponly=True, secure=request.url.scheme == "https", samesite="strict", max_age=8 * 3600)
-        return {"reviewer": settings.reviewer_identity}
-
-    @app.post("/api/logout")
-    def logout(request: Request, response: Response, identity=Depends(reviewer)):
-        with db.connect(settings, write=True) as conn:
-            conn.execute("DELETE FROM sessions WHERE token_hash=?", (db.digest(request.cookies.get("step_wise_session", "").encode()),))
-        response.delete_cookie("step_wise_session")
-        return {"status": "ok"}
 
     @app.post("/api/assessments", status_code=201)
     def create(payload: AssessmentInput, identity=Depends(reviewer)):

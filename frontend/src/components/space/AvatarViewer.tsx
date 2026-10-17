@@ -34,7 +34,7 @@ export default function AvatarViewer({ assessmentId, refreshKey }: { assessmentI
           {showModel ? (
             <AvatarModel url={value.glb_url!} />
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element -- protected same-origin asset behind the session cookie
+            // eslint-disable-next-line @next/next/no-img-element -- same-origin API image
             <img src={value.preview_url!} width={value.preview_width ?? undefined} height={value.preview_height ?? undefined} alt="Figura illustrativa della persona" className="h-full w-full object-contain" />
           )}
         </div>

@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Step Wise reviewer app
 
-## Getting Started
+This Next.js app is the reviewer UI for the Step Wise FastAPI backend. It supports fictional patient intake, room-photo upload, queued analysis, evidence review, draft inspection, and controlled report release. See the [root README](../README.md) for backend setup and the fixture/live model boundary.
 
-First, run the development server:
+For local development, start the API and worker as described in the root README, allowing the UI origin on the API. Then run:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+STEP_WISE_BACKEND=http://127.0.0.1:8000 npm run dev -- --port 3010
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://127.0.0.1:3010> to use the reviewer app. The development server proxies `/api` to `STEP_WISE_BACKEND`; the API needs `STEP_WISE_ALLOWED_ORIGINS=http://127.0.0.1:3010` when started. There is no reviewer login, so only run it with the API bound to a trusted local interface.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For the API-served production build:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run typecheck
+npm run build
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The build exports static files to `out/`. FastAPI serves them on its own origin alongside `/api`; Docker builds and copies the same export. The UI does not contain model credentials. Its 3D room view loads the point-cloud asset from the reviewer API and retains photo evidence when metric scale or 3D hazard anchors are unavailable.

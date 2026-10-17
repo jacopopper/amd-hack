@@ -4,7 +4,7 @@
 
 **Local 3D backend · 17 October 2026.** The [local implementation plan](docs/piano-3d-locale.md) is implemented with 78 passing backend tests, cited clinical intake, typed review bundles, selective queued-stage reuse, scale-aware metric room links/calibration and MPFB2 avatars. An experimental four-screenshot run completed the local API/worker → RTX 5090/VGGT → live Jev → Hugging Face/Novita Gemma → MPFB2 → simulated review → unreleased live-Gemma PDF draft workflow. The screenshots are watermarked listing images, not a guided staged capture; real capture, quality review and AMD validation remain open.
 
-The saved [live-run artifacts](demo/artifacts/listing-2026-10-17/) include the colored room point cloud, raw VGGT arrays, avatar GLB, rendered preview and unreleased draft. A separate [avatar style demo](demo/artifacts/avatar-style-2026-10-17/) shows the updated illustrative figure and walker.
+The saved [live-run artifacts](demo/artifacts/listing-2026-10-17/) include the colored room point cloud, raw VGGT arrays, avatar GLB, rendered preview and unreleased draft. A separate [avatar style demo](demo/artifacts/avatar-style-2026-10-17/) shows the updated illustrative figure and walker. The current reviewer app is the Next.js static export in [`frontend/`](frontend/), served by FastAPI.
 
 Staged-data prototype implementing [the implementation plan](step-wise-implementation-plan.md). The CPU path runs from upload through a persisted worker, evidence review, Italian HTML/PDF draft and restricted family release. **The default demo's findings and point clouds are synthetic fixtures.** The experimental full live backend run and separate model checks are recorded in [runtime evidence](docs/runtime.md); no AMD result or real clinical approval is claimed. The historical [Jev evaluation](eval/jev/README.md) is preserved separately.
 
@@ -21,8 +21,6 @@ python3 -m venv .venv
 npm --prefix frontend ci
 npm --prefix frontend run typecheck
 npm --prefix frontend run build
-export REVIEWER_USER=reviewer
-export REVIEWER_PASSWORD='choose-a-long-random-local-password'
 .venv/bin/python -m step_wise.cli init
 .venv/bin/python -m step_wise.cli seed-controls
 ```
@@ -34,9 +32,9 @@ Run the API and worker in separate terminals with the same environment and local
 .venv/bin/python -m step_wise.worker
 ```
 
-Open <http://localhost:8000>. Log in as the configured reviewer, choose “Nuovo paziente”, enter a fictional profile and upload `data/demo/synthetic-1.png` and `synthetic-2.png` to a room. Their controls are deliberately generated drawings, not overlapping photographs. In fixture mode, arbitrary uploads receive the same synthetic control findings, **not an assessment of their contents**. Review every finding (confirm, edit, dismiss or ask to verify), prepare the report, inspect it, then release it from “Rivedi e rilascia”. Reviewer identity defaults to “Team member — simulated reviewer”. A high-entropy family link grants only the released HTML/PDF, expires after seven days and is shown once. Deleting an assessment revokes access; released assessments cannot otherwise be edited.
+Open <http://localhost:8000>, choose “Nuovo paziente”, enter a fictional profile and upload `data/demo/synthetic-1.png` and `synthetic-2.png` to a room. Their controls are deliberately generated drawings, not overlapping photographs. In fixture mode, arbitrary uploads receive the same synthetic control findings, **not an assessment of their contents**. Review every finding (confirm, edit, dismiss or ask to verify), prepare the report, inspect it, then release it from “Rivedi e rilascia”. The fixed audit identity defaults to “Team member — simulated reviewer”. A high-entropy family link serves only the released HTML/PDF, expires after seven days and is shown once. Deleting an assessment revokes access; released assessments cannot otherwise be edited.
 
-The reviewer app in `frontend/` is Next.js. `npm --prefix frontend run build` writes a static export to `frontend/out`, which the API serves on its own origin; exported pages get a CSP that admits only their inline bootstrap scripts by hash. For live development run `STEP_WISE_BACKEND=http://127.0.0.1:8000 npm --prefix frontend run dev -- --port 3010` and start the API with `STEP_WISE_ALLOWED_ORIGINS=http://127.0.0.1:3010`; the dev server proxies `/api` so the session cookie stays same-origin.
+The reviewer app in `frontend/` is Next.js. `npm --prefix frontend run build` writes a static export to `frontend/out`, which the API serves on its own origin; exported pages get a CSP that admits only their inline bootstrap scripts by hash. For live development run `STEP_WISE_BACKEND=http://127.0.0.1:8000 npm --prefix frontend run dev -- --port 3010` and start the API with `STEP_WISE_ALLOWED_ORIGINS=http://127.0.0.1:3010`; the dev server proxies `/api` to the local backend.
 
 ## CPU verification
 
@@ -46,7 +44,7 @@ python3 eval/jev/evaluate.py self-check
 .venv/bin/python scripts/smoke_e2e.py --mode fixture --base-url http://localhost:8000
 ```
 
-The smoke command uses the fixed `room-001` manifest through normal HTTP/queue endpoints and records a **simulated** approve/edit/reject/defer review. It checks rejected-action exclusion, unknown scale, stale release and private assets. It leaves its released demonstration assessment available for inspection. API and worker must already be running. It never prints the family token.
+The smoke command uses the fixed `room-001` manifest through normal HTTP/queue endpoints and records a **simulated** approve/edit/reject/defer review. It checks rejected-action exclusion, unknown scale, stale release and family-link access. It leaves its released demonstration assessment available for inspection. API and worker must already be running. It never prints the family token.
 
 Optional browser QA uses a fresh headless browser, without a real user profile:
 
@@ -100,7 +98,7 @@ docker compose -f compose.yaml up --build
 
 API restart preserves the queue. Stop the normal worker before running a case or benchmark against its shared worker/GPU lock. A worker holds one file lock; exclusive restart marks abandoned running jobs interrupted. Retry submits a new analyze request and reuses compatible, intact stages from that assessment. Heartbeat age never authorizes a second worker. Local SQLite WAL and filesystem storage are intended for one host. Back up database and assets together before schema changes. Schema v1/v2 databases migrate transactionally to v3 without rewriting released reports.
 
-The API requires reviewer authentication for assessment/media/review routes, rejects cross-origin mutations, uses HttpOnly SameSite session cookies and marks private responses `no-store`. Bind loopback for local development. `STEP_WISE_PORT` changes the Compose host port (default 8000). Before any hosted demo, use HTTPS, suppress/redact proxy access logs (family paths contain capabilities), keep worker/model services internal, complete the hosted-demo access and deployment audit. This prototype is not ready for real patient intake.
+The reviewer API has no login or password: any client that can reach its host can read and change assessments and assets. Bind it to loopback for local development; Compose does so by default. `STEP_WISE_PORT` changes the Compose host port (default 8000). Cross-origin mutation checks and `no-store` responses remain, but do not restrict same-host access. Family links still require a released, unrevoked, unexpired token. Before any hosted demo, put the reviewer API behind an access control layer, use HTTPS, suppress/redact proxy access logs (family paths contain capabilities), keep worker/model services internal, and complete the deployment audit. This prototype is not ready for real patient intake.
 
 ## Remaining scope
 

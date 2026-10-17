@@ -21,19 +21,16 @@ from step_wise.pipeline.photos import canonical_box, decode, prepared_image
 from step_wise.pipeline.photos import ingest
 from step_wise.pipeline.reports import validate_draft
 
-
 def picture():
     stream = io.BytesIO()
     Image.new("RGB", (960, 640), "#adbea1").save(stream, "PNG")
     return stream.getvalue()
 
-
 class Workflow(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
-        self.settings = Settings(data=Path(self.temporary.name), reviewer_password="fixture-testing-password")
+        self.settings = Settings(data=Path(self.temporary.name))
         self.client = TestClient(create_app(self.settings))
-        self.client.auth = ("reviewer", "fixture-testing-password")
 
     def tearDown(self):
         self.client.close()
@@ -97,6 +94,7 @@ class Workflow(unittest.TestCase):
         report = self.report(aid)
         accepted = report["snapshot"]["accepted"]
         self.assertEqual([h["priority"] for h in accepted], ["urgent", "important"])
+        self.assertTrue(all(h["reviewer"] == self.settings.reviewer_identity for h in accepted))
         self.assertEqual({h["id"] for h in accepted}, {h["id"] for h in findings["hazards"][:2]})
         self.assertEqual(len(report["snapshot"]["deferred"]), 1)
         html = self.client.get(report["html_url"]).text
@@ -122,13 +120,13 @@ class Workflow(unittest.TestCase):
         self.assertEqual(family.get(f"/api/family/{token}").status_code, 404)
         with db.connect(self.settings, write=True) as conn:
             conn.execute("UPDATE reports SET family_expires_at=? WHERE id=?", (expiry, report["id"]))
-        self.assertEqual(family.get(report["pdf_url"]).status_code, 401)
-        self.assertEqual(family.get(self.get(aid)["photos"][0]["asset_url"]).status_code, 401)
+        self.assertEqual(family.get(f"/api/family/{token}wrong").status_code, 404)
         self.assertEqual(family.get(f"/api/family/{token}?format=../source").status_code, 422)
         self.assertEqual(self.client.post(f"/api/reports/{report['id']}/release", json=self.revisions(aid)).status_code, 409)
         payload = {**self.get(aid)["inputs"], "expected_input_revision": self.get(aid)["input_revision"]}
         self.assertEqual(self.client.patch(f"/api/assessments/{aid}", json=payload).status_code, 409)
         released = self.client.get(f"/api/reports/{report['id']}").json()
+        self.assertEqual(released["approver"], self.settings.reviewer_identity)
         self.assertFalse(released["revoked"])
         self.assertTrue(released["family_expires_at"])
         self.assertEqual(self.client.post(f"/api/reports/{report['id']}/revoke").status_code, 200)
@@ -199,14 +197,14 @@ class Workflow(unittest.TestCase):
         self.assertEqual(model.call_count, 1)
         self.assertEqual(self.client.get(f"/api/jobs/{jid}").json()["status"], "succeeded")
 
-    def test_upload_queue_auth_and_restart_boundaries(self):
+    def test_upload_queue_and_restart_boundaries_without_login(self):
         aid = self.create()
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("x.jpg", b"not an image")}).status_code, 422)
         self.assertEqual(self.get(aid)["photos"], [])
         self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("../../secret.png", picture())})
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/analyze", json=self.revisions(aid)).status_code, 202)
         restarted = TestClient(create_app(self.settings))
-        restarted.auth = ("reviewer", self.settings.reviewer_password)
+
         self.assertEqual(restarted.get(f"/api/assessments/{aid}").json()["status"], "queued")
         restarted.close()
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/analyze", json=self.revisions(aid)).status_code, 409)
@@ -220,11 +218,21 @@ class Workflow(unittest.TestCase):
             worker.recover(self.settings)
         self.assertEqual(self.client.get(f"/api/jobs/{job['id']}").json()["status"], "interrupted")
         self.assertEqual(self.get(aid)["status"], "failed")
-        unauth = TestClient(self.client.app)
-        self.assertEqual(unauth.get(f"/api/assessments/{aid}").status_code, 401)
+        fresh_client = TestClient(self.client.app)
+        self.assertEqual(fresh_client.get(f"/api/assessments/{aid}").status_code, 200)
         self.assertEqual(self.client.post("/api/assessments", headers={"Origin": "https://attacker.example"}, json={}).status_code, 403)
         self.assertEqual(self.client.get("/api/unknown").status_code, 404)
-        unauth.close()
+        fresh_client.close()
+
+    def test_existing_login_sessions_are_removed_without_losing_assessments(self):
+        aid = self.create()
+        with db.connect(self.settings, write=True) as conn:
+            conn.execute("CREATE TABLE sessions(token_hash TEXT PRIMARY KEY, expires_at TEXT NOT NULL)")
+            conn.execute("INSERT INTO sessions VALUES('old-token-hash', '2099-01-01T00:00:00+00:00')")
+        db.init(self.settings)
+        with db.connect(self.settings) as conn:
+            self.assertIsNone(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='sessions'").fetchone())
+            self.assertEqual(db.assessment(conn, aid)["id"], aid)
 
     def test_new_photo_invalidates_external_photo_consent_until_reacknowledged(self):
         created = self.client.post("/api/assessments", json={
@@ -284,10 +292,11 @@ class Workflow(unittest.TestCase):
     def test_configured_dev_origin_may_mutate_but_others_may_not(self):
         settings = replace(self.settings, allowed_origins=("http://127.0.0.1:3010",))
         with TestClient(create_app(settings)) as client:
-            client.auth = ("reviewer", "fixture-testing-password")
-            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3010"}).status_code, 200)
-            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3011"}).status_code, 403)
-            self.assertEqual(client.post("/api/logout", headers={"Origin": "http://127.0.0.1:3010", "Sec-Fetch-Site": "cross-site"}).status_code, 403)
+            payload = {"label": "Origin test", "profile": {"description": "Fixture"}, "profile_confirmed": True,
+                       "staged_data_confirmed": True, "processing_consent": True}
+            self.assertEqual(client.post("/api/assessments", json=payload, headers={"Origin": "http://127.0.0.1:3010"}).status_code, 201)
+            self.assertEqual(client.post("/api/assessments", json=payload, headers={"Origin": "http://127.0.0.1:3011"}).status_code, 403)
+            self.assertEqual(client.post("/api/assessments", json=payload, headers={"Origin": "http://127.0.0.1:3010", "Sec-Fetch-Site": "cross-site"}).status_code, 403)
 
     def test_backend_change_cannot_turn_a_queued_fixture_into_live_calls(self):
         aid = self.create()
@@ -324,7 +333,6 @@ class Workflow(unittest.TestCase):
             self.assertEqual(main(["reset", "--assessment", seeded]), 0)
         self.assertEqual(self.client.get(f"/api/assessments/{normal}").status_code, 200)
         self.assertEqual(self.client.get(f"/api/assessments/{seeded}").status_code, 404)
-
 
 class Contracts(unittest.TestCase):
     def test_guidance_ids_and_source_integrity(self):
@@ -374,7 +382,6 @@ class Contracts(unittest.TestCase):
         item.update(hazard_id="accepted", suggested_action="Costa 200 euro")
         with self.assertRaises(ValueError):
             validate_draft({"title": "Piano d’azione per la casa", "items": [item]}, accepted)
-
 
 if __name__ == "__main__":
     unittest.main()
