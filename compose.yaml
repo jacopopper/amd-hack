@@ -3,9 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
-    ports: ["127.0.0.1:${SAFE_HOME_PORT:-8000}:8000"]
+    ports: ["127.0.0.1:${STEP_WISE_PORT:-${SAFE_HOME_PORT:-8000}}:8000"]
     environment: &environment
-      SAFE_HOME_DATA: /data
+      STEP_WISE_DATA: /data
       REVIEWER_USER: ${REVIEWER_USER:-reviewer}
       REVIEWER_PASSWORD: ${REVIEWER_PASSWORD:?Set REVIEWER_PASSWORD in your shell or local .env}
       REVIEWER_IDENTITY: ${REVIEWER_IDENTITY:-Team member — simulated reviewer}
@@ -28,4 +28,5 @@ services:
       api:
         condition: service_healthy
 volumes:
+  # Keep the persisted volume key so existing deployments retain their assessments.
   safe-home-data:

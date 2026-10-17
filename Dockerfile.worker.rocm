@@ -12,5 +12,5 @@ COPY guidance/ guidance/
 COPY demo/ demo/
 COPY scripts/ scripts/
 RUN python -m pip install --no-deps -e .
-ENV PYTHONUNBUFFERED=1 SAFE_HOME_DATA=/data
-CMD ["python", "-m", "safe_home.worker"]
+ENV PYTHONUNBUFFERED=1 STEP_WISE_DATA=/data
+CMD ["python", "-m", "step_wise.worker"]

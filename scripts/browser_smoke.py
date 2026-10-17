@@ -6,7 +6,7 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-from safe_home.config import ROOT
+from step_wise.config import ROOT
 
 
 def run(base_url, executable=None):

@@ -4,8 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from safe_home import cases, db, worker
-from safe_home.config import ROOT, Settings
+from step_wise import cases, db, worker
+from step_wise.config import ROOT, Settings
 
 
 def main():

@@ -2,12 +2,13 @@ import json
 import base64
 import math
 import time
+from pathlib import Path
 
-from safe_home import db
-from safe_home.config import ROOT
-from safe_home.models import Candidate, Evidence
-from safe_home.pipeline.http import ExternalFailure, post_json
-from safe_home.pipeline.photos import canonical_box
+from step_wise import db
+from step_wise.config import ROOT
+from step_wise.models import Candidate, Evidence
+from step_wise.pipeline.http import ExternalFailure, post_json
+from step_wise.pipeline.photos import canonical_box
 
 
 ENDPOINT = "https://api.typesafe.ai/v1/systemone"
@@ -15,15 +16,13 @@ MODEL = "jev-1.14.0"
 
 
 def request_payload(image_bytes, entries):
-    """The Jev boundary accepts pixels and public guidance only, never a profile/context."""
+    """Use the approved open-ended question without sending profile or checklist context."""
     reference = db.uid()
-    questions = {}
-    for entry in entries:
-        category = entry["category"]
-        questions[category + "_present"] = {"type": "noul", "instructions": f"Is {entry['question']} visibly present in `photo`? Judge only visible evidence."}
-        questions[category + "_box"] = {"type": "box", "instructions": f"Smallest visible-extent box around one explicit target: {entry['question']}. This does not establish presence."}
-        questions[category + "_coverage"] = {"type": "choice", "instructions": f"Can the relevant area for {entry['question']} be inspected in `photo`?", "criteria": {"visible": "The relevant area is visible.", "partial": "Only part of the relevant area can be inspected.", "obscured": "The area is hidden by other objects.", "out_of_frame": "The relevant area is outside the photo.", "unknown": "Coverage cannot be determined."}}
-    questions["rug_attachment"] = {"type": "choice", "instructions": "For a visible rug, is underside attachment actually visible? A flat top cannot establish fixation.", "criteria": {"fixed": "Attachment is visibly present.", "loose": "The underside is exposed and visibly unattached.", "unknown": "Attachment cannot be inspected or no rug is visible."}}
+    question = (Path(__file__).resolve().parents[1] / "prompts/jev-general.txt").read_text().strip()
+    questions = {
+        "hazard_review": {"type": "noul", "instructions": question},
+        "hazard_region": {"type": "box", "instructions": "If the answer is yes, draw a tight box around the single visible feature that most warrants review. If none does, return an empty box."},
+    }
     return {"model": MODEL, "state": {"photo": reference}, "assets": {reference: {"type": "image", "format": "jpg", "data_base64": base64.b64encode(image_bytes).decode()}}, "questions": questions}
 
 
@@ -31,25 +30,20 @@ def interpret(body, photo, prepared, entries):
     if body.get("model") != MODEL:
         raise ValueError("Unexpected Jev model version")
     answers = body["answers"]
-    result = []
-    for entry in entries:
-        name = entry["category"]
-        present, box, coverage = (answers[name + suffix] for suffix in ("_present", "_box", "_coverage"))
-        if present.get("type") != "noul" or box.get("type") != "box" or coverage.get("type") != "choice":
-            raise ValueError("Invalid Jev response types")
-        score = present["noul"]
-        if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
-            raise ValueError("Invalid presence score")
-        coords = [box["box"][k] for k in ("left", "top", "right", "bottom")]
-        mapped = canonical_box(coords, prepared["transform"], prepared["upright_size"])
-        presence = "present" if score >= .75 else "absent" if score <= .25 else "unknown"
-        attachment = answers["rug_attachment"]["choice"] if name == "rug" else "unknown"
-        candidate = Candidate(photo_id=photo["id"], category=name, question_id=entry["id"], presence=presence, coverage=coverage["choice"],
-                              evidence=Evidence(photo_id=photo["id"], box=mapped) if mapped and presence == "present" else None,
-                              attachment=attachment, producer=MODEL, provenance="live",
-                              provider_response={"presence": present, "box": box, "coverage": coverage, "attachment": answers["rug_attachment"] if name == "rug" else None})
-        result.append(candidate.model_dump(mode="json"))
-    return result
+    present, box = answers["hazard_review"], answers["hazard_region"]
+    if present.get("type") != "noul" or box.get("type") != "box":
+        raise ValueError("Invalid Jev response types")
+    score = present["noul"]
+    if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
+        raise ValueError("Invalid presence score")
+    coords = [box["box"][k] for k in ("left", "top", "right", "bottom")]
+    mapped = None if coords == [0, 0, 0, 0] else canonical_box(coords, prepared["transform"], prepared["upright_size"])
+    presence = "present" if score >= .75 else "absent" if score <= .25 else "unknown"
+    candidate = Candidate(photo_id=photo["id"], category="potential_home_safety_hazard", question_id="general-home-safety",
+                          presence=presence, coverage="unknown",
+                          evidence=Evidence(photo_id=photo["id"], box=mapped) if mapped and presence == "present" else None,
+                          producer=MODEL, provenance="live", provider_response={"presence": present, "box": box})
+    return [candidate.model_dump(mode="json")]
 
 
 def fixture(context):

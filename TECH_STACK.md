@@ -1,64 +1,63 @@
-# Safe Home — Tech Stack
+# Step Wise — stack e flusso backend
 
-Proposed hackathon stack, based on [SAFE_HOME.md](SAFE_HOME.md). Status: 16 October 2026.
+**Direzione corrente:** sviluppo del backend sul PC con NVIDIA RTX 5090 Laptop; VGGT locale; Gemma tramite Hugging Face; Jev tramite API esterna. L’interfaccia web esistente non rientra nel prossimo ciclo. Il piano backend dettagliato e aggiornato è in [`docs/piano-3d-locale.md`](docs/piano-3d-locale.md).
 
-## Current implementation
+## Cosa funziona già
 
-The repository now includes an authenticated FastAPI/SQLite application, persisted single-worker queue, React/three.js interface, bounded photo preparation, labelled synthetic fixtures, professional/simulated review controls, guarded Italian HTML/PDF release, and an isolated case runner. CPU containers have passed the fixture HTTP smoke workflow. Jev/Gemma HTTP and VGGT adapters are implemented with offline contract checks; real model execution, supported real pins and AMD deployment are still unvalidated. See [runtime evidence and pending gates](docs/runtime.md). The original public-photo Jev evaluation remains separate and unchanged.
+Il repository contiene una API FastAPI autenticata, archivio SQLite, coda worker persistente, preparazione delle foto, casi di fixture dichiarati, revisione professionale, rilascio protetto e generazione HTML/PDF in italiano. Le verifiche CPU e fixture riportate in [`docs/runtime.md`](docs/runtime.md) non equivalgono al flusso reale.
 
-The [Jev smoke test](eval/jev/README.md) matched 42/42 presence labels and localized 8/8 positive targets above IoU 0.5 in each of two passes; median API latency was 1.61 seconds. This small, selected test does not establish end-to-end hazard accuracy.
+VGGT ha già ricostruito una singola foto dell’utente sulla RTX 5090, esportando camera, mappa e nuvola di punti. Jev è stato provato separatamente sulla stessa foto con uno screening generale: la prova ha proposto il tappetino come rischio d’inciampo. Nessuna inferenza Gemma e nessun flusso live completo sono ancora verificati. Il piccolo evaluation set Jev con 42/42 presenze e 8/8 localizzazioni corrette sopra IoU 0,5 resta una valutazione selezionata e separata, non una stima dell’accuratezza di sistema: [report Jev](eval/jev/README.md).
 
-## Planned data flow
+## Flusso backend previsto
 
 ```mermaid
 flowchart TD
-    Photos["Overlapping home photos"] --> Intake["FastAPI: create assessment"]
-    Profile["Confirmed patient profile"] --> Intake
-    Intake -->|photos| Prep["Worker: normalize photos and record image transforms"]
-    Prep -->|prepared photos only| Jev["Jev API - external TypeSafe service"]
-    Jev -->|presence, coverage and boxes| Gate["Worker: gate unsupported candidates"]
-    Prep -->|full overlapping photo set| VGGT["VGGT on AMD: camera poses, depth and point cloud"]
-    VGGT --> Geometry["Worker: calibrate geometry and locate findings"]
-    Gate -->|candidate boxes| Geometry
-    Reference["Known-size marker or measured reference"] --> Geometry
-    Gate -->|candidates and coverage| Assess["Gemma on AMD: verify evidence and personalize priorities"]
-    Geometry -->|supported measurements and optional 3D pins| Assess
-    Prep -->|room photos and crops| Assess
-    Intake -->|patient profile| Assess
-    Guidance["Versioned guidance JSON"] --> Assess
-    Assess -->|proposed findings and source IDs| Validate["Backend: validate evidence, measurement and guidance references"]
-    Validate --> Review["Professional reviews findings with photos and 3D scene"]
-    Review -->|accepted findings and confirmed profile| Draft["Same Gemma endpoint: draft Italian action plan"]
-    Guidance --> Draft
-    Draft --> Release["Backend validates report; professional approves release"]
-    Release --> Report["Family: web report and WeasyPrint PDF"]
+    Photos["Foto raggruppate per stanza"] --> Intake["API: upload, permessi e consensi"]
+    Report["Referto medico"] --> Extract["Estrazione locale e riferimenti di pagina"]
+    Extract --> Profile["Bozza del profilo funzionale"]
+    Profile --> Confirm["Conferma del revisore"]
+    Intake --> Prep["Worker: preparazione e trasformazioni foto"]
+    Prep --> Jev["Jev esterno: domanda generale"]
+    Prep --> VGGT["VGGT locale sulla RTX 5090"]
+    Prep --> Gemma["Gemma via Hugging Face: esame delle evidenze"]
+    Confirm --> Gemma
+    Jev --> Findings["Proposte con foto, box e provenienza"]
+    Gemma --> Findings
+    VGGT --> Geometry["Geometria, scala e registrazione stanze"]
+    Findings --> Geometry
+    Confirm --> Avatar["Profilo funzionale e avatar schematico"]
+    Geometry --> Bundle["Pacchetto JSON e artefatti 3D"]
+    Avatar --> Bundle
+    Bundle --> Review["Revisione professionale"]
+    Review --> ReportOut["Flusso report e rilascio esistente"]
 ```
 
-SQLite stores profiles, job states, findings and review decisions; a mounted volume stores photos, evidence, reconstruction outputs and reports. Patient profiles stay on our infrastructure. Findings without reliable 3D locations remain available as photo evidence; dimensions stay unknown without validated scale. The branches show data dependencies; heavy GPU stages are scheduled sequentially.
+Referto e consensi rimangono separati dalle foto inviate a Jev. Gemma può ricevere solo dati essenziali con consenso esplicito, tramite Hugging Face; il token resta sul backend. Profilo, rischi e avatar mantengono riferimenti alla fonte e ai campi confermati. Le geometrie senza calibrazione dichiarano unità relative. Le stanze senza foto di collegamento restano componenti separate, non una casa allineata per supposizione.
 
-## Planned stack
+## Componenti
 
-| Layer | Technology | Role |
+| Area | Tecnologia attuale o prevista | Scopo |
 |---|---|---|
-| Web app | React, Vite, TypeScript, Tailwind CSS | Photo/profile intake, processing status, professional review |
-| 3D viewer | three.js | Point cloud and clickable hazard pins |
-| API | Python, FastAPI, Pydantic | Assessments, uploads, validated findings, review and reports |
-| Jobs | One Python background worker; progress polling | Persist job states in SQLite; process one assessment at a time |
-| Persistence | SQLite and a mounted filesystem volume | Structured records; photos, evidence and reconstruction files |
-| Photo preparation | Pillow, OpenCV | Orientation, format normalization and quality checks |
-| Visual candidates | TypeSafe API, pinned `jev-1.14.0` | Checklist responses and candidate bounding boxes |
-| Reconstruction | VGGT with PyTorch on ROCm | Camera poses, depth and point cloud |
-| Geometry | OpenCV ArUco, Open3D, NumPy | Scale calibration, measurements and supported 3D anchors |
-| Assessment and drafting | Target: `google/gemma-4-31B-it`, BF16, vLLM on ROCm | Verify evidence, personalize priorities and draft Italian action plans |
-| Guidance | Versioned JSON checklist with source URLs | Explicit guidance selection by hazard type |
-| PDF | HTML templates and WeasyPrint | Export the professionally approved report |
-| Deployment | Docker Compose: `api`, `worker`, `vllm` | API serves the built frontend; target one AMD Instinct MI300X |
+| API | Python, FastAPI, Pydantic | Intake per stanza/documenti, job, output e asset autenticati |
+| Coda | Worker Python esistente, un job per volta | Esecuzione CPU e scheduling del lavoro GPU locale |
+| Persistenza | SQLite e filesystem protetto | Revisioni strutturate, input, scene e report |
+| Preparazione | Pillow, OpenCV già presenti | Orientamento, normalizzazione foto e coordinate di ritorno |
+| Screening visivo | Jev, servizio esterno già integrato | Candidato generale, box, copertura e riferimento alla foto |
+| Modello linguistico | Gemma 4 31B IT via Hugging Face Inference Providers | Evidenze strutturate e profilo funzionale limitato alle fonti |
+| Ricostruzione | VGGT-1B, PyTorch CUDA | Pose, profondità e nuvola; ambiente GPU e pesi già verificati per la prova singola |
+| Geometria | NumPy e componenti OpenCV esistenti | Associazioni multivista, calibrazione esplicita e registrazione delle stanze |
+| Avatar | MPFB2/Blender headless, profilo JSON, export GLB | Figura umanoide parametrica e ausili confermati; sorgenti e consenso nel JSON privato |
+| Report | Template HTML/PDF e flusso professionale esistente | Proposta del sistema, revisione e rilascio controllati |
 
-## Boundaries and validation
+## Confini e condizioni
 
-- Jev is an external API. Send prepared photos only; keep patient profiles on our infrastructure. Gate boxes and dependent attributes on object presence.
-- Gemma and VGGT are intended AMD workloads. GPU access, checkpoint compatibility, image/JSON inference, latency and peak memory remain unvalidated. Pin runtime versions after smoke tests; cap vLLM memory to leave reconstruction headroom.
-- Measurements require validated physical scale. Preserve image evidence when reconstruction or 3D placement fails; leave unsupported dimensions unknown.
-- Validate evidence, measurement and guidance references in the backend. A professional approves findings and the final report before release.
+- La domanda per Jev è generale e non suggerisce oggetti o categorie che potrebbero non esserci. Jev propone candidati; non certifica tutti i pericoli presenti.
+- Il referto può sostenere una bozza del profilo. Il reviewer conferma i fatti prima che personalizzino un rischio o l’avatar. La storia di una lesione non indica automaticamente una condizione attuale.
+- La singola foto della cucina dimostra che il modello può produrre una stima 3D locale. Non dimostra una scena coerente, ancore multivista, misure metriche o ricostruzione della casa.
+- Una o più stanze si uniscono solo tramite acquisizioni di passaggio, viste sovrapposte o riferimenti geometrici sufficienti. ArUco fissa la scala, ma non allinea da solo origine e orientamento di due stanze.
+- Quando una box riguarda un cavo o un oggetto sottile a terra, la profondità dei pixel può essere quella del pavimento. Se non si può verificare la geometria, il backend conserva la prova in foto e omette l’ancora 3D.
+- API, modelli e validatore devono preservare privacy, ownership, riferimenti di provenienza, revision guards e rilascio professionale già presenti.
 
-First integration target: one overlapping room-photo set and a fictional profile through findings, reliable 3D pins, review and an Italian report. Video, SAM 2 and Evolus integration are deferred.
+## Fuori dall’ambito corrente
+
+Frontend, NVIDIA-to-AMD portability, vLLM su AMD, video e Gaussian Splatting. Queste direzioni sono future e non configurano l’implementazione richiesta ora.

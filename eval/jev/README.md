@@ -28,7 +28,7 @@ Artifacts: [annotated gallery](results-2026-10-16/gallery.html), [machine-readab
 
 ## Method
 
-This smoke test evaluates `jev-1.14.0` for Safe Home using six public Wikimedia photos and one crop of the same tidy-room photo. No patient information is transmitted. The test has 42 shared binary observations, 14 shared choice questions (13 scored; one ambiguous floor-view label excluded), and 11 target-presence/box pairs per pass. Two passes check repeatability on identical image bytes and prompts.
+This smoke test evaluates `jev-1.14.0` for Step Wise using six public Wikimedia photos and one crop of the same tidy-room photo. No patient information is transmitted. The test has 42 shared binary observations, 14 shared choice questions (13 scored; one ambiguous floor-view label excluded), and 11 target-presence/box pairs per pass. Two passes check repeatability on identical image bytes and prompts.
 
 Labels and approximate visible-extent reference boxes were recorded in `manifest.json` before any model calls. They come from a single assistant visual inspection, not clinician annotation. Labels, image titles, filenames, source URLs, and reference coordinates are not included in API requests. The manifest includes image checksums and the script snapshots it into the results directory.
 

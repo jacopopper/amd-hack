@@ -10,10 +10,10 @@ from importlib.metadata import version
 from dataclasses import replace
 from pathlib import Path
 
-from safe_home import db, worker
-from safe_home.config import ROOT, Settings
-from safe_home.demo import load_case, seed_case
-from safe_home.pipeline.geometry import box_overlap
+from step_wise import db, worker
+from step_wise.config import ROOT, Settings
+from step_wise.demo import load_case, seed_case
+from step_wise.pipeline.geometry import box_overlap
 
 
 def find_run(settings, run_id):
@@ -68,24 +68,33 @@ def related_stages(stage):
 
 def run_case(settings, case_path, mode, stage=None, reuse_id=None):
     case, dataset, selected, profile = load_case(case_path)
+    prerequisites, invalidated = related_stages(stage) if stage else (set(), set())
+    scope = ({stage} | (invalidated & {"geometry", "avatar"})) if stage else set(worker.job_stages("analyze"))
     if stage and not reuse_id and stage != "prepare":
-        raise db.Conflict(f"Missing prerequisites; run: python -m safe_home.cli case run {shlex.quote(str(case_path))} --mode {mode}")
+        raise db.Conflict(f"Missing prerequisites; run: python -m step_wise.cli case run {shlex.quote(str(case_path))} --mode {mode}")
     with worker.worker_lock(settings):
         run_id = db.uid()
         directory = settings.data / "case-runs" / case["id"] / run_id
         directory.mkdir(parents=True)
         local = run_settings(settings, directory)
-        local = replace(local, recon_backend="fixture" if mode == "fixture" else "vggt", gemma_backend="fixture" if mode == "fixture" else "http", jev_enabled=False if mode == "fixture" else settings.jev_enabled)
+        local = replace(local, recon_backend="fixture" if mode == "fixture" else "vggt",
+                        gemma_backend="fixture" if mode == "fixture" else "http",
+                        avatar_backend="fixture" if mode == "fixture" else settings.avatar_backend,
+                        jev_enabled=False if mode == "fixture" else settings.jev_enabled)
         input_hash = db.digest(db.dumps({"case": case, "dataset": dataset, "profile": profile}).encode())
-        visual_hash = db.digest(db.dumps({"photos": selected, "ids": case["photo_ids"], "scene_label": case["scene_label"]}).encode())
+        visual_hash = db.digest(db.dumps({"photos": selected, "ids": case["photo_ids"], "scene_label": case.get("scene_label")}).encode())
         record = {"schema_version": 1, "id": run_id, "case": case, "case_path": str(case_path), "mode": mode, "modes": local.modes(),
                   "input_hash": input_hash, "visual_input_hash": visual_hash, "created_at": db.now(), "reuse_run": reuse_id, "selected_stage": stage, "status": "running"}
-        record["runtime"] = {"python": sys.version, "platform": platform.platform(), "packages": {name: version(name) for name in ("safe-home", "Pillow", "numpy", "pydantic", "requests")}, "model": local.gemma_model, "model_revision": local.gemma_revision}
+        record["runtime"] = {"python": sys.version, "platform": platform.platform(), "packages": {name: version(name) for name in ("step-wise", "Pillow", "numpy", "pydantic", "requests")}, "model": local.gemma_model, "model_revision": local.gemma_revision}
         worker.atomic_json(directory / "run.json", record)
         manifests = {}
         try:
-            if mode == "live" and dataset["data_kind"] != "staged_capture":
-                record.update({"status": "blocked", "error": "Real overlapping staged capture and compatible AMD runtime are unavailable. Synthetic controls cannot validate live quality."})
+            if mode == "live" and dataset["data_kind"] not in {"staged_capture", "single_image_experiment", "multi_room_capture"}:
+                record.update({"status": "blocked", "error": "Live mode requires a declared real capture; synthetic controls cannot validate model quality."})
+                return finish(directory, record, {}, 3)
+            sends_photos = "gemma" in scope or ("jev" in scope and local.jev_enabled)
+            if mode == "live" and sends_photos and not case.get("consents", {}).get("external_processing_consent", False):
+                record.update({"status": "blocked", "error": "Live mode requires the case manifest to record explicit external photo-processing consent."})
                 return finish(directory, record, {}, 3)
             prior = find_run(settings, reuse_id) if reuse_id else None
             if prior:
@@ -104,8 +113,11 @@ def run_case(settings, case_path, mode, stage=None, reuse_id=None):
                 with db.connect(local, write=True) as conn:
                     previous = db.assessment(conn, record["assessment_id"])
                     previous_input = json.loads(previous["input_json"])
-                    if previous_input["profile"] != profile:
-                        previous_input["profile"] = profile
+                    desired = {**previous_input, "profile": profile,
+                               **{name: case.get("consents", {}).get(name, False) for name in
+                                  ("external_processing_consent", "clinical_external_processing_consent")}}
+                    if desired != previous_input:
+                        previous_input = desired
                         conn.execute("UPDATE assessments SET input_json=?,input_revision=input_revision+1,review_revision=0,analysis_job_id=NULL WHERE id=?", (db.dumps(previous_input), record["assessment_id"]))
                     conn.execute("UPDATE assessments SET status=? WHERE id=?", ("review_ready" if stage == "report" else "draft", record["assessment_id"]))
                     conn.execute("UPDATE jobs SET status='interrupted' WHERE status IN ('running','queued')")
@@ -114,15 +126,16 @@ def run_case(settings, case_path, mode, stage=None, reuse_id=None):
                 record["assessment_id"], record["photo_mapping"] = seed_case(local, case_path)
             with db.connect(local) as conn:
                 assessment = db.assessment(conn, record["assessment_id"])
-            jid = db.enqueue(local, assessment["id"], "report" if stage == "report" else "analyze", assessment["input_revision"], assessment["review_revision"])
+            jid = db.enqueue(local, assessment["id"], "report" if stage == "report" else "analyze", assessment["input_revision"], assessment["review_revision"], stage_scope=scope)
             job = worker.claim(local)
             record["job_id"] = jid
             context = worker.load_context(local, job, directory=directory)
-            prerequisites, invalidated = related_stages(stage) if stage else (set(), set())
-            for name in worker.STAGES if stage == "report" else worker.STAGES[:5]:
+            for name in worker.job_stages("report" if stage == "report" else "analyze"):
                 if name in invalidated:
-                    manifests[name] = {"stage": name, "status": "stale", "reason": f"Rerun of {stage}; rebuild dependent outputs"}
-                    continue
+                    dependencies_ready = all(manifests.get(dep, {}).get("status") == "succeeded" for dep in worker.DEPENDENCIES[name])
+                    if name not in {"geometry", "avatar"} or not dependencies_ready:
+                        manifests[name] = {"stage": name, "status": "stale", "reason": f"Rerun of {stage}; rebuild dependent outputs"}
+                        continue
                 cached = prior / "stages" / name / "manifest.json" if prior else None
                 required = name in prerequisites
                 can_reuse = cached and cached.is_file() and name != stage and read(cached).get("status") == "succeeded"
@@ -152,7 +165,7 @@ def run_case(settings, case_path, mode, stage=None, reuse_id=None):
                 if not can_reuse:
                     if required:
                         raise db.Conflict(f"Missing prerequisite {name}; rerun with --stage {name} --reuse-run {reuse_id}")
-                    if stage and name != stage:
+                    if stage and name != stage and name not in invalidated:
                         manifests[name] = {"stage": name, "status": "stale", "reason": "Independent cached output unavailable; no implicit model call"}
                         continue
                     worker.execute_stage(name, context, manifests)
@@ -160,7 +173,7 @@ def run_case(settings, case_path, mode, stage=None, reuse_id=None):
                 manifests["report"] = {"stage": "report", "status": "stale", "reason": "Upstream evidence changed; compatible review is required"}
             if stage == "report":
                 record["status"] = "report_ready"
-            elif all(manifests.get(s, {}).get("status") == "succeeded" for s in worker.STAGES[:5]):
+            elif all(manifests.get(s, {}).get("status") == "succeeded" for s in worker.job_stages("analyze")):
                 worker.publish_analysis(context)
                 record["status"] = "review_ready"
             else:
@@ -192,11 +205,24 @@ def check_run(directory):
     record = read(directory / "run.json")
     if (directory / "baseline.json").exists():
         baseline = read(directory / "baseline.json")
-        valid = baseline["records_sha256"] == records_hash(directory) and all((directory / p).is_file() and db.digest((directory / p).read_bytes()) == checksum for p, checksum in baseline["files"].items())
+        valid = baseline["records_sha256"] == records_hash(directory, baseline.get("schema_version", 1)) and all((directory / p).is_file() and db.digest((directory / p).read_bytes()) == checksum for p, checksum in baseline["files"].items())
         return read(directory / "checks.json") if valid else [{"id": "baseline-integrity", "status": "fail", "observed": "Frozen baseline changed"}], 0 if valid else 2
     checks = []
     outputs = {}
-    for stage in worker.STAGES[:5]:
+    selected_stage = record.get("selected_stage")
+    if selected_stage:
+        if selected_stage == "report":
+            required_stages = set()
+        else:
+            dependencies, _ = related_stages(selected_stage)
+            required_stages = dependencies | {selected_stage}
+    else:
+        required_stages = set(worker.job_stages("analyze"))
+    for stage in worker.job_stages("analyze"):
+        if stage not in required_stages:
+            checks.append({"id": f"stage-{stage}", "status": "not_applicable", "required": False,
+                           "evidence": "outside the selected stage scope"})
+            continue
         p = directory / "stages" / stage / "output.json"
         manifest = record["stages"].get(stage, {})
         state = manifest.get("status", "blocked" if record["status"] == "blocked" else "skipped")
@@ -208,8 +234,18 @@ def check_run(directory):
                 state = "failed"
         checks.append({"id": f"stage-{stage}", "status": {"succeeded": "pass", "failed": "fail", "stale": "blocked"}.get(state, state), "evidence": f"stages/{stage}/manifest.json"})
     candidates = outputs.get("jev", {}).get("candidates", [])
-    scenes = outputs.get("geometry", {}).get("scenes", [])
+    scenes = outputs.get("geometry", {}).get("scenes", outputs.get("reconstruct", {}).get("scenes", []))
+    expectation_stages = {"candidate": {"jev"}, "unknown_scale": {"reconstruct", "geometry"},
+                          "finite_geometry": {"reconstruct"}, "single_view_estimate": {"reconstruct"},
+                          "scene_reconstruction": {"reconstruct"}, "floor_state": {"geometry"},
+                          "house_components": {"geometry"},
+                          "source_validity": {"gemma"}}
     for expectation in record["case"]["expectations"]:
+        relevant = expectation_stages.get(expectation["kind"], set())
+        if selected_stage and not relevant.intersection(required_stages):
+            checks.append({"id": expectation["id"], "status": "not_applicable", "required": False,
+                           "observed": "outside the selected stage scope", "evidence": "case stage selection"})
+            continue
         observed, passed = None, False
         if expectation["kind"] == "candidate" and "jev" in outputs:
             photo = record["photo_mapping"][expectation["photo_id"]]
@@ -222,16 +258,37 @@ def check_run(directory):
                 actual = match[0]["evidence"]["box"] if match[0]["evidence"] else None
                 expected = [expectation["box"][i] * (size["width"] if i % 2 == 0 else size["height"]) for i in range(4)]
                 passed = actual is not None and box_overlap(actual, expected) >= expectation["min_iou"]
-        elif expectation["kind"] == "unknown_scale" and "geometry" in outputs:
+        elif expectation["kind"] == "unknown_scale" and ("geometry" in outputs or "reconstruct" in outputs):
             observed = [{"scale_state": s.get("scale_state"), "scale_factor": s.get("scale_factor"), "measurements": s.get("measurements")} for s in scenes]
             passed = bool(scenes) and all(s.get("scale_state") == "unknown" and s.get("scale_factor") is None and not s.get("measurements") for s in scenes)
         elif expectation["kind"] == "finite_geometry" and "reconstruct" in outputs:
             import numpy as np
             observed = [s.get("bounds") for s in outputs["reconstruct"]["scenes"]]
             passed = bool(observed) and all(b is not None and np.asarray(b).shape == (2, 3) and np.isfinite(b).all() and np.max(np.abs(b)) < 1e6 for b in observed)
+        elif expectation["kind"] == "single_view_estimate" and "reconstruct" in outputs:
+            photo_id = record["photo_mapping"][expectation["photo_id"]]
+            observed = [s for s in outputs["reconstruct"]["scenes"] if photo_id in s.get("selected_photo_ids", [])]
+            passed = (len(observed) == 1 and observed[0].get("reconstruction_kind") == "single_view_estimate"
+                      and observed[0].get("anchor_eligibility") == "abstain_single_view"
+                      and observed[0].get("scale_state") == "unknown" and observed[0].get("scale_factor") is None)
+        elif expectation["kind"] in {"scene_reconstruction", "floor_state"} and scenes:
+            with db.connect(Settings(data=directory)) as conn:
+                room = conn.execute("SELECT id FROM scenes WHERE assessment_id=? AND label=?",
+                                    (record["assessment_id"], expectation["scene_label"])).fetchone()
+            observed = [scene for scene in scenes if room and scene["id"] == room["id"]]
+            fields = ("status", "reconstruction_kind") if expectation["kind"] == "scene_reconstruction" else ("floor_state", "gravity_state")
+            passed = len(observed) == 1 and all(observed[0].get(key) == expectation[key] for key in fields if key in expectation)
+        elif expectation["kind"] == "house_components" and "geometry" in outputs:
+            from step_wise.pipeline.registration import compose_rooms
+            with db.connect(Settings(data=directory)) as conn:
+                scene_payloads = {scene["id"]: json.loads(scene["payload"]) for scene in db.active_scenes(conn, record["assessment_id"])}
+                links = db.current_scene_links(conn, record["assessment_id"], scene_payloads)
+            components, _ = compose_rooms(scene_payloads, links)
+            observed = sorted(len(component) for component in components)
+            passed = observed == sorted(expectation["component_sizes"])
         elif expectation["kind"] == "source_validity" and "gemma" in outputs:
-            from safe_home.validation import validate_output
-            from safe_home.models import AssessmentOutput
+            from step_wise.validation import validate_output
+            from step_wise.models import AssessmentOutput
             local = Settings(data=directory)
             context = worker.load_context(local, {"assessment_id": record["assessment_id"]}, directory)
             value = {k: outputs["gemma"][k] for k in ("hazards", "coverage", "follow_up_requests")}
@@ -240,8 +297,11 @@ def check_run(directory):
                 observed, passed = "All source references validated", True
             except ValueError:
                 observed = "Invalid source reference"
-        checks.append({"id": expectation["id"], "status": "pass" if passed else ("fail" if observed is not None else "blocked"), "observed": observed, "evidence": "stages/jev/output.json" if expectation["kind"] == "candidate" else "stages/geometry/output.json", "scope": "fixture contract" if record["mode"] == "fixture" else "live expectation"})
-    checks.append({"id": "real-model-quality", "status": "blocked" if record["mode"] == "fixture" else "manual_pending", "required": False, "observed": "Fixtures cannot establish visual accuracy or AMD execution"})
+        evidence_stage = "jev" if expectation["kind"] == "candidate" else "geometry" if "geometry" in outputs else "reconstruct"
+        checks.append({"id": expectation["id"], "status": "pass" if passed else ("fail" if observed is not None else "blocked"), "observed": observed, "evidence": f"stages/{evidence_stage}/output.json", "scope": "fixture contract" if record["mode"] == "fixture" else "live expectation"})
+    quality_note = ("Fixtures cannot establish visual accuracy or live inference" if record["mode"] == "fixture"
+                    else "Live inference ran; visual accuracy still needs independent review")
+    checks.append({"id": "real-model-quality", "status": "blocked" if record["mode"] == "fixture" else "manual_pending", "required": False, "observed": quality_note})
     attestations = read(directory / "manual_checks.json") if (directory / "manual_checks.json").is_file() else {}
     revision = None
     if record.get("assessment_id"):
@@ -249,8 +309,30 @@ def check_run(directory):
             row = db.assessment(conn, record["assessment_id"])
             revision = {key: row[key] for key in ("input_revision", "review_revision", "analysis_job_id")}
     for name in record["case"]["manual_checks"]:
+        if selected_stage:
+            checks.append({"id": name, "status": "not_applicable", "required": False, "evidence": "full workflow manual check outside selected stage scope"})
+            continue
         current = name in attestations and attestations[name].get("revision") == revision
         checks.append({"id": name, "status": "pass" if current else "manual_pending", "evidence": attestations.get(name, "index.html and normal reviewer UI")})
+    if selected_stage == "report":
+        manifest = record["stages"].get("report", {})
+        upstream_valid = False
+        if record.get("reuse_run"):
+            prior = directory.parent / record["reuse_run"]
+            prior_path = prior / "run.json"
+            if prior_path.is_file():
+                prior_record = read(prior_path)
+                upstream_valid = prior_record.get("status") in {"review_ready", "report_ready"} and all(
+                    prior_record.get("stages", {}).get(name, {}).get("status") == "succeeded" for name in worker.job_stages("analyze"))
+                if upstream_valid:
+                    try:
+                        for name in worker.job_stages("analyze"):
+                            verify_artifacts(prior, prior_record["stages"][name])
+                    except (ValueError, db.Conflict):
+                        upstream_valid = False
+        stage_status = "pass" if manifest.get("status") == "succeeded" and upstream_valid else "fail" if manifest.get("status") == "failed" else "blocked"
+        checks.append({"id": "stage-report", "status": stage_status,
+                       "evidence": "stages/report/manifest.json"})
     code = 1 if record["status"] == "failed" else 2 if any(c["status"] == "fail" for c in checks) else 3 if any(c["status"] == "blocked" and c.get("required", True) for c in checks) else 4 if any(c["status"] == "manual_pending" and c.get("required", True) for c in checks) else 0
     worker.atomic_json(directory / "checks.json", checks)
     return checks, code
@@ -288,7 +370,7 @@ def gallery(directory, record, checks):
         os.replace(temporary, target)
         overlays.append((target, photo["photo_id"]))
     images = "".join(f'<figure><img style="max-width:100%" src="{html.escape(str(p.relative_to(directory)))}"><figcaption>{html.escape(photo_id)} · green: expected / pink: observed after gates</figcaption></figure>' for p, photo_id in overlays)
-    page = '<!doctype html><meta charset="utf-8"><title>Safe Home case evidence</title><style>body{font:16px sans-serif;max-width:960px;margin:40px auto;background:#f4f1e7;color:#243b31}pre{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:24px 0}</style>'
+    page = '<!doctype html><meta charset="utf-8"><title>Step Wise case evidence</title><style>body{font:16px sans-serif;max-width:960px;margin:40px auto;background:#f4f1e7;color:#243b31}pre{white-space:pre-wrap;overflow-wrap:anywhere}figure{margin:24px 0}</style>'
     page += f'<h1>{html.escape(record["case"]["id"])} / {html.escape(record["mode"])}</h1><p>{html.escape(record["status"])} · Synthetic fixture output is not live inference. Use the normal reviewer UI to inspect 3D.</p>'
     page += '<pre>' + html.escape(json.dumps(checks, ensure_ascii=False, indent=2)) + '</pre>' + images
     (directory / "index.html").write_text(page)
@@ -297,13 +379,16 @@ def gallery(directory, record, checks):
 def inspect(settings, run_id):
     directory = find_run(settings, run_id)
     record = read(directory / "run.json")
-    command = f"SAFE_HOME_DATA={shlex.quote(str(directory))} SAFE_HOME_DATABASE={shlex.quote(str(directory / 'assessment.sqlite3'))} SAFE_HOME_WORKER_LOCK={shlex.quote(str(settings.worker_lock_path or settings.data / 'worker.lock'))} .venv/bin/uvicorn safe_home.api:create_app --factory --no-access-log --host 127.0.0.1 --port 8000"
+    command = f"STEP_WISE_DATA={shlex.quote(str(directory))} STEP_WISE_DATABASE={shlex.quote(str(directory / 'assessment.sqlite3'))} STEP_WISE_WORKER_LOCK={shlex.quote(str(settings.worker_lock_path or settings.data / 'worker.lock'))} .venv/bin/uvicorn step_wise.api:create_app --factory --no-access-log --host 127.0.0.1 --port 8000"
     return {"id": run_id, "status": record["status"], "mode": record["mode"], "gallery": str(directory / "index.html"), "checks": read(directory / "checks.json"), "reviewer_launch": command, "assessment_url": f"http://localhost:8000/?assessment={record.get('assessment_id', '')}", "error": record.get("error")}
 
 
-def records_hash(directory):
+def records_hash(directory, schema_version=1):
     with db.connect(Settings(data=directory)) as conn:
-        records = {table: [dict(r) for r in conn.execute(f"SELECT * FROM {table} ORDER BY id")] for table in ("assessments", "photos", "assets", "scenes", "hazards", "reviews", "reports")}
+        tables = ["assessments", "photos", "assets", "scenes", "hazards", "reviews", "reports"]
+        if schema_version >= 2:
+            tables.extend(["candidates", "measurements", "scene_links", "clinical_documents", "clinical_profile_drafts"])
+        records = {table: [dict(r) for r in conn.execute(f"SELECT * FROM {table} ORDER BY {'assessment_id' if table == 'clinical_profile_drafts' else 'id'}")] for table in tables}
     return db.digest(db.dumps(records).encode())
 
 
@@ -340,8 +425,8 @@ def freeze(settings, run_id):
     with db.connect(Settings(data=directory)) as conn:
         if conn.execute("SELECT 1 FROM jobs WHERE status IN ('running','queued')").fetchone():
             raise db.Conflict("Cannot freeze active work")
-    files = {str(p.relative_to(directory)): db.digest(p.read_bytes()) for p in directory.rglob("*") if p.is_file() and (p.suffix in {".json", ".html", ".ply", ".jpg", ".png", ".npz", ".pdf"})}
-    baseline = {"run_id": run_id, "selected_at": db.now(), "selected_by": settings.reviewer_identity, "mode": read(directory / "run.json")["mode"], "records_sha256": records_hash(directory), "files": files}
+    files = {str(p.relative_to(directory)): db.digest(p.read_bytes()) for p in directory.rglob("*") if p.is_file() and (p.suffix in {".json", ".html", ".ply", ".jpg", ".png", ".npz", ".pdf", ".glb"})}
+    baseline = {"schema_version": 2, "run_id": run_id, "selected_at": db.now(), "selected_by": settings.reviewer_identity, "mode": read(directory / "run.json")["mode"], "records_sha256": records_hash(directory, 2), "files": files}
     worker.atomic_json(directory / "baseline.json", baseline)
     return {"run_id": run_id, "status": "frozen", "mode": baseline["mode"]}
 

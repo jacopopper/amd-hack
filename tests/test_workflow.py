@@ -10,14 +10,14 @@ from dataclasses import replace
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from safe_home import db, worker
-from safe_home.api import create_app
-from safe_home.config import Settings
-from safe_home.models import Candidate, Evidence, GuidanceChecklist, Hazard, Profile
-from safe_home.config import ROOT
-from safe_home.pipeline.photos import canonical_box, decode, prepared_image
-from safe_home.pipeline.photos import ingest
-from safe_home.pipeline.reports import validate_draft
+from step_wise import db, worker
+from step_wise.api import create_app
+from step_wise.config import Settings
+from step_wise.models import Candidate, Evidence, GuidanceChecklist, Hazard, Profile
+from step_wise.config import ROOT
+from step_wise.pipeline.photos import canonical_box, decode, prepared_image
+from step_wise.pipeline.photos import ingest
+from step_wise.pipeline.reports import validate_draft
 
 
 def picture():
@@ -37,8 +37,8 @@ class Workflow(unittest.TestCase):
         self.client.close()
         self.temporary.cleanup()
 
-    def create(self):
-        response = self.client.post("/api/assessments", json={"label": "Test fittizio", "profile": {"description": "Profilo fittizio"}, "profile_confirmed": True, "staged_data_confirmed": True, "processing_consent": True})
+    def create(self, **inputs):
+        response = self.client.post("/api/assessments", json={"label": "Test fittizio", "profile": {"description": "Profilo fittizio"}, "profile_confirmed": True, "staged_data_confirmed": True, "processing_consent": True, **inputs})
         self.assertEqual(response.status_code, 201, response.text)
         return response.json()["id"]
 
@@ -49,8 +49,8 @@ class Workflow(unittest.TestCase):
         a = self.get(aid)
         return {"expected_input_revision": a["input_revision"], "expected_review_revision": a["review_revision"]}
 
-    def ready(self):
-        aid = self.create()
+    def ready(self, **inputs):
+        aid = self.create(**inputs)
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/photos", headers={"Content-Length": str(30 * 1024 * 1024)}, content=b"small").status_code, 413)
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("ignored-path.png", picture(), "image/png")}).status_code, 201)
         response = self.client.post(f"/api/assessments/{aid}/analyze", json=self.revisions(aid))
@@ -59,8 +59,8 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.get(aid)["status"], "review_ready")
         return aid
 
-    def reviewed(self):
-        aid = self.ready()
+    def reviewed(self, **inputs):
+        aid = self.ready(**inputs)
         findings = self.client.get(f"/api/assessments/{aid}/findings").json()
         self.assertEqual(findings["provenance"], "fixture")
         self.assertEqual(len(findings["hazards"]), 4)
@@ -98,10 +98,13 @@ class Workflow(unittest.TestCase):
         self.assertEqual({h["id"] for h in accepted}, {h["id"] for h in findings["hazards"][:2]})
         self.assertEqual(len(report["snapshot"]["deferred"]), 1)
         html = self.client.get(report["html_url"]).text
+        self.assertIn("Step Wise", html)
         self.assertNotIn(injected, html)
         self.assertIn("&lt;img", html)
         self.assertIn(report["snapshot_sha256"], html)
-        self.assertTrue(self.client.get(report["pdf_url"]).content.startswith(b"%PDF"))
+        pdf = self.client.get(report["pdf_url"])
+        self.assertTrue(pdf.content.startswith(b"%PDF"))
+        self.assertIn('filename="step-wise.pdf"', pdf.headers["content-disposition"])
         released = self.client.post(f"/api/reports/{report['id']}/release", json=self.revisions(aid))
         self.assertEqual(released.status_code, 200, released.text)
         token = released.json()["token"]
@@ -132,7 +135,7 @@ class Workflow(unittest.TestCase):
     def test_stale_report_and_browser_writes(self):
         aid, findings = self.reviewed()
         report = self.report(aid)
-        with patch("safe_home.pipeline.reports.generation_fingerprints", return_value={"template": "changed"}):
+        with patch("step_wise.pipeline.reports.generation_fingerprints", return_value={"template": "changed"}):
             self.assertEqual(self.client.post(f"/api/reports/{report['id']}/release", json=self.revisions(aid)).status_code, 409)
         before = self.revisions(aid)
         hid = findings["hazards"][0]["id"]
@@ -172,7 +175,7 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.get(aid)["reports"], [])
 
     def test_live_report_sends_reviewed_text_without_thumbnail_base64(self):
-        aid, _ = self.reviewed()
+        aid, _ = self.reviewed(clinical_external_processing_consent=True)
         settings = replace(self.settings, gemma_backend="http", gemma_revision="mocked-contract-test")
         rev = self.revisions(aid)
         jid = db.enqueue(settings, aid, "report", rev["expected_input_revision"], rev["expected_review_revision"])
@@ -185,7 +188,7 @@ class Workflow(unittest.TestCase):
             validate(result)
             return result, [{"status": "mocked_contract_test"}]
 
-        with patch("safe_home.pipeline.gemma.complete", side_effect=draft) as model:
+        with patch("step_wise.pipeline.gemma.complete", side_effect=draft) as model:
             worker.run(settings, once=True)
         self.assertEqual(model.call_count, 1)
         self.assertEqual(self.client.get(f"/api/jobs/{jid}").json()["status"], "succeeded")
@@ -216,11 +219,41 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.client.get("/api/unknown").status_code, 404)
         unauth.close()
 
+    def test_new_photo_invalidates_external_photo_consent_until_reacknowledged(self):
+        created = self.client.post("/api/assessments", json={
+            "label": "Consenso fittizio", "profile": {"description": "Profilo sintetico"},
+            "profile_confirmed": True, "staged_data_confirmed": True, "processing_consent": True,
+            "external_processing_consent": True,
+        })
+        aid = created.json()["id"]
+        uploaded = self.client.post(f"/api/assessments/{aid}/photos", data={
+            "scene_label": "Sala", "expected_input_revision": 1,
+        }, files={"file": ("room.png", picture(), "image/png")})
+        self.assertEqual(uploaded.status_code, 201, uploaded.text)
+        assessment = self.get(aid)
+        self.assertFalse(assessment["inputs"]["external_processing_consent"])
+        live = replace(self.settings, gemma_backend="http")
+        with self.assertRaisesRegex(db.Conflict, "external photo processing"):
+            db.enqueue(live, aid, "analyze", assessment["input_revision"], assessment["review_revision"])
+
+        consent = {**assessment["inputs"], "expected_input_revision": assessment["input_revision"],
+                   "external_processing_consent": True}
+        self.assertEqual(self.client.patch(f"/api/assessments/{aid}", json=consent).status_code, 200)
+        current = self.get(aid)
+        with self.assertRaisesRegex(db.Conflict, "clinical profile"):
+            db.enqueue(live, aid, "analyze", current["input_revision"], current["review_revision"])
+        consent = {**current["inputs"], "expected_input_revision": current["input_revision"],
+                   "clinical_external_processing_consent": True}
+        self.assertEqual(self.client.patch(f"/api/assessments/{aid}", json=consent).status_code, 200)
+        current = self.get(aid)
+        job_id = db.enqueue(live, aid, "analyze", current["input_revision"], current["review_revision"])
+        self.assertTrue(job_id)
+
     def test_backend_change_cannot_turn_a_queued_fixture_into_live_calls(self):
         aid = self.create()
         self.client.post(f"/api/assessments/{aid}/photos", data={"scene_label": "room", "expected_input_revision": 1}, files={"file": ("control.png", picture())})
         jid = self.client.post(f"/api/assessments/{aid}/analyze", json=self.revisions(aid)).json()["job_id"]
-        with patch("safe_home.pipeline.http.requests.post") as post:
+        with patch("step_wise.pipeline.http.requests.post") as post:
             worker.run(replace(self.settings, gemma_backend="http"), once=True)
             post.assert_not_called()
         self.assertEqual(self.client.get(f"/api/jobs/{jid}").json()["status"], "failed")
@@ -242,11 +275,11 @@ class Workflow(unittest.TestCase):
             self.assertEqual(conn.execute("SELECT count(*) FROM scenes").fetchone()[0], 0)
 
     def test_cli_reset_is_limited_to_the_selected_seeded_dataset(self):
-        from safe_home.cli import main
-        from safe_home.demo import seed_case
+        from step_wise.cli import main
+        from step_wise.demo import seed_case
         normal = self.create()
         seeded, _ = seed_case(self.settings, ROOT / "demo/cases/room-001.json")
-        with patch("safe_home.cli.Settings.from_env", return_value=self.settings), redirect_stdout(io.StringIO()):
+        with patch("step_wise.cli.Settings.from_env", return_value=self.settings), redirect_stdout(io.StringIO()):
             self.assertEqual(main(["reset", "--assessment", normal]), 3)
             self.assertEqual(main(["reset", "--assessment", seeded]), 0)
         self.assertEqual(self.client.get(f"/api/assessments/{normal}").status_code, 200)

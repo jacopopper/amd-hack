@@ -1,6 +1,6 @@
 PRAGMA foreign_keys = ON;
-CREATE TABLE IF NOT EXISTS schema_version(version INTEGER PRIMARY KEY CHECK(version = 1));
-INSERT OR IGNORE INTO schema_version VALUES(1);
+CREATE TABLE IF NOT EXISTS schema_version(version INTEGER PRIMARY KEY CHECK(version = 3));
+INSERT OR IGNORE INTO schema_version VALUES(3);
 CREATE TABLE IF NOT EXISTS assessments(
  id TEXT PRIMARY KEY, input_json TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'draft',
  input_revision INTEGER NOT NULL DEFAULT 1, review_revision INTEGER NOT NULL DEFAULT 0,
@@ -42,6 +42,14 @@ CREATE TABLE IF NOT EXISTS measurements(
  id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
  scene_id TEXT NOT NULL REFERENCES scenes(id) ON DELETE CASCADE, payload TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS scene_links(
+ id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
+ from_scene_id TEXT NOT NULL REFERENCES scenes(id) ON DELETE CASCADE,
+ to_scene_id TEXT NOT NULL REFERENCES scenes(id) ON DELETE CASCADE,
+ payload TEXT NOT NULL, created_at TEXT NOT NULL,
+ UNIQUE(assessment_id, from_scene_id, to_scene_id),
+ CHECK(from_scene_id <> to_scene_id)
+);
 CREATE TABLE IF NOT EXISTS reviews(
  id TEXT PRIMARY KEY, hazard_id TEXT NOT NULL REFERENCES hazards(id) ON DELETE CASCADE,
  assessment_id TEXT NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
@@ -58,3 +66,12 @@ CREATE TABLE IF NOT EXISTS reports(
  family_hash TEXT UNIQUE, family_expires_at TEXT, revoked INTEGER NOT NULL DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, expires_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS clinical_documents(
+ id TEXT PRIMARY KEY, assessment_id TEXT NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
+ asset_id TEXT NOT NULL REFERENCES assets(id), format TEXT NOT NULL CHECK(format IN ('pdf','text')),
+ page_count INTEGER NOT NULL, extracted_json TEXT NOT NULL, created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS clinical_profile_drafts(
+ assessment_id TEXT PRIMARY KEY REFERENCES assessments(id) ON DELETE CASCADE,
+ input_revision INTEGER NOT NULL, draft_json TEXT NOT NULL, created_at TEXT NOT NULL
+);

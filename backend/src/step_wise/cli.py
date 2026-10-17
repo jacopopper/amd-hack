@@ -3,13 +3,13 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from safe_home import cases, db, worker
-from safe_home.config import ROOT, Settings
-from safe_home.demo import generate_controls, load_case, seed_case
+from step_wise import cases, db, worker
+from step_wise.config import ROOT, Settings
+from step_wise.demo import generate_controls, load_case, seed_case
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="Safe Home staged-data development tools")
+    parser = argparse.ArgumentParser(description="Step Wise staged-data development tools")
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init")
     commands.add_parser("seed-controls")

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Safe Home — Mappa del progetto e prossimi passi</title>
+<title>Step Wise — Mappa del progetto e prossimi passi</title>
 <style>
 :root{
   --bg:#f6f7f9;--panel:#fff;--ink:#1c2230;--muted:#5d6678;--line:#dfe3ea;--accent:#2f5bd3;
@@ -108,8 +108,9 @@ th{color:var(--muted);font-weight:600}
 </head>
 <body>
 <header>
-  <h1>Safe Home — mappa del progetto</h1>
+  <h1>Step Wise — mappa del progetto</h1>
   <p class="sub">Stato del repo (commit <code>e3e1a8c</code>, prima beta del 16/10) + architettura 3D discussa · AMD Developer Hackathon ACT III, Roma · Health &amp; Wellbeing</p>
+  <p class="card"><strong>Nota sul backend:</strong> questa mappa conserva la proposta precedente e alcuni riferimenti ad AMD e all’interfaccia. Per il lavoro corrente, il riferimento è il <a href="piano-3d-locale.md">piano unico del backend</a>: RTX 5090 locale, VGGT locale, Gemma via Hugging Face, foto per stanza e referto, hazards con prove e avatar schematico.</p>
   <div class="kpis">
     <div class="kpi"><b id="countdown">—</b><span>alla consegna (18 ottobre 2026)</span></div>
     <div class="kpi"><b>12 / ~33</b><span>task del piano chiusi (solo CPU)</span></div>
@@ -133,7 +134,7 @@ th{color:var(--muted);font-weight:600}
 <section id="overview">
   <div class="grid2">
     <div class="card">
-      <h3>Cos'è Safe Home</h3>
+      <h3>Cos'è Step Wise</h3>
       <p>Un familiare carica foto (o un video) della casa di una persona anziana e una descrizione dei suoi bisogni. Il sistema:</p>
       <ol>
         <li>trova i <b>potenziali pericoli di caduta</b> nelle foto (detector 2D esterno, Jev);</li>
@@ -272,18 +273,18 @@ th{color:var(--muted);font-weight:600}
 .venv/bin/pip install --no-deps -e .
 npm --prefix web ci &amp;&amp; npm --prefix web run build
 export REVIEWER_USER=reviewer REVIEWER_PASSWORD='una-password-lunga'
-.venv/bin/python -m safe_home.cli init
-.venv/bin/python -m safe_home.cli seed-controls</pre>
+.venv/bin/python -m step_wise.cli init
+.venv/bin/python -m step_wise.cli seed-controls</pre>
     <h3>2 · Avvio (due terminali)</h3>
-<pre>.venv/bin/uvicorn safe_home.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log
-.venv/bin/python -m safe_home.worker</pre>
+<pre>.venv/bin/uvicorn step_wise.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log
+.venv/bin/python -m step_wise.worker</pre>
     <h3>3 · Verifiche CPU</h3>
 <pre>.venv/bin/python -m unittest discover -s tests
 .venv/bin/python scripts/smoke_e2e.py --mode fixture --base-url http://localhost:8000</pre>
     <h3>4 · Ciclo su un singolo caso</h3>
-<pre>.venv/bin/python -m safe_home.cli case run demo/cases/room-001.json --mode fixture
-.venv/bin/python -m safe_home.cli case inspect --run RUN_ID
-.venv/bin/python -m safe_home.cli case run demo/cases/room-001.json --mode fixture --stage geometry --reuse-run RUN_ID</pre>
+<pre>.venv/bin/python -m step_wise.cli case run demo/cases/room-001.json --mode fixture
+.venv/bin/python -m step_wise.cli case inspect --run RUN_ID
+.venv/bin/python -m step_wise.cli case run demo/cases/room-001.json --mode fixture --stage geometry --reuse-run RUN_ID</pre>
     <h3>5 · Su AMD Developer Cloud (MI300X)</h3>
 <pre>docker pull rocm/pytorch:rocm6.4.3_ubuntu24.04_py3.12_pytorch_release_2.6.0
 rocm-smi                      # verifica che la GPU sia visibile
@@ -401,8 +402,8 @@ const NEEDS=[
     ["bench","Tempi e memoria reali misurati su MI300X","P1","<code>scripts/benchmark.py</code> raccoglie i dati."],
     ["video","Video demo registrato + testo di consegna","P0","Traccia in <code>docs/demo-script.md</code>."]]},
 ];
-const KEY="safehome-needs";
-const state=JSON.parse(localStorage.getItem(KEY)||"{}");
+const KEY="stepwise-needs";
+const state=JSON.parse(localStorage.getItem(KEY)||localStorage.getItem("safehome-needs")||"{}");
 const nl=document.getElementById("needs-list");
 NEEDS.forEach(g=>{
   const h=document.createElement("h4");h.textContent=g.g;h.style.margin="16px 0 4px";nl.append(h);

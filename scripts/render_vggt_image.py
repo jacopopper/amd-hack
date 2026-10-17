@@ -9,15 +9,15 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from safe_home import db
-from safe_home.config import ROOT, Settings
-from safe_home.pipeline.photos import decode
-from safe_home.pipeline.reconstruction import live_scene
+from step_wise import db
+from step_wise.config import ROOT, Settings
+from step_wise.pipeline.photos import decode
+from step_wise.pipeline.reconstruction import live_scene_local
 
 
 VIEWER = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Safe Home · Kitchen in 3D</title>
+<title>Step Wise · Kitchen in 3D</title>
 <style>
 :root{color-scheme:light;--paper:#f5f3eb;--ink:#214b3b;--line:#d7dacf}*{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 system-ui,sans-serif}
@@ -36,7 +36,7 @@ button[aria-pressed=true]{background:var(--ink);color:white}#loading{position:ab
 @media(max-width:900px){header{padding:18px 20px}main{padding:22px 20px;grid-template-columns:1fr;gap:20px}.original{max-width:420px}h1{font-size:36px}.stage{height:65svh;min-height:420px}.caption{flex-wrap:wrap}}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.js"}}</script></head>
-<body><header><div class="brand">safe home.</div><div class="eyebrow">3D study / actual VGGT output</div></header>
+<body><header><div class="brand">Step Wise.</div><div class="eyebrow">3D study / actual VGGT output</div></header>
 <main><aside><div class="eyebrow">One photograph → estimated geometry</div><h1>A new angle<br>on the kitchen.</h1>
 <img class="original" src="input.png" alt="The original kitchen photo supplied for this experiment">
 <h2>Your photo, in depth.</h2><p>Drag to orbit. Scroll to zoom. Right-drag to pan. Switch between a colored surface and the underlying point cloud.</p>
@@ -98,7 +98,7 @@ def main():
     with (ROOT / 'model-cache/vggt-inference.lock').open('a+') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         print(f'Running VGGT on {torch.cuda.get_device_name(0)}; one image, no duplicated views', flush=True)
-        scene = live_scene(context, {'id': 'kitchen'}, [{'id': 'input', 'path': 'input.png'}])
+        scene = live_scene_local(context, {'id': 'kitchen'}, [{'id': 'input', 'path': 'input.png'}])
     scene.update({'reconstruction_kind': 'single_view_estimate', 'source_image_sha256': db.digest(args.image.read_bytes()),
                   'model_revision': metadata['revision'], 'metric_validated': False,
                   'limitations': ['Only visible surfaces; no hidden-room reconstruction', 'No multi-view consistency validation', 'Relative scale; no validated dimensions', 'Surface triangulation omits large neighboring depth discontinuities']})

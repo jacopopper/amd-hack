@@ -1,14 +1,16 @@
-# Safe Home implementation plan
+# Step Wise implementation plan
 
 **Prepared:** 16 October 2026 · **Complexity:** High · **AMD access:** Not confirmed
 
 **First beta status — 16 October 2026:** CPU fixture workflow implemented and verified with 22 offline tests, production frontend build, CPU Compose HTTP smoke, desktop/phone browser checks and multipage PDF inspection. Live Jev/Gemma/VGGT adapters exist but have no validated service/AMD execution. The user requested convergence on this beta; real capture/GPU evidence, the inspected real baseline, full evaluation and P1/P2 remain open. Checkboxes below refer only to tasks whose applicable CPU acceptance was verified; they do not close the P0 hardware/quality gates. See [runtime evidence and remaining gates](docs/runtime.md).
 
+**Backend direction updated 16 October 2026:** the proposed target is the NVIDIA RTX 5090 Laptop on the developer PC, with local VGGT, Gemma via Hugging Face, room-grouped photos plus a clinical report, and reviewer-visible hazard evidence and functional avatar. AMD and frontend are outside this backend pass. Use the [current backend plan](docs/piano-3d-locale.md) for scope and sequence; implementation awaits the user's explicit go-ahead. Older AMD milestones below describe the previous proposal.
+
 ## 1. Objective and scope
 
 Build a working assessment from overlapping home photos and a confirmed patient profile to evidenced findings, a 3D point cloud, professional review, and an approved Italian web/PDF action plan.
 
-This is an implementation handoff. The repository currently contains [the product blueprint](SAFE_HOME.md), [the stack and data flow](TECH_STACK.md), and [the Jev evaluation](eval/jev/README.md). The application and GPU pipeline still need implementation. Preserve the existing evaluation, raw results, attribution, and uncommitted user changes.
+This is the earlier AMD-first implementation handoff. The repository also contains [the product blueprint](STEP_WISE.md), [the stack and data flow](TECH_STACK.md), and [the Jev evaluation](eval/jev/README.md). The CPU application and fixture workflow exist; the proposed backend work for the RTX 5090, Hugging Face Gemma, clinical intake and avatar is tracked in [the backend plan](docs/piano-3d-locale.md). Preserve the existing evaluation, raw results, attribution, and uncommitted user changes.
 
 Build one complete room first. Then test a connected bedroom–hallway–bathroom capture. Support multiple separate room scenes within one assessment from the outset; automatic whole-house alignment is an extension after the core product works.
 
@@ -29,7 +31,7 @@ The five-minute processing target and median measurement-error target below 3 cm
 
 ### Instructions for the coding agent
 
-- Read this file, `TECH_STACK.md`, `SAFE_HOME.md`, and applicable `AGENTS.md` instructions before editing. Use this plan for implementation order; keep the product constraints from the blueprint.
+- Read this file, `TECH_STACK.md`, `STEP_WISE.md`, and applicable `AGENTS.md` instructions before editing. Use this plan for implementation order; keep the product constraints from the blueprint.
 - Implement the P0 path before extensions. Complete each task's acceptance checks before marking it done. Tasks are small reviewable changes; committing or pushing still requires the user's authorization under the workspace rules.
 - Use ordinary functions and a few modules. Keep one worker, SQLite, filesystem storage, HTTP calls, React state, and polling. Add a dependency only for a concrete requirement.
 - Work through independent CPU tasks while GPU access is pending. Record blocked GPU tasks explicitly. A fixture run is development progress, not proof of AMD execution.
@@ -78,7 +80,7 @@ Create files as their tasks need them; this is a placement guide, not a request 
 
 ```text
 pyproject.toml
-backend/src/safe_home/
+backend/src/step_wise/
   config.py                 # environment configuration
   models.py                 # Pydantic contracts
   db.py                     # sqlite3 access and schema setup
@@ -249,7 +251,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [x] 0.1 Record runtime choices and backend readiness — P0
 
-- **Files:** `docs/runtime.md`, `.env.example`, later `backend/src/safe_home/config.py`.
+- **Files:** `docs/runtime.md`, `.env.example`, later `backend/src/step_wise/config.py`.
 - **Work:** Document confirmed/unconfirmed GPU access, desired stage backends, model/checkpoint access, model licenses, available RAM/disk, and external image-processing boundary. Record environment variable names without values. Check actual AMD access for shell/container/device permissions versus a hosted API.
 - **Dependencies:** None.
 - **Accept/verify:** A readiness checklist identifies which real stages can run and why others cannot. No key or private credential appears in documentation or logs. No GPU is provisioned by merely starting fixture mode.
@@ -283,35 +285,35 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [x] 1.1 Create the minimal runnable services — P0
 
-- **Files:** `pyproject.toml`, `backend/src/safe_home/{config.py,api.py,cli.py}`, `web/package.json`, `web/src/App.tsx`, `.env.example`, `.gitignore`, `README.md`.
+- **Files:** `pyproject.toml`, `backend/src/step_wise/{config.py,api.py,cli.py}`, `web/package.json`, `web/src/App.tsx`, `.env.example`, `.gitignore`, `README.md`.
 - **Work:** Add package/runtime entry points, health endpoint, React/TypeScript Vite app, Tailwind plugin and Vite `/api` proxy. Configure the API to serve built frontend assets in deployment. Default to explicit fixture settings for local development; keep secrets server-side. Include `data/`, model caches and build outputs in ignore rules.
 - **Dependencies:** 0.1; CPU work can proceed before GPU checks.
 - **Accept/verify:** API health and a browser page run locally; frontend production build/typecheck passes. SPA fallback never turns `/api` errors into HTML. Startup reports execution mode without printing secrets.
 
 ### [x] 1.2 Implement records, validators and schema initialization — P0
 
-- **Files:** `backend/src/safe_home/{models.py,db.py,schema.sql}`, `web/src/types.ts`, `tests/test_contracts.py`.
+- **Files:** `backend/src/step_wise/{models.py,db.py,schema.sql}`, `web/src/types.ts`, `tests/test_contracts.py`.
 - **Work:** Implement Section 3 records, JSON contracts, foreign keys, indexes and revision fields. Use a schema version and one initialization command; add versioned SQL migrations only when changes require them. Export or explicitly synchronize TypeScript API types. Keep model output strict and bounded.
 - **Dependencies:** 1.1.
 - **Accept/verify:** A fresh and existing database initialize safely; invalid boxes, non-finite coordinates, invalid enums and dangling references fail validation. Unknown profile fields and unassessable coverage round-trip without becoming false/safe.
 
 ### [x] 1.3 Implement protected assessment and asset storage — P0
 
-- **Files:** `backend/src/safe_home/{api.py,db.py,config.py}`, `tests/test_api.py`.
+- **Files:** `backend/src/step_wise/{api.py,db.py,config.py}`, `tests/test_api.py`.
 - **Work:** Create/get/edit assessments and store uploads under generated IDs with `Asset` records. Start with configurable limits of 20 MiB/file, 200 MiB/assessment, 40 photos and 40 megapixels/decoded image; these are chosen app limits. Validate decoded format, count and dimensions, reject traversal/caller-supplied paths, stream bounded uploads, clean partial files, and add a shared reviewer-auth guard. One configured reviewer can access demo assessments; this is not a multi-tenant ownership system. Require acknowledgement of external photo processing before Jev is enabled for an assessment.
 - **Dependencies:** 1.2.
 - **Accept/verify:** Upload and fetch a valid image; reject corrupt, oversized and non-image files. An unauthenticated request cannot fetch source photos, and another assessment's asset cannot be substituted as evidence. No raw filesystem path or credential is returned. Files and rows remain consistent after a simulated write failure.
 
 ### [x] 1.4 Implement the SQLite worker queue — P0
 
-- **Files:** `backend/src/safe_home/{worker.py,db.py,api.py}`, `tests/test_jobs.py`.
+- **Files:** `backend/src/step_wise/{worker.py,db.py,api.py}`, `tests/test_jobs.py`.
 - **Work:** Enqueue `analyze`/`report` jobs with revision snapshots. Claim queued work in a short `BEGIN IMMEDIATE` transaction; use a process-lifetime Linux file lock on the shared local volume to enforce one worker. Track stage completion, heartbeat, warnings and safe errors. Write attempt outputs to temporary paths and publish completed manifests atomically. At exclusive worker startup, mark abandoned running jobs interrupted; retry is an explicit new attempt.
 - **Dependencies:** 1.2, 1.3.
 - **Accept/verify:** API restart preserves queued work; worker restart identifies interrupted work; duplicate submissions do not launch duplicate active jobs. No database transaction stays open during HTTP/GPU computation. Repeated completion cannot duplicate hazards or report snapshots. A heartbeat timeout alone must not launch a second worker over a still-running GPU call.
 
 ### [x] 1.5 Add an explicitly labelled fixture pipeline — P0
 
-- **Files:** `backend/src/safe_home/worker.py`, `demo/fixtures/`, `backend/src/safe_home/cli.py`.
+- **Files:** `backend/src/step_wise/worker.py`, `demo/fixtures/`, `backend/src/step_wise/cli.py`.
 - **Work:** Read small fixture candidates/hazards/scene manifests through the same contracts and persist them through the worker. Add seed/reset commands restricted to the development dataset. Record provenance per artifact and return it through the API. Keep fixtures out of live-stage success paths.
 - **Dependencies:** 0.2, 1.4.
 - **Accept/verify:** A fixture assessment reaches `review_ready`, survives refresh, and visibly identifies generated fixture content. Live backend failure stays failed/degraded rather than returning fixture success.
@@ -325,7 +327,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 1.7 Add the single-case runner and inspectable outputs — P0
 
-- **Files:** `backend/src/safe_home/{cli.py,worker.py}`, `demo/cases/room-001.json`, `tests/test_case_runner.py`, `README.md`.
+- **Files:** `backend/src/step_wise/{cli.py,worker.py}`, `demo/cases/room-001.json`, `tests/test_case_runner.py`, `README.md`.
 - **Work:** Implement `case run`, `case check`, `case inspect` and `case compare` as small CLI commands around the same stage functions/validators used by the worker. Begin with the fixture path and extend it in Sprints 2–4. Give each run an isolated development assessment/database and distinct artifact directory with immutable stage outputs; obey the same GPU lock as normal processing. Save stage fingerprints, inputs/outputs, execution provenance, errors and expectation results. Support rerunning a selected stage with compatible saved prerequisites; see Section 12 for commands and invalidation rules. Do not build a second inference pipeline or general experiment framework.
 - **Dependencies:** 0.2, 1.2, 1.4, 1.5.
 - **Accept/verify:** Run the fixture case twice, inspect its gallery, and compare semantic results. Deliberately fail one expectation and surface the exact observation/artifact. Deliberately corrupt one cached artifact or change an input hash and refuse reuse. A failed run retains partial diagnostics without overwriting a prior success. Missing live dependencies report blocked; fixture mode performs no external model calls.
@@ -338,35 +340,35 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [x] 2.1 Prepare photos and record transforms — P0
 
-- **Files:** `backend/src/safe_home/pipeline/photos.py`, `tests/test_photos.py`.
+- **Files:** `backend/src/step_wise/pipeline/photos.py`, `tests/test_photos.py`.
 - **Work:** Decode safely, rotate pixels upright with EXIF handling, preserve canonical upright coordinates, strip metadata from processed copies, hash normalized bytes, and flag exact duplicates/blur. Produce thumbnails, Jev-compatible copies and reconstruction inputs without overlays. Resize/pad deliberately and store transforms. Begin with JPEG/PNG uploads; explicitly reject HEIC until a tested decoder is added.
 - **Dependencies:** 1.2, 1.3.
 - **Accept/verify:** Portrait EXIF, padded panorama, duplicate, corrupt and small-image cases behave predictably. Map a known box through resize/padding and back within a pixel tolerance. Jev copies meet its 280–1568 pixel-per-side limits; quality flags never assert room safety. [TypeSafe image preparation](https://docs.typesafe.ai/images)
 
 ### [x] 2.2 Add a small versioned guidance checklist — P0
 
-- **Files:** `guidance/checklist.json`, `backend/src/safe_home/models.py`, `tests/test_guidance.py`.
+- **Files:** `guidance/checklist.json`, `backend/src/step_wise/models.py`, `tests/test_guidance.py`.
 - **Work:** Create a small set of hazard categories, observation/coverage questions, permitted suggested actions, source title/URL/date and applicability. Start with verified public material such as CDC STEADI's home checklist. Clearly mark regional applicability; do not convert general guidance into Italian building law. Add numeric thresholds only when a verified source supports the specific use. Select entries directly by category.
 - **Dependencies:** 1.2.
 - **Accept/verify:** IDs are unique; referenced sources and category mappings resolve. Every proposed action can cite an existing entry. Unsupported cost estimates and numeric requirements remain absent. [CDC STEADI resources](https://www.cdc.gov/steadi/patient-resources/)
 
 ### [ ] 2.3 Implement Jev inspection with application-level gates — P0
 
-- **Files:** `backend/src/safe_home/pipeline/jev.py`, `tests/test_jev.py`; reuse `eval/jev/manifest.json` and saved responses as regression inputs.
+- **Files:** `backend/src/step_wise/pipeline/jev.py`, `tests/test_jev.py`; reuse `eval/jev/manifest.json` and saved responses as regression inputs.
 - **Work:** Adapt the existing tested HTTP request structure without modifying its historical experiment. Pin `jev-1.14.0`, fixed API host, no redirects, explicit images header and timeouts. Send prepared photos only, using one image reference in state. Ask atomic presence/coverage/attribute questions; pair each target box with presence. Gate absent boxes and dependent attributes; preserve unknown attachment. For repeated objects use bounded, explicit target descriptions or bounded crop passes and retain the distinction from exhaustive discovery.
 - **Dependencies:** 2.1, 2.2.
 - **Accept/verify:** Existing absent-target boxes are suppressed; no-rug attachment answers are ignored; malformed/out-of-range boxes fail; padded-only boxes do not become evidence. A request containing profile fields fails a payload-boundary test. Record model, question/prompt version, response, usage and duration. Do not automatically retry an ambiguous billed timeout; classify 429/5xx separately and apply only a documented bounded policy. [TypeSafe images](https://docs.typesafe.ai/images), [Box semantics](https://docs.typesafe.ai/primitives/box)
 
 ### [ ] 2.4 Implement the Gemma HTTP client and assessment prompt — P0
 
-- **Files:** `backend/src/safe_home/pipeline/gemma.py`, `backend/src/safe_home/prompts/assessment.txt`, `tests/test_gemma.py`.
+- **Files:** `backend/src/step_wise/pipeline/gemma.py`, `backend/src/step_wise/prompts/assessment.txt`, `tests/test_gemma.py`.
 - **Work:** Call the configured internal OpenAI-compatible endpoint through `requests` with bounded timeouts. Supply confirmed profile, original room views/crops, candidates, coverage and selected guidance. Use a Pydantic-derived JSON schema, bounded output, and concise evidence-based explanations. Treat image text, patient free text and model outputs as data, never instructions to call tools or change configuration. Stream no private reasoning into the UI.
 - **Dependencies:** 1.2, 2.1, 2.2; candidates from 2.3 are optional when Jev is disabled. Live verification requires 0.3.
 - **Accept/verify:** Parse structured final JSON, reject unknown evidence/guidance IDs and invented measurement IDs, and reject unconfirmed profile facts. Handle timeout/truncation/schema failure explicitly, with at most one bounded repair request. Log final outputs/provenance safely. Input photos are sent as controlled inline data, not arbitrary model-selected fetch URLs.
 
 ### [ ] 2.5 Fuse findings and run the additional checklist sweep — P0
 
-- **Files:** `backend/src/safe_home/pipeline/gemma.py`, `backend/src/safe_home/worker.py`, `backend/src/safe_home/models.py`.
+- **Files:** `backend/src/step_wise/pipeline/gemma.py`, `backend/src/step_wise/worker.py`, `backend/src/step_wise/models.py`.
 - **Work:** Let Gemma inspect overview views beyond Jev positives, in bounded batches. Mark new Gemma candidates by producer and validate them identically. Merge only supported duplicates; preserve evidence and disagreement. Produce image-only hazards when geometry is unavailable, retaining null measurements/anchors. Reject an all-failed assessment instead of publishing a zero-hazard success.
 - **Dependencies:** 2.3, 2.4; can use Jev-disabled mode deliberately.
 - **Accept/verify:** A finding outside Jev positives can reach review with evidence; two genuinely separate rugs are not merged just because their category matches. Missing coverage stays visible. Jev failure may continue with real Gemma inspection and a degraded-stage warning; Gemma failure cannot be reported as completed personalization.
@@ -386,28 +388,28 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 3.1 Implement the VGGT reconstruction adapter — P0
 
-- **Files:** `backend/src/safe_home/pipeline/reconstruction.py`, `backend/src/safe_home/worker.py`.
+- **Files:** `backend/src/step_wise/pipeline/reconstruction.py`, `backend/src/step_wise/worker.py`.
 - **Work:** Feed each selected overlapping scene set to the pinned checkpoint using inference mode and validated mixed precision. Preserve stable photo ordering and actual input transforms. Export full analysis depth/confidence/cameras plus a filtered colored PLY for display. Use independent scenes for disconnected groups. Start with a configurable 20-frame cap per scene; exceeding it requests selection/more deliberate grouping rather than silently merging chunks.
 - **Dependencies:** 2.1; live execution needs 0.4.
 - **Accept/verify:** Real saved output conforms to Section 3, reloads without the model and contains finite valid geometry. Reject corrupted manifests, invalid poses and unusable coverage. Save timing and memory. Preserve raw outputs separately from decimated display points.
 
 ### [ ] 3.2 Add known-reference scale calibration — P1
 
-- **Files:** `backend/src/safe_home/pipeline/geometry.py`, `backend/src/safe_home/api.py`, `tests/test_geometry.py`, `demo/manifest.json`.
+- **Files:** `backend/src/step_wise/pipeline/geometry.py`, `backend/src/step_wise/api.py`, `tests/test_geometry.py`, `demo/manifest.json`.
 - **Work:** Detect a specified ArUco dictionary/ID and use the printed marker's measured physical side length. Match detected corners to reliable reconstructed geometry, or triangulate with corresponding scene cameras; do not substitute background depth for marker corners. Estimate scale robustly across usable observations and store residuals. Support a reviewer-entered physical length between two verified scene points as an explicit manual-reference method. Expose the calibration endpoint, with proposed/validated/rejected decisions and independent check records. Marker pose estimation requires matching intrinsics/distortion; do not mix original-image and VGGT intrinsics. [OpenCV ArUco](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html)
 - **Dependencies:** 3.1, 0.2.
 - **Accept/verify:** Synthetic known-scale geometry recovers the expected factor; a real reference is checked against independent tape measurements. Missing/wrong-size/poorly reconstructed markers keep scale unknown or proposed. Never validate a scene solely by checking the same length used to calibrate it.
 
 ### [ ] 3.3 Implement reviewer-assisted measurements — P1
 
-- **Files:** `backend/src/safe_home/pipeline/geometry.py`, `backend/src/safe_home/api.py`, `tests/test_geometry.py`.
+- **Files:** `backend/src/step_wise/pipeline/geometry.py`, `backend/src/step_wise/api.py`, `tests/test_geometry.py`.
 - **Work:** Compute distances/heights from validated same-scene geometry with known scale. Start with reviewer-selected endpoints and optionally a verified floor plane. Store endpoints, feature meaning, calibration ID and uncertainty. A selected pair of points provides a distance; it does not automatically establish a minimum passage width or walker clearance. Manual tape values are a separately labelled method.
 - **Dependencies:** 3.2.
 - **Accept/verify:** Unit, rotated-camera and scale checks pass. Unknown scale, points from different scenes and unstable endpoints cannot produce metric claims. Independently verify selected demo distances; withhold clearance conclusions when measurement uncertainty overlaps the relevant threshold.
 
 ### [ ] 3.4 Propose and validate 3D hazard anchors — P0
 
-- **Files:** `backend/src/safe_home/pipeline/geometry.py`, `tests/test_geometry.py`.
+- **Files:** `backend/src/step_wise/pipeline/geometry.py`, `tests/test_geometry.py`.
 - **Work:** Transform evidence regions into reconstruction pixels. Unproject a confidence-filtered foreground region using the scene camera/depth conventions. A box center alone is insufficient: require a supported surface/region, consistent views, or explicit reviewer correction. Store anchor method, supporting views and uncertainty. Missing-object findings reference a verified fixture/area. Keep uncertain findings image-only.
 - **Dependencies:** 3.1, 2.5; metric scale is not required for relative pins.
 - **Accept/verify:** A synthetic rotated/translated camera projects and unprojects consistently; resize/crop/pad round-trips are checked. An ambiguous foreground/background box abstains. Inspect all final demo pins for wrong-surface placement and preserve rejected-anchor reasons.
@@ -421,7 +423,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 3.6 Integrate geometry into personalized assessment — P0 for pins; P1 for dimensions
 
-- **Files:** `backend/src/safe_home/{worker.py,models.py}`, `backend/src/safe_home/pipeline/gemma.py`.
+- **Files:** `backend/src/step_wise/{worker.py,models.py}`, `backend/src/step_wise/pipeline/gemma.py`.
 - **Work:** Run the final personalized assessment once available geometry is known; early image candidates can remain visible while it runs. Provide trusted measurement records and coverage, not just naked numbers. Validate all referenced IDs and permit only existing measurements in actions. Maintain the Jev-disabled path. Keep calibrated scene geometry optional when reconstruction fails.
 - **Dependencies:** 2.5, 3.1, 3.4; numeric measurement input needs 3.2–3.3.
 - **Accept/verify:** Final hazards use valid geometry references or explicit unknowns. A failed room preserves other rooms and its image evidence; no global safe status is inferred. No accepted review is overwritten by a late inference result because review starts only after the final analysis revision is ready.
@@ -434,7 +436,7 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 4.1 Implement review decisions and revision guards — P0
 
-- **Files:** `backend/src/safe_home/{api.py,db.py,models.py}`, `tests/test_reviews.py`.
+- **Files:** `backend/src/step_wise/{api.py,db.py,models.py}`, `tests/test_reviews.py`.
 - **Work:** Approve/edit/reject/defer hazards, retain original proposals and reviewed effective fields, store reviewer identity/time, and enforce input/review revision checks. Include an optional reviewer-corrected anchor with scene ID, finite raw-world coordinates and method; validate it against the referenced scene. Provide explicit follow-up notes for unassessable observations. Block report drafting until required decisions exist. Editing source inputs invalidates old analysis; editing reviews invalidates draft report readiness.
 - **Dependencies:** 1.2, 2.5; integrate scene links from 3.6.
 - **Accept/verify:** Rejecting a hazard removes it from accepted actions, edits survive refresh, pending decisions block drafting, stale browser submissions receive `409`, and changes during generation cannot yield a releasable stale report.
@@ -448,28 +450,28 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 4.3 Generate a constrained Italian action-plan draft — P0
 
-- **Files:** `backend/src/safe_home/pipeline/{gemma.py,reports.py}`, `backend/src/safe_home/prompts/report.txt`, `tests/test_reports.py`.
+- **Files:** `backend/src/step_wise/pipeline/{gemma.py,reports.py}`, `backend/src/step_wise/prompts/report.txt`, `tests/test_reports.py`.
 - **Work:** Snapshot accepted reviewed findings, confirmed profile, trusted measurements and selected guidance. Ask the same Gemma endpoint for schema-constrained plan items referencing those hazard IDs. Permit wording/prioritization explanations within reviewed constraints; do not add new hazards, diagnoses, measurements or unsourced prices. Validate completeness, duplicate IDs, referenced values and priority changes. Use deterministic structured fields for measurements, priorities and source links in the rendered report. If Gemma fails, construct a plainly labelled deterministic draft from accepted findings.
 - **Dependencies:** 2.4, 4.1, 1.4.
 - **Accept/verify:** Only accepted IDs appear as actions, each accepted item is represented, rejected/deferred items do not become accepted actions, and supplied trusted measurements are unchanged. A model response inventing an ID or price is rejected. Deterministic fallback still requires final professional approval and does not masquerade as a successful Gemma call.
 
 ### [x] 4.4 Render web and PDF reports from the same snapshot — P0
 
-- **Files:** `backend/src/safe_home/pipeline/reports.py`, `backend/src/safe_home/templates/report.html`, `web/src/components/ReportPreview.tsx`, `Dockerfile.worker`.
+- **Files:** `backend/src/step_wise/pipeline/reports.py`, `backend/src/step_wise/templates/report.html`, `web/src/components/ReportPreview.tsx`, `Dockerfile.worker`.
 - **Work:** Render overview, prioritized actions, evidence thumbnails, verified measurements, guidance links, coverage limits, reviewer and date. Use Jinja2 autoescaping and fixed templates; the model never supplies executable HTML. Install/test WeasyPrint's Pango/font dependencies in the worker image. Restrict renderer asset fetching to known local report assets; forbid arbitrary network URLs and unrelated filesystem access. [WeasyPrint installation](https://doc.courtbouillon.org/weasyprint/stable/first_steps.html)
 - **Dependencies:** 4.3.
 - **Accept/verify:** Italian accents, long text, multi-page lists, uncertainty labels, source links and images render correctly. Inspect generated pages at normal zoom; no clipped text or overlapping blocks. HTML/PDF share the same snapshot hash. Escaped HTML and an external image URL cannot inject markup or trigger unwanted fetches.
 
 ### [x] 4.5 Implement final release and family access — P0
 
-- **Files:** `backend/src/safe_home/{api.py,db.py}`, `web/src/components/ReportPreview.tsx`, `tests/test_reports.py`.
+- **Files:** `backend/src/step_wise/{api.py,db.py}`, `web/src/components/ReportPreview.tsx`, `tests/test_reports.py`.
 - **Work:** Release the reviewed snapshot only after a final transaction checks current revisions, required decisions, references and generated artifact hashes. Create a high-entropy, revocable, expiring family capability; store its hash, not the plaintext token. Limit it to that released report and its approved report assets. Keep drafts and source assessment editing behind reviewer access.
 - **Dependencies:** 4.1, 4.4.
 - **Accept/verify:** Draft and stale reports cannot be released or fetched by family links. Released contents remain immutable. Expired/revoked/unknown tokens fail. The family link cannot enumerate or access another assessment's media. Repeated release cannot create inconsistent snapshots.
 
 ### [ ] 4.6 Add minimal access controls and retention — P0 for hosted demo
 
-- **Files:** `backend/src/safe_home/{api.py,config.py,cli.py,db.py}`, `.env.example`, `README.md`.
+- **Files:** `backend/src/step_wise/{api.py,config.py,cli.py,db.py}`, `.env.example`, `README.md`.
 - **Work:** Finish the reviewer-auth guard from 1.3 for every reviewer/media route, using the configured login behind HTTPS; keep public deployment restricted to staged data. Protect mutation routes against cross-origin browser requests. Keep worker/vLLM internal. Add explicit assessment deletion and a dry-run-first retention cleanup command; reject deletion while a job is active. Redact secrets/profile/media and family-token paths from application/proxy access logs; prevent public caching of private assets.
 - **Dependencies:** 1.3, 4.5; deploy before any hosted test.
 - **Accept/verify:** Unauthorized review/media requests fail, family capabilities grant only report access, deletion revokes links and removes derived media/rows, and cleanup reports affected assessment IDs before execution. Public demo documentation accurately describes external image processing and limits use to fictional/staged data.
@@ -521,21 +523,21 @@ Independent work becomes possible after the shared contracts exist: browser inta
 
 ### [ ] 6.1 Validate a connected multiroom capture — P1
 
-- **Files:** `demo/manifest.json`, `backend/src/safe_home/pipeline/reconstruction.py`, `eval/pipeline/`.
+- **Files:** `demo/manifest.json`, `backend/src/step_wise/pipeline/reconstruction.py`, `eval/pipeline/`.
 - **Work:** Capture overlapping room-to-doorway-to-hallway transitions and a return to a previously viewed area. Try a bounded connected reconstruction, raising the frame cap only after measuring memory. Record connected components, cross-room consistency and independent scale checks. Add room labels/route selection without assuming capture trajectory equals a patient route.
 - **Dependencies:** 3.1, 3.5, 5.3.
 - **Accept/verify:** Shared doorway geometry agrees across views and selected cross-room features validate. If the reconstruction is inconsistent, show separate scenes under one assessment. A room label alone cannot establish spatial adjacency.
 
 ### [ ] 6.2 Add overlapping chunk alignment and loop correction — P2
 
-- **Files:** `backend/src/safe_home/pipeline/mapping.py`, `backend/src/safe_home/models.py`, `web/src/components/SceneViewer.tsx`, `eval/pipeline/`.
+- **Files:** `backend/src/step_wise/pipeline/mapping.py`, `backend/src/step_wise/models.py`, `web/src/components/SceneViewer.tsx`, `eval/pipeline/`.
 - **Work:** Benchmark direct overlapping-chunk alignment against a mapping layer such as VGGT-SLAM. Audit the chosen layer's own VGGT fork, compiled dependencies, licenses, and ROCm support before adopting it. Estimate common transforms from shared views/correspondences with geometric verification; handle scale and accumulating drift. Use loop closure/global optimization where needed. Similarity registration is a first candidate, not a guarantee that all raw VGGT chunk distortions can be reconciled. [VGGT-SLAM](https://github.com/MIT-SPARK/VGGT-SLAM), [Open3D registration](https://www.open3d.org/docs/release/tutorial/pipelines/global_registration.html)
 - **Dependencies:** 6.1 and a separately validated mapping runtime.
 - **Accept/verify:** Evaluate on a real multiroom dataset with independently measured cross-room references. Wrong alignments, low overlap and ambiguous repeated doorways are rejected. Transform points, cameras, anchors and scale together; preserve provenance. Keep disconnected scenes separate and preserve the baseline pipeline behind an explicit mapping option.
 
 ### [ ] 6.3 Add segmentation or video only for observed needs — P2
 
-- **Files:** `backend/src/safe_home/pipeline/photos.py`, optional segmentation module, frontend capture controls.
+- **Files:** `backend/src/step_wise/pipeline/photos.py`, optional segmentation module, frontend capture controls.
 - **Work:** Add SAM 2 only if a measured foreground-localization failure needs it. Add video-to-photo extraction only if capture usability warrants it; choose sharp, diverse overlapping frames and keep all transforms/IDs. Benchmark quality, runtime and memory before making either default.
 - **Dependencies:** 5.3 demonstrates the need; mapping is not required for video extraction.
 - **Accept/verify:** Existing photo-only assessments remain reproducible. Additional stages improve a documented failure case; video frame count stays bounded. Update external-processing disclosures if media handling changes.
@@ -597,20 +599,20 @@ These are CLI targets for task 1.7, not commands already available today. Run th
 
 ```bash
 # First prove the local case runner, contracts and checks without model calls.
-python -m safe_home.cli case run demo/cases/room-001.json --mode fixture
+python -m step_wise.cli case run demo/cases/room-001.json --mode fixture
 
 # Replace fixtures with real stages for the same immutable inputs.
-python -m safe_home.cli case run demo/cases/room-001.json --mode live
+python -m step_wise.cli case run demo/cases/room-001.json --mode live
 
 # Inspect and check an actual run ID returned by the previous command.
-python -m safe_home.cli case inspect --run <run-id>
-python -m safe_home.cli case check --run <run-id>
+python -m step_wise.cli case inspect --run <run-id>
+python -m step_wise.cli case check --run <run-id>
 
 # After fixing the Gemma prompt/client, reuse compatible photo/Jev/3D inputs.
-python -m safe_home.cli case run demo/cases/room-001.json --mode live --stage gemma --reuse-run <run-id>
+python -m step_wise.cli case run demo/cases/room-001.json --mode live --stage gemma --reuse-run <run-id>
 
 # Compare the saved baseline with the new attempt; never overwrite the baseline.
-python -m safe_home.cli case compare --baseline <baseline-run-id> --candidate <new-run-id>
+python -m step_wise.cli case compare --baseline <baseline-run-id> --candidate <new-run-id>
 ```
 
 Accept stage names `prepare`, `jev`, `reconstruct`, `geometry`, `gemma`, and `report`. A normal run stops at `review_ready`; the report stage requires a saved, revision-compatible review snapshot. Scripted review/release is permitted only in the isolated development/lifecycle-test path with its simulated identity recorded.
@@ -722,7 +724,7 @@ The live smoke and benchmark commands perform model/API work and incur whatever 
 
 ## 15. Coding-agent kickoff prompt
 
-> Implement Safe Home following `safe-home-implementation-plan.md`. Preserve existing user changes and the Jev evaluation. Start with tasks 0.1–0.2 and Sprint 1, including the `room-001` case runner in 1.7, while preparing the GPU checks in 0.3–0.4. GPU access is currently unconfirmed: complete independent CPU tasks and record GPU tasks as pending, without inventing live outputs. Work task by task, run the specified checks, and update checkboxes with evidence as tasks finish. As each real stage is added, run the same case, inspect saved artifacts, fix the first failure, rerun the affected stage and compare with the selected baseline. Keep model interfaces, source IDs, coordinate transforms, revisions, professional review and report-release rules consistent. Deliver one staged room end to end before whole-house mapping or other extensions. Follow applicable `AGENTS.md` rules; do not commit or push without authorization.
+> Implement Step Wise following `step-wise-implementation-plan.md`. Preserve existing user changes and the Jev evaluation. Start with tasks 0.1–0.2 and Sprint 1, including the `room-001` case runner in 1.7, while preparing the GPU checks in 0.3–0.4. GPU access is currently unconfirmed: complete independent CPU tasks and record GPU tasks as pending, without inventing live outputs. Work task by task, run the specified checks, and update checkboxes with evidence as tasks finish. As each real stage is added, run the same case, inspect saved artifacts, fix the first failure, rerun the affected stage and compare with the selected baseline. Keep model interfaces, source IDs, coordinate transforms, revisions, professional review and report-release rules consistent. Deliver one staged room end to end before whole-house mapping or other extensions. Follow applicable `AGENTS.md` rules; do not commit or push without authorization.
 
 ## 16. Documentation basis
 

@@ -1,4 +1,4 @@
-# Safe Home
+# Step Wise
 
 **A personalized home fall-hazard assessment from photos and a patient description, with hazards highlighted in 3D and a professionally reviewed action plan.**
 
@@ -8,7 +8,7 @@ AMD Developer Hackathon: ACT III · Track 2: Health and Wellbeing
 
 ## 1. One-line pitch
 
-A family member uploads overlapping photos of an older person's home and a description of their needs. Safe Home identifies candidate hazards in the photos, reconstructs the space in 3D with supported hazard locations highlighted, and produces a personalized action plan for professional review.
+A family member uploads overlapping photos of an older person's home and a description of their needs. Step Wise identifies candidate hazards in the photos, reconstructs the space in 3D with supported hazard locations highlighted, and produces a personalized action plan for professional review.
 
 ## 2. The problem
 
@@ -43,13 +43,13 @@ A family member uploads overlapping photos of an older person's home and a descr
 
 Clinical evidence (Cochrane reviews on environmental interventions) shows that a **home hazard assessment by an occupational therapist, followed by home modifications, reduces falls**, especially in high-risk people. However, therapists are scarce, home visits are expensive and slow, and they rarely happen before a patient is discharged. Paper checklists exist, but families don't use them and can't measure what matters, such as whether a hallway is wide enough for a walker.
 
-**Safe Home supports a remote home assessment from phone photos and patient context.**
+**Step Wise supports a remote home assessment from phone photos and patient context.**
 
 ## 3. Positioning
 
 **For** hospital discharge teams, home-care cooperatives and families of older people
 **who** need to make a home safe before or after a fall,
-**Safe Home is** an AI home-safety assessment
+**Step Wise is** an AI home-safety assessment
 **that** turns home photos and patient context into an evidenced, prioritized, professionally reviewed action plan,
 **unlike** paper checklists (unmeasured, rarely completed), in-person therapist visits (scarce, slow) and fall-detection devices (they react after the fall instead of preventing it).
 
@@ -76,7 +76,7 @@ Clinical evidence (Cochrane reviews on environmental interventions) shows that a
 
 Maria is 84 and lives alone in Imperia. She is about to leave hospital after a hip fracture, and a second fall could be her last. Her daughter Giulia works in Milan and can't get there before discharge.
 
-Giulia's cousin takes overlapping photos of Maria's flat. The nurse adds Maria's mobility and support needs. Safe Home first highlights candidate hazards in the photos, then places supported findings in the reconstructed rooms:
+Giulia's cousin takes overlapping photos of Maria's flat. The nurse adds Maria's mobility and support needs. Step Wise first highlights candidate hazards in the photos, then places supported findings in the reconstructed rooms:
 
 - a loose rug in the hallway,
 - a bathtub with no grab bar,
@@ -92,7 +92,7 @@ The nurse approves the report. Giulia gets a prioritized list of fixes with appr
 3. **The gap (20 s):** 54% of falls happen at home, only 29% see the home as risky, and only 11% get advice.
 4. **Live demo (90 s):** photos and patient profile in, image findings, 3D scene with pins, nurse review, final report.
 5. **AMD + Google (15 s):** Jev supplies candidate image findings through its API. Gemma checks evidence against the patient profile and writes the action plan on AMD, alongside 3D reconstruction. Show where each stage runs and its measured timing.
-6. **Close (15 s):** who pays, and the line *"We have a law for the factory floor. Safe Home is for the bathroom floor."*
+6. **Close (15 s):** who pays, and the line *"We have a law for the factory floor. Step Wise is for the bathroom floor."*
 
 ## 5. Product experience
 
@@ -255,17 +255,17 @@ Keep one consistent finding schema for Jev candidates and Gemma's fallback inspe
 
 - **Data handling design:** home photos can identify people and places, and the supplied patient description may contain health data. Specify consent, access control, encryption and retention before collecting real assessments. Use staged photos and fictional profiles for development.
 - **External image processing:** the proposed Jev stage sends selected prepared photos to TypeSafe. Keep patient descriptions on our AMD infrastructure and show this processing boundary accurately. A Gemma-only inspection path can avoid that external image transfer; the Jev path must not be marketed as entirely self-hosted.
-- **Not a diagnosis:** Safe Home assesses the environment, not the patient. A professional reviews every report before the family sees it. The positioning ("home safety assessment support for care professionals") is chosen to stay on the right side of medical-device rules. Formal regulatory review would be needed before any clinical deployment.
+- **Not a diagnosis:** Step Wise assesses the environment, not the patient. A professional reviews every report before the family sees it. The positioning ("home safety assessment support for care professionals") is chosen to stay on the right side of medical-device rules. Formal regulatory review would be needed before any clinical deployment.
 - **Honest uncertainty:** every finding shows a confidence level. Low-confidence findings are marked "to verify" instead of being presented as facts.
 
 ## 8. Evaluation
 
 What we measure, so the demo shows numbers and not just claims:
 
-- **Measurement accuracy:** Safe Home measurements vs a tape measure on 15–20 real features (hallway widths, door widths, step heights, toilet and bed heights). Target: median error under 3 cm.
+- **Measurement accuracy:** Step Wise measurements vs a tape measure on 15–20 real features (hallway widths, door widths, step heights, toilet and bed heights). Target: median error under 3 cm.
 - **Hazard detection:** precision and recall against a hand-labelled checklist on photo sets, including absent objects, obscured areas and repeated objects. Compare Jev candidates, Gemma-only inspection and the combined pipeline.
 - **Localization:** manually check image boxes and 3D anchors; report wrong-surface pins, duplicate findings and findings that correctly abstain from localization.
-- **Reviewer time:** time to review a Safe Home report vs a typical in-person home visit.
+- **Reviewer time:** time to review a Step Wise report vs a typical in-person home visit.
 - **Performance on AMD:** time for each pipeline stage, total time from upload to report, vision-model throughput (tokens per second) and peak GPU memory, all measured on the MI300X.
 - **Submission evidence:** preserve the hardware identity, exact model/checkpoint and container versions, real requests and outputs, and timed runs. Report AMD compute and TypeSafe API costs separately using measured usage and actual rates; include provisioned idle time when reporting deployment cost. Label cached demo replay explicitly.
 
@@ -281,7 +281,7 @@ What we measure, so the demo shows numbers and not just claims:
 | Slow live demo | Pre-processed demo homes, with one short live capture as a bonus |
 | Running out of credits | Strict GPU on/off discipline and cached outputs |
 
-## 10. How Safe Home meets the judging criteria
+## 10. How Step Wise meets the judging criteria
 
 ### Award priorities
 
@@ -300,7 +300,7 @@ The event permits overlapping main and partner awards. The public page does not 
 
 For Evolus, use its event workspace, our AMD-hosted vLLM endpoint, **workflows + knowledge libraries**, and app-driven REST calls. A possible extension prepares a guidance-backed plan after review. Validate this integration against the partner requirements before claiming eligibility. Keep raw home media on our infrastructure; use public guidance and synthetic or sanitized findings for the integration demo, and disclose external processing. Its listed prizes are plans, credits and promotion, so it must not displace the core build.
 
-| Criterion | Safe Home |
+| Criterion | Step Wise |
 |---|---|
 | Application of Technology | Jev's typed photo findings, followed by Gemma's personalized assessment and spatial reconstruction on AMD, with each stage's compute location and performance documented |
 | Business Value | A large, measurable problem (falls, fractures, readmissions) with clear users and buyers, replacing a scarce manual process |

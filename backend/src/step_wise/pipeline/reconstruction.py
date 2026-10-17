@@ -1,15 +1,17 @@
 import struct
 import os
-import time
+import json
+import math
 import subprocess
+import time
 from inspect import getfile
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
 
-from safe_home import db
-from safe_home.pipeline.http import ExternalFailure
+from step_wise import db
+from step_wise.pipeline.http import ExternalFailure
 
 
 def aligned_input(image):
@@ -38,7 +40,7 @@ def validate_predictions(depth, confidence, cameras, intrinsics, points, count):
             raise ValueError("Invalid reconstructed camera")
 
 
-def live_scene(context, scene, selected):
+def live_scene_local(context, scene, selected):
     settings = context["settings"]
     checkpoint = Path(settings.vggt_checkpoint)
     if not settings.vggt_commit or not settings.vggt_checkpoint_sha256 or not checkpoint.is_file():
@@ -115,7 +117,10 @@ def live_scene(context, scene, selected):
                "dtype": str(dtype), "peak_allocated_bytes": torch.cuda.max_memory_allocated(), "peak_reserved_bytes": torch.cuda.max_memory_reserved(), "free_total_bytes_after": list(torch.cuda.mem_get_info()), "elapsed_seconds": time.perf_counter() - start}
     del predictions, model
     torch.cuda.empty_cache()
-    return {"id": scene["id"], "status": "ready", "provenance": "live", "checkpoint_sha256": checksum, "vggt_commit": installed, "runtime": runtime,
+    view_mode = "single_view_estimate" if len(selected) == 1 else "multiview"
+    return {"id": scene["id"], "status": "ready", "provenance": "live", "reconstruction_kind": view_mode,
+            "anchor_eligibility": "abstain_single_view" if len(selected) == 1 else "multiview_review_required",
+            "checkpoint_sha256": checksum, "vggt_commit": installed, "runtime": runtime,
             "selected_photo_ids": [p["id"] for p in selected], "coordinate_convention": "OpenCV world-to-camera [R|t]; z depth; raw world units",
             "depth_interpretation": "camera_z", "raw_coordinate_units": "relative", "scale_state": "unknown", "scale_factor": None, "calibration": None,
             "analysis_path": analysis_path.relative_to(settings.data).as_posix(), "analysis_sha256": db.digest(analysis_path.read_bytes()), "ply_path": ply_path.relative_to(settings.data).as_posix(),
@@ -124,12 +129,85 @@ def live_scene(context, scene, selected):
             "cameras": [np.linalg.inv(np.vstack([e, [0, 0, 0, 1]]))[:3, 3].tolist() for e in cameras], "measurements": [], "confidence_threshold": threshold}
 
 
+def live_scene(context, scene, selected):
+    """Run CUDA inference in the isolated VGGT environment, never in the API venv."""
+    settings = context["settings"]
+    checkpoint = Path(settings.vggt_checkpoint)
+    python = Path(settings.vggt_python)
+    if not settings.vggt_commit or not settings.vggt_checkpoint_sha256 or not checkpoint.is_file():
+        raise ExternalFailure("Provide a local VGGT_CHECKPOINT, its SHA256 and the installed VGGT_COMMIT; no automatic checkpoint download")
+    if not python.is_file():
+        raise ExternalFailure("VGGT_PYTHON must point to the isolated model-cache/vggt-env Python runtime")
+    request_directory = context["directory"] / "stages" / "reconstruct" / "gpu-requests"
+    request_directory.mkdir(parents=True, exist_ok=True)
+    request_path = request_directory / f"{scene['id']}.json"
+    request = {"data": str(settings.data.resolve()), "directory": str(context["directory"].resolve()),
+               "scene": {"id": scene["id"]},
+               "photos": [{key: photo[key] for key in ("id", "path", "scene_id", "role")} for photo in selected],
+               "vggt": {"checkpoint": str(checkpoint.resolve()), "checkpoint_sha256": settings.vggt_checkpoint_sha256,
+                        "commit": settings.vggt_commit, "timeout_seconds": settings.vggt_timeout_seconds}}
+    request_path.write_text(db.dumps(request))
+    secret_markers = ("TOKEN", "API_KEY", "SECRET", "PASSWORD", "CREDENTIAL")
+    child_env = {key: value for key, value in os.environ.items()
+                 if not any(marker in key.upper() for marker in secret_markers)}
+    child_env["PYTHONNOUSERSITE"] = "1"
+    source = Path(__file__).resolve().parents[4]
+    vggt_source = source / "model-cache" / "vggt"
+    child_env.pop("PYTHONPATH", None)
+    child_env.pop("PYTHONHOME", None)
+    child_env.pop("PYTHONSTARTUP", None)
+    child_env.pop("VIRTUAL_ENV", None)
+    child_env["PYTHONPATH"] = os.pathsep.join([str(source / "backend" / "src"), str(vggt_source)])
+    try:
+        result = subprocess.run([str(python), "-m", "step_wise.pipeline.vggt_worker", str(request_path)], cwd=source,
+                                capture_output=True, text=True, timeout=settings.vggt_timeout_seconds,
+                                check=False, env=child_env)
+    except subprocess.TimeoutExpired:
+        raise ExternalFailure(f"VGGT exceeded its configured {settings.vggt_timeout_seconds}s timeout; no implicit retry") from None
+    except OSError:
+        raise ExternalFailure("Isolated VGGT Python runtime could not be started") from None
+    if result.returncode:
+        try:
+            error = json.loads(result.stderr.strip().splitlines()[-1])
+        except (json.JSONDecodeError, IndexError):
+            error = {}
+        category, message = error.get("error_category"), error.get("message")
+        if category == "OutOfMemoryError":
+            raise ExternalFailure("CUDA ran out of memory; create an explicit smaller frame selection")
+        if message and isinstance(message, str) and len(message) <= 300:
+            raise ExternalFailure(message)
+        raise ExternalFailure("Isolated VGGT worker failed; verify the pinned CUDA runtime and capture")
+    try:
+        output = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        raise ExternalFailure("Isolated VGGT worker returned invalid JSON") from None
+    if output.get("id") != scene["id"] or output.get("status") != "ready" or output.get("checkpoint_sha256") != settings.vggt_checkpoint_sha256 or output.get("vggt_commit") != settings.vggt_commit:
+        raise ExternalFailure("Isolated VGGT result does not match the requested scene or pinned model")
+    expected_kind = "single_view_estimate" if len(selected) == 1 else "multiview"
+    expected_anchor = "abstain_single_view" if len(selected) == 1 else "multiview_review_required"
+    runtime = output.get("runtime", {})
+    if (output.get("reconstruction_kind") != expected_kind or output.get("anchor_eligibility") != expected_anchor
+            or output.get("scale_state") != "unknown" or output.get("scale_factor") is not None
+            or output.get("selected_photo_ids") != [photo["id"] for photo in selected]
+            or len(output.get("images", [])) != len(selected) or not runtime.get("gpu") or not runtime.get("cuda") or runtime.get("hip") is not None
+            or not isinstance(runtime.get("elapsed_seconds"), (int, float)) or not math.isfinite(runtime["elapsed_seconds"]) or runtime["elapsed_seconds"] <= 0):
+        raise ExternalFailure("Isolated VGGT result violates the CUDA, input-view or non-metric output contract")
+    analysis = db.asset_path(settings, output.get("analysis_path", ""))
+    ply = db.asset_path(settings, output.get("ply_path", ""))
+    if not analysis.is_file() or db.digest(analysis.read_bytes()) != output.get("analysis_sha256") or not ply.is_file() or not ply.stat().st_size:
+        raise ExternalFailure("Isolated VGGT artifacts failed integrity checks")
+    return output
+
+
 def live_reconstruct(context):
     scenes, warnings = [], []
     for scene in context["scenes"]:
         selected = [p for p in context["photos"] if p["scene_id"] == scene["id"] and p["role"] == "overview"]
-        if not 2 <= len(selected) <= context["settings"].frame_cap:
-            scenes.append({"id": scene["id"], "status": "insufficient_coverage", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": "Select 2–20 overlapping overview photos; no implicit frame dropping"})
+        if not selected:
+            scenes.append({"id": scene["id"], "status": "insufficient_coverage", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": "Upload an overview photo for this room"})
+            continue
+        if len(selected) > context["settings"].frame_cap:
+            scenes.append({"id": scene["id"], "status": "failed", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": f"Room has {len(selected)} overview photos, above the configured cap of {context['settings'].frame_cap}; no implicit frame dropping"})
             continue
         try:
             scenes.append(live_scene(context, scene, selected))

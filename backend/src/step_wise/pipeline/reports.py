@@ -8,12 +8,12 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from PIL import Image, ImageDraw
 
-from safe_home import db
-from safe_home.models import DraftOutput
+from step_wise import db
+from step_wise.models import DraftOutput
 
 
 def generation_fingerprints():
-    from safe_home.config import ROOT
+    from step_wise.config import ROOT
     package = Path(__file__).resolve().parents[1]
     return {"template": db.digest((package / "templates/report.html").read_bytes()), "prompt": db.digest((package / "prompts/report.txt").read_bytes()),
             "renderer": db.digest(Path(__file__).read_bytes()), "contracts": db.digest((package / "models.py").read_bytes()), "guidance": db.digest((ROOT / "guidance/checklist.json").read_bytes())}
@@ -61,8 +61,10 @@ def draft_report(context):
     validate_draft(draft, snapshot["accepted"])
     provenance = "deterministic_fixture"
     if settings.gemma_backend == "http":
-        from safe_home.pipeline.gemma import complete
-        from safe_home.pipeline.http import ExternalFailure
+        from step_wise.pipeline.gemma import complete
+        from step_wise.pipeline.http import ExternalFailure
+        if not context["assessment_input"].get("clinical_external_processing_consent"):
+            raise ExternalFailure("External clinical-profile processing consent is required before Gemma drafts a report")
         prompt = (Path(__file__).resolve().parents[1] / "prompts/report.txt").read_text()
         try:
             reviewed = [{key: hazard[key] for key in ("id", "observation", "priority", "suggested_action", "profile_relevance", "uncertainty", "guidance_ids", "measurement_ids")} for hazard in snapshot["accepted"]]
@@ -78,7 +80,9 @@ def draft_report(context):
             snapshot["draft_warning"] = str(exc) + ". Deterministic reviewed values require final approval. No successful Gemma call is claimed."
     snapshot["draft"] = draft
     snapshot["draft_provenance"] = provenance
-    snapshot["limitations"] = ["Dati dimostrativi e profilo fittizio.", "Il ruolo del revisore è dichiarato da chi rilascia il rapporto.", "Scala metrica non validata; nessuna dimensione è disponibile."]
+    scale_note = ("Scala metrica verificata solo nelle stanze con calibrazione; nessuna misura è inferita dal modello."
+                  if snapshot.get("calibrations") else "Scala metrica non validata; nessuna dimensione è disponibile.")
+    snapshot["limitations"] = ["Dati dimostrativi e profilo fittizio.", "Il ruolo del revisore è dichiarato da chi rilascia il rapporto.", scale_note]
     snapshot_hash = db.digest(db.dumps(snapshot).encode())
     template_path = Path(__file__).resolve().parents[1] / "templates"
     env = Environment(loader=FileSystemLoader(template_path), autoescape=select_autoescape(["html"]))

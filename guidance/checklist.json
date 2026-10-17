@@ -14,6 +14,7 @@
     {"id": "night-light", "category": "lighting", "question": "a night light on the visible bedroom to bathroom route", "action": "Verificare di notte l’illuminazione del percorso e valutare una luce notturna."},
     {"id": "bath-support", "category": "bathroom", "question": "a support grab bar beside a visible toilet or bath", "action": "Verificare con un professionista il bisogno di supporti in bagno e la loro installazione."},
     {"id": "stair-handrail", "category": "stairs", "question": "a handrail beside visible stairs", "action": "Verificare la stabilità e la continuità dei corrimano con un professionista."},
-    {"id": "reach-items", "category": "reach", "question": "frequently used objects on a high shelf", "action": "Spostare gli oggetti di uso frequente in una posizione raggiungibile senza salire su sedie."}
+    {"id": "reach-items", "category": "reach", "question": "frequently used objects on a high shelf", "action": "Spostare gli oggetti di uso frequente in una posizione raggiungibile senza salire su sedie."},
+    {"id": "home-hazard-review", "category": "*", "question": "any other visible feature that may warrant a home-safety review", "action": "Chiedere al professionista di verificare l’elemento e il possibile rischio sul posto; la sola fotografia non consente di concludere sulla sicurezza."}
   ]
 }

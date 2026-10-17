@@ -3,7 +3,7 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "safe-home"
+name = "step-wise"
 version = "0.1.0"
 description = "Evidence-led staged home assessment prototype"
 requires-python = ">=3.12"
@@ -17,10 +17,10 @@ dependencies = [
 test = ["httpx>=0.28,<1"]
 
 [project.scripts]
-safe-home = "safe_home.cli:main"
+step-wise = "step_wise.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["backend/src"]
 
 [tool.setuptools.package-data]
-safe_home = ["schema.sql", "prompts/*.txt", "templates/*.html"]
+step_wise = ["schema.sql", "prompts/*.txt", "templates/*.html"]

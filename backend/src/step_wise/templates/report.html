@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><title>Piano d’azione per la casa</title>
+<html lang="it"><head><meta charset="utf-8"><title>Step Wise · Piano d’azione per la casa</title>
 <meta name="snapshot-sha256" content="{{ snapshot_hash }}">
 <style>
 @page { size: A4; margin: 18mm; @bottom-right { content: counter(page); font-size: 9pt; color: #526359 } }
@@ -16,7 +16,7 @@ img { width: 48%; height: auto; margin-right: 1%; vertical-align: top } a { colo
 {% set priorities = {'urgent': 'Urgente', 'important': 'Importante', 'recommended': 'Raccomandata'} %}
 {% set categories = {'rug': 'Tappeto', 'cable': 'Cavi', 'path': 'Passaggio', 'lighting': 'Illuminazione', 'bathroom': 'Bagno', 'stairs': 'Scale', 'reach': 'Oggetti da raggiungere'} %}
 {% set origins = {'deterministic_fixture': 'testo deterministico su dati sintetici', 'deterministic_fallback': 'testo deterministico dopo un errore di generazione Gemma', 'live_gemma': 'Gemma, esecuzione live'} %}
-<p class="eyebrow">Safe Home / rapporto dimostrativo</p>
+<p class="eyebrow">Step Wise / rapporto dimostrativo</p>
 <h1>Piano d’azione<br>per la casa</h1>
 <p>{{ snapshot.label }} · {{ snapshot.created_at[:10] }}</p>
 <p class="notice">Dati dimostrativi e profilo fittizio. Origine bozza: {{ origins.get(snapshot.draft_provenance, snapshot.draft_provenance) }}. Il rilascio è registrato separatamente, dopo la verifica finale del revisore.</p>

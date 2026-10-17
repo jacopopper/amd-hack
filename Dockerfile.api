@@ -14,6 +14,6 @@ COPY backend/ backend/
 COPY guidance/ guidance/
 RUN pip install --no-deps -e .
 COPY --from=web /web/dist web/dist/
-ENV PYTHONUNBUFFERED=1 SAFE_HOME_DATA=/data
+ENV PYTHONUNBUFFERED=1 STEP_WISE_DATA=/data
 EXPOSE 8000
-CMD ["uvicorn", "safe_home.api:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+CMD ["uvicorn", "step_wise.api:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

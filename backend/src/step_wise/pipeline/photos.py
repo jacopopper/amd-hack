@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import warnings
 from pathlib import Path
@@ -6,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from safe_home import db
+from step_wise import db
 
 
 def decode(data, max_pixels=40_000_000):
@@ -64,9 +65,9 @@ def ingest(settings, aid, data, scene_label, role, expected_revision):
     metadata.update({"raw_sha256": db.digest(data), "width": image.width, "height": image.height})
     try:
         with db.connect(settings, write=True) as conn:
-            db.editable(conn, aid, expected_revision)
+            assessment = db.editable(conn, aid, expected_revision)
             count = conn.execute("SELECT count(*) FROM photos WHERE assessment_id=? AND active=1", (aid,)).fetchone()[0]
-            total = conn.execute("SELECT coalesce(sum(byte_size),0) FROM assets WHERE assessment_id=? AND scope='source'", (aid,)).fetchone()[0]
+            total = conn.execute("SELECT coalesce(sum(byte_size),0) FROM assets WHERE assessment_id=? AND scope IN ('source','clinical')", (aid,)).fetchone()[0]
             if count >= settings.max_photos or total + len(data) > settings.max_assessment_bytes:
                 raise OverflowError("Assessment media limit reached")
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -76,10 +77,15 @@ def ingest(settings, aid, data, scene_label, role, expected_revision):
                 conn.execute("INSERT INTO scenes(id,assessment_id,label) VALUES(?,?,?)", (scene_id, aid, scene_label))
             image.save(path, "JPEG", quality=95)
             content = path.read_bytes()
+            if len(content) > settings.max_file_bytes or total + len(content) > settings.max_assessment_bytes:
+                raise OverflowError("Canonical photo exceeds the assessment media limit")
             metadata["upright_sha256"] = db.digest(content)
             conn.execute("INSERT INTO assets VALUES(?,?,?,?,?,?,?,?)", (asset_id, aid, path.relative_to(settings.data).as_posix(), "image/jpeg", len(content), db.digest(content), "upload", "source"))
             conn.execute("INSERT INTO photos(id,assessment_id,scene_id,asset_id,role,payload) VALUES(?,?,?,?,?,?)", (photo_id, aid, scene_id, asset_id, role, db.dumps(metadata)))
-            db.invalidate(conn, aid)
+            inputs = json.loads(assessment["input_json"])
+            inputs["external_processing_consent"] = False
+            conn.execute("UPDATE assessments SET input_json=? WHERE id=?", (db.dumps(inputs), aid))
+            db.invalidate_scene(conn, aid, scene_id)
     except BaseException:
         path.unlink(missing_ok=True)
         raise
@@ -119,4 +125,4 @@ def prepare(context):
                         "prepared_path": target.relative_to(context["settings"].data).as_posix(),
                         "thumbnail_path": thumb_path.relative_to(context["settings"].data).as_posix(),
                         "sha256": db.digest(target.read_bytes()), "provenance": "derived"})
-    return {"photos": results}
+    return {"photos": results, "provenance": "derived"}

@@ -3,16 +3,83 @@ import tempfile
 import unittest
 from pathlib import Path
 from dataclasses import replace
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
-from safe_home import cases, worker
-from safe_home.api import create_app
-from safe_home.config import ROOT, Settings
-from safe_home.demo import generate_controls
+from step_wise import cases, db, worker
+from step_wise.api import create_app
+from step_wise.config import ROOT, Settings
+from step_wise.demo import generate_controls, load_case, seed_case
 
 
 class Cases(unittest.TestCase):
+    def test_queued_provider_change_is_rejected_before_network_and_invalidates_only_model_cache(self):
+        generate_controls()
+        with tempfile.TemporaryDirectory() as directory:
+            settings = Settings(data=Path(directory), gemma_backend="http", gemma_provider="provider-a")
+            db.init(settings)
+            case = json.loads((ROOT / "demo/cases/room-001.json").read_text())
+            case["consents"] = {"external_processing_consent": True, "clinical_external_processing_consent": True}
+            path = Path(directory) / "case.json"
+            path.write_text(json.dumps(case))
+            aid, _ = seed_case(settings, path)
+            with db.connect(settings) as conn:
+                row = db.assessment(conn, aid)
+            db.enqueue(settings, aid, "analyze", row["input_revision"], row["review_revision"])
+            job = worker.claim(settings)
+            original = worker.load_context(settings, job)
+            changed = worker.load_context(replace(settings, gemma_provider="provider-b"), job)
+            worker.execute_stage("prepare", changed, {})  # local work is independent of the provider
+            self.assertEqual(worker.fingerprint("reconstruct", original, {}), worker.fingerprint("reconstruct", changed, {}))
+            for stage in ("gemma", "report"):
+                self.assertNotEqual(worker.fingerprint(stage, original, {}), worker.fingerprint(stage, changed, {}))
+            with patch("step_wise.pipeline.gemma.post_json") as post:
+                with self.assertRaisesRegex(RuntimeError, "enqueued request"):
+                    worker.execute_stage("gemma", changed, {})
+                post.assert_not_called()
+            endpoint = worker.load_context(replace(settings, gemma_base_url="https://other.invalid/v1?secret=synthetic"), job)
+            self.assertNotEqual(worker.fingerprint("gemma", original, {}), worker.fingerprint("gemma", endpoint, {}))
+            self.assertNotIn("synthetic", json.dumps(endpoint["settings"].gemma_identity()))
+
+    def test_local_stage_does_not_request_external_consent_or_expand_queued_scope(self):
+        generate_controls()
+        with tempfile.TemporaryDirectory() as directory:
+            settings = Settings(data=Path(directory))
+            path = ROOT / "demo/cases/room-001.json"
+            case, dataset, photos, profile = load_case(path)
+            # Only the data-kind gate is replaced: no remote inference or GPU is exercised.
+            with patch("step_wise.cases.load_case", return_value=(case, {**dataset, "data_kind": "single_image_experiment"}, photos, profile)):
+                record, code = cases.run_case(settings, path, "live", "prepare")
+            self.assertEqual((record["status"], code), ("partial", 0))
+            local = cases.run_settings(settings, cases.find_run(settings, record["id"]))
+            local = replace(local, recon_backend="vggt", gemma_backend="http")
+            with db.connect(local) as conn:
+                job = dict(conn.execute("SELECT * FROM jobs WHERE id=?", (record["job_id"],)).fetchone())
+            self.assertNotIn("gemma", json.loads(job["output"])["requested_stages"])
+            context = worker.load_context(local, job)
+            with self.assertRaisesRegex(RuntimeError, "queued scope"):
+                worker.execute_stage("jev", context, {})
+
+    def test_case_consents_cover_the_complete_uploaded_collection(self):
+        generate_controls()
+        with tempfile.TemporaryDirectory() as directory:
+            settings = Settings(data=Path(directory))
+            db.init(settings)
+            case = json.loads((ROOT / "demo/cases/room-001.json").read_text())
+            case["consents"] = {"external_processing_consent": True, "clinical_external_processing_consent": True}
+            path = Path(directory) / "case.json"
+            path.write_text(json.dumps(case))
+            aid, mapping = seed_case(settings, path)
+            with db.connect(settings) as conn:
+                row = db.assessment(conn, aid)
+                inputs = json.loads(row["input_json"])
+            self.assertEqual(len(mapping), 2)
+            self.assertTrue(inputs["external_processing_consent"])
+            self.assertTrue(inputs["clinical_external_processing_consent"])
+            self.assertTrue(db.enqueue(replace(settings, gemma_backend="http"), aid, "analyze",
+                                       row["input_revision"], row["review_revision"]))
+
     def test_report_snapshot_rerun_and_frozen_baseline(self):
         generate_controls()
         with tempfile.TemporaryDirectory() as directory:
@@ -69,8 +136,9 @@ class Cases(unittest.TestCase):
             self.assertEqual(targeted["status"], "review_ready", targeted)
             self.assertEqual(targeted["stages"]["prepare"]["origin_run"], first["id"])
             partial, code = cases.run_case(settings, path, "fixture", "reconstruct", targeted["id"])
-            self.assertEqual(partial["status"], "partial")
-            self.assertEqual(partial["stages"]["gemma"]["status"], "stale")
+            self.assertEqual(partial["status"], "review_ready")
+            self.assertEqual(partial["stages"]["gemma"]["status"], "succeeded")
+            self.assertEqual(partial["stages"]["geometry"]["status"], "succeeded")
             self.assertEqual(partial["stages"]["jev"]["origin_run"], first["id"])
             rebuilt, code = cases.run_case(settings, path, "fixture", reuse_id=partial["id"])
             self.assertEqual(rebuilt["status"], "review_ready", rebuilt)
@@ -86,6 +154,25 @@ class Cases(unittest.TestCase):
             live, code = cases.run_case(settings, path, "live", reuse_id=first["id"])
             self.assertEqual(code, 3)
             self.assertEqual(live["status"], "blocked")
+
+    def test_stage_scoped_case_check_only_requires_its_prerequisites(self):
+        generate_controls()
+        with tempfile.TemporaryDirectory() as directory:
+            settings = Settings(data=Path(directory))
+            path = ROOT / "demo/cases/room-001.json"
+            prepared, code = cases.run_case(settings, path, "fixture", "prepare")
+            self.assertEqual(prepared["status"], "partial")
+            self.assertEqual(code, 0)
+            prepare_checks = cases.read(cases.find_run(settings, prepared["id"]) / "checks.json")
+            self.assertEqual(next(c["status"] for c in prepare_checks if c["id"] == "stage-prepare"), "pass")
+            self.assertTrue(all(c["status"] == "not_applicable" for c in prepare_checks if c["id"].startswith("stage-") and c["id"] != "stage-prepare"))
+
+            reconstructed, code = cases.run_case(settings, path, "fixture", "reconstruct", prepared["id"])
+            self.assertEqual(reconstructed["status"], "partial")
+            self.assertEqual(code, 0, cases.read(cases.find_run(settings, reconstructed["id"]) / "checks.json"))
+            checks = cases.read(cases.find_run(settings, reconstructed["id"]) / "checks.json")
+            self.assertEqual(next(c["status"] for c in checks if c["id"] == "stage-prepare"), "pass")
+            self.assertEqual(next(c["status"] for c in checks if c["id"] == "stage-reconstruct"), "pass")
 
     def test_wrong_expectation_is_visible(self):
         generate_controls()
