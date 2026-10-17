@@ -231,7 +231,7 @@ Keep one consistent finding schema for Jev candidates and Gemma's fallback inspe
 | Layer | Choice |
 |---|---|
 | Mobile capture | Multiple-photo upload, room labels and overlap guidance; patient description with structured confirmation fields |
-| Frontend | React + Vite + TypeScript, three.js for the point cloud and clickable pins, Tailwind CSS |
+| Frontend | Next.js (static export served by the API) + React + TypeScript, three.js for the point cloud and clickable pins, Tailwind CSS |
 | Backend API | Python, FastAPI, Pydantic |
 | Jobs | One background worker, persisted job states in SQLite, progress polling; identify interrupted jobs after restart |
 | Database | SQLite |

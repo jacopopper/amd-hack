@@ -18,9 +18,9 @@ Tested with Python 3.12.3 and Node 22.22.3 on Linux. Native PDF rendering needs 
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.lock
 .venv/bin/pip install --no-deps -e .
-npm --prefix web ci
-npm --prefix web run typecheck
-npm --prefix web run build
+npm --prefix frontend ci
+npm --prefix frontend run typecheck
+npm --prefix frontend run build
 export REVIEWER_USER=reviewer
 export REVIEWER_PASSWORD='choose-a-long-random-local-password'
 .venv/bin/python -m step_wise.cli init
@@ -34,9 +34,9 @@ Run the API and worker in separate terminals with the same environment and local
 .venv/bin/python -m step_wise.worker
 ```
 
-Open <http://localhost:8000>. Log in as the configured reviewer; create a fictional profile and upload `data/demo/synthetic-1.png` and `synthetic-2.png`. Their controls are deliberately generated drawings, not overlapping photographs. In fixture mode, arbitrary uploads receive the same synthetic control findings, **not an assessment of their contents**. After all four decisions, generate and inspect the draft, then release it. Reviewer identity defaults to “Team member — simulated reviewer”. A high-entropy family link grants only the released HTML/PDF, expires after seven days and is shown once. Deleting an assessment revokes access; released assessments cannot otherwise be edited.
+Open <http://localhost:8000>. Log in as the configured reviewer, choose “Nuovo paziente”, enter a fictional profile and upload `data/demo/synthetic-1.png` and `synthetic-2.png` to a room. Their controls are deliberately generated drawings, not overlapping photographs. In fixture mode, arbitrary uploads receive the same synthetic control findings, **not an assessment of their contents**. Review every finding (confirm, edit, dismiss or ask to verify), prepare the report, inspect it, then release it from “Rivedi e rilascia”. Reviewer identity defaults to “Team member — simulated reviewer”. A high-entropy family link grants only the released HTML/PDF, expires after seven days and is shown once. Deleting an assessment revokes access; released assessments cannot otherwise be edited.
 
-Vite development is available with `npm --prefix web run dev` after starting the API on port 8000. Its `/api` proxy keeps requests on one origin.
+The reviewer app in `frontend/` is Next.js. `npm --prefix frontend run build` writes a static export to `frontend/out`, which the API serves on its own origin; exported pages get a CSP that admits only their inline bootstrap scripts by hash. For live development run `STEP_WISE_BACKEND=http://127.0.0.1:8000 npm --prefix frontend run dev -- --port 3010` and start the API with `STEP_WISE_ALLOWED_ORIGINS=http://127.0.0.1:3010`; the dev server proxies `/api` so the session cookie stays same-origin.
 
 ## CPU verification
 

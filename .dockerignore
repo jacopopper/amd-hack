@@ -7,7 +7,8 @@
 .venv
 data
 model-cache
-web/node_modules
-web/dist
+frontend/node_modules
+frontend/.next
+frontend/out
 **/__pycache__
 **/*.egg-info

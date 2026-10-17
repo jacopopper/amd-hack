@@ -44,6 +44,16 @@ function dotTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
+// Without WebGL the page stays usable and the reviewer works from the photos.
+function hasWebGL() {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
 function homeView(rt: Pick<Runtime, "center" | "span">, mode: ViewMode): [THREE.Vector3, THREE.Vector3] {
   const target = rt.center.clone();
   if (mode === "plan") return [target.clone().add(new THREE.Vector3(0, rt.span * 1.9, 0.0001)), target];
@@ -75,6 +85,7 @@ export default function SpaceViewer({
   const runtime = useRef<Runtime | null>(null);
   const latest = useRef({ onPick, tool, selectedId, hazards, scene, rightInset });
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [webgl] = useState(hasWebGL);
   const [measurement, setMeasurement] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,7 +95,7 @@ export default function SpaceViewer({
   // Scene lifetime: the cloud is loaded once per scene asset.
   useEffect(() => {
     const element = mount.current;
-    if (!element || !scene?.ply_url) return;
+    if (!element || !scene?.ply_url || !webgl) return;
     let disposed = false;
     let frame = 0;
     const abort = new AbortController();
@@ -274,7 +285,7 @@ export default function SpaceViewer({
     };
     // Keyed on identity + asset: polling returns new array instances for the same scene.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene?.id, scene?.ply_url]);
+  }, [scene?.id, scene?.ply_url, webgl]);
 
   // Tags: positions and stems follow hazards/decisions without reloading the cloud.
   useEffect(() => {
@@ -365,7 +376,7 @@ export default function SpaceViewer({
         </div>
       </div>
       {state === "loading" && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Apertura della casa…</div>}
-      {state === "error" && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Vista 3D non disponibile. La revisione resta possibile dalle foto.</div>}
+      {(state === "error" || !webgl) && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Vista 3D non disponibile. La revisione resta possibile dalle foto.</div>}
       {!scene?.ply_url && <div className="absolute inset-0 grid place-items-center text-sm text-white/60">Questa stanza non ha una ricostruzione 3D. Usa la vista foto.</div>}
     </div>
   );

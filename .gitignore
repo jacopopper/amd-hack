@@ -5,8 +5,6 @@ __pycache__/
 .venv/
 data/
 model-cache/
-web/node_modules/
-web/dist/
 *.egg-info/
 .pytest_cache/
 .playwright-mcp/

@@ -124,7 +124,7 @@ def main():
     (output / 'scene.json').write_text(json.dumps(scene, indent=2, allow_nan=False) + '\n')
     vendor = output / 'vendor'
     vendor.mkdir()
-    three = ROOT / 'web/node_modules/three'
+    three = ROOT / 'frontend/node_modules/three'
     for source in ('build/three.module.js', 'build/three.core.js', 'examples/jsm/controls/OrbitControls.js', 'examples/jsm/loaders/PLYLoader.js'):
         shutil.copyfile(three / source, vendor / Path(source).name)
     shutil.copyfile(three / 'LICENSE', vendor / 'LICENSE-three.txt')
