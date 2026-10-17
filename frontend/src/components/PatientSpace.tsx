@@ -112,10 +112,11 @@ export default function PatientSpace({ id }: { id: string }) {
       if (sid) setSceneId(sid);
       const pid = effective(h).evidence[0]?.photo_id;
       if (pid) setPhotoId(pid);
-      // Findings without a 3D location are shown on their photo.
-      if (!effective(h).anchor) setView("photos");
+      // Keep navigational/illustrative pins in 3D without promoting them to anchors.
+      const hasPresentationPin = scenes.find((s) => s.id === sid)?.presentation?.hazard_positions[h.id];
+      if (!effective(h).anchor && !h.evidence_marker && !hasPresentationPin) setView("photos");
     },
-    [hazards, assessment],
+    [hazards, assessment, scenes],
   );
 
   const step = (d: number) => {

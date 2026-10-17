@@ -1,0 +1,33 @@
+<!doctype html><html lang="it"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Jev · risultati reali sulle foto del pitch</title><style>body{font:16px/1.55 system-ui;background:#101214;color:#eee;max-width:1200px;margin:40px auto;padding:0 24px}h1{line-height:1.15}article{background:#1b1e22;padding:24px;border-radius:12px;margin:28px 0}img{display:block;max-width:100%;max-height:900px;margin:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}a{color:#9ccaff}.note{color:#bfc3ca;max-width:900px}</style><h1>Jev · risultati reali sulle foto del pitch</h1><p>Due chiamate live a <code>jev-1.14.0</code>, con la stessa domanda generale e lo stesso adattatore del backend.</p><p class="note">Rosso continuo = candidato incluso dal gate di presenza del backend (punteggio ≥ 0.75). Il gate attuale non controlla la confidenza della box, riportata sotto ogni foto. Giallo tratteggiato = regione grezza, non accettata. Il punteggio è l'output Noul del modello, non una probabilità di caduta. Ogni richiesta restituisce una sola regione e nessun nome dell'oggetto; i nove hotspot illustrativi della presentazione non sono stati inviati al modello.</p><article><h2>Corridoio</h2><img src='corridoio-jev.jpg' alt='Regione restituita da Jev: Corridoio'><pre>{
+  &quot;presence_score&quot;: 0.9,
+  &quot;backend_presence&quot;: &quot;present&quot;,
+  &quot;normalized_box&quot;: [
+    0.12,
+    0.22,
+    0.26,
+    0.44
+  ],
+  &quot;box_confidence&quot;: 0.04,
+  &quot;model&quot;: &quot;jev-1.14.0&quot;,
+  &quot;elapsed_seconds&quot;: 1.481,
+  &quot;usage&quot;: {
+    &quot;input_tokens&quot;: 5084,
+    &quot;output_tokens&quot;: 40
+  }
+}</pre><p><a href='corridoio.json'>Risposta API completa e domande</a> · <a href='corridoio-prepared.jpg'>Immagine inviata</a> · <a href='https://unsplash.com/photos/ornate-room-with-green-trim-KQTxSW43ios'>Photo by Thomas Würth on Unsplash</a></p></article><article><h2>Bagno</h2><img src='bagno-jev.jpg' alt='Regione restituita da Jev: Bagno'><pre>{
+  &quot;presence_score&quot;: 0.7,
+  &quot;backend_presence&quot;: &quot;unknown&quot;,
+  &quot;normalized_box&quot;: [
+    0.3,
+    0.03,
+    0.35,
+    0.95
+  ],
+  &quot;box_confidence&quot;: 0.06,
+  &quot;model&quot;: &quot;jev-1.14.0&quot;,
+  &quot;elapsed_seconds&quot;: 0.454,
+  &quot;usage&quot;: {
+    &quot;input_tokens&quot;: 4637,
+    &quot;output_tokens&quot;: 40
+  }
+}</pre><p><a href='bagno.json'>Risposta API completa e domande</a> · <a href='bagno-prepared.jpg'>Immagine inviata</a> · <a href='https://unsplash.com/photos/white-ceramic-bathtub-near-white-ceramic-bathtub-hWGlQlfoEr0'>Photo by Point3D Commercial Imaging Ltd. on Unsplash</a></p></article></html>

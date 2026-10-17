@@ -1,0 +1,1395 @@
+{
+  "requests": 14,
+  "model_versions": [
+    "jev-1.14.0"
+  ],
+  "first_run_binary": {
+    "correct": 42,
+    "total": 42,
+    "tp": 7,
+    "fp": 0,
+    "fn": 0
+  },
+  "first_run_choice": {
+    "correct": 11,
+    "total": 13
+  },
+  "first_run_boxes_iou_ge_05": 8,
+  "first_run_box_count": 8,
+  "median_latency_seconds": 0.7498152220002794,
+  "min_latency_seconds": 0.35303823100002774,
+  "max_latency_seconds": 1.3829230880000978,
+  "input_tokens": 47457,
+  "binary_results": [
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.16,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": true,
+      "actual": true,
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.16,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": true,
+      "actual": true,
+      "value": 0.99,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "cables",
+      "expected": true,
+      "actual": true,
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.31,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.01,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "cables",
+      "expected": true,
+      "actual": true,
+      "value": 0.99,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.35,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.25,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.06,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": true,
+      "actual": true,
+      "value": 0.99,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.25,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.05,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": true,
+      "actual": true,
+      "value": 0.99,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.28,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "rug",
+      "expected": true,
+      "actual": true,
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.29,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "rug",
+      "expected": true,
+      "actual": true,
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.14,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "rug",
+      "expected": true,
+      "actual": true,
+      "value": 0.96,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.07,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.03,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.14,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "rug",
+      "expected": true,
+      "actual": true,
+      "value": 0.97,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.07,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.19,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.34,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": true,
+      "actual": true,
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": true,
+      "actual": true,
+      "value": 0.96,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.18,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.33,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": true,
+      "actual": true,
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": true,
+      "actual": true,
+      "value": 0.96,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.2,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.06,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.16,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.12,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.02,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "cables",
+      "expected": false,
+      "actual": false,
+      "value": 0.18,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "rug",
+      "expected": false,
+      "actual": false,
+      "value": 0.04,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "stairs",
+      "expected": false,
+      "actual": false,
+      "value": 0.06,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "grab_bar",
+      "expected": false,
+      "actual": false,
+      "value": 0.16,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "stair_handrail",
+      "expected": false,
+      "actual": false,
+      "value": 0.1,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "clutter",
+      "expected": false,
+      "actual": false,
+      "value": 0.01,
+      "correct": true
+    }
+  ],
+  "choice_results": [
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": null,
+      "actual": "visible",
+      "value": 0.22,
+      "correct": null
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "unknown",
+      "value": 0.65,
+      "correct": false
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": null,
+      "actual": "visible",
+      "value": 0.2,
+      "correct": null
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "unknown",
+      "value": 0.77,
+      "correct": false
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "obscured",
+      "actual": "obscured",
+      "value": 0.89,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 0.92,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "obscured",
+      "actual": "obscured",
+      "value": 0.88,
+      "correct": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 0.93,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "unknown",
+      "actual": "unknown",
+      "value": 0.92,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "unknown",
+      "actual": "unknown",
+      "value": 0.92,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "unknown",
+      "actual": "unknown",
+      "value": 0.95,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "unknown",
+      "actual": "unknown",
+      "value": 0.92,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "unknown",
+      "value": 0.68,
+      "correct": false
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "visible",
+      "actual": "visible",
+      "value": 1.0,
+      "correct": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "unknown",
+      "value": 0.73,
+      "correct": false
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "floor_view",
+      "expected": "out_of_frame",
+      "actual": "out_of_frame",
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 0.97,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "floor_view",
+      "expected": "out_of_frame",
+      "actual": "out_of_frame",
+      "value": 0.98,
+      "correct": true
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "question": "rug_attachment",
+      "expected": "not_visible",
+      "actual": "not_visible",
+      "value": 0.99,
+      "correct": true
+    }
+  ],
+  "box_results": [
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "target": "left_grab_bar",
+      "box": [
+        0.06,
+        0.16,
+        0.15,
+        0.63
+      ],
+      "confidence": 0.81,
+      "presence": 0.95,
+      "valid": true,
+      "iou": 0.790378006872852,
+      "gated_in": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "target": "folding_grab_bar",
+      "box": [
+        0.74,
+        0.15,
+        0.82,
+        0.62
+      ],
+      "confidence": 0.69,
+      "presence": 0.85,
+      "valid": true,
+      "iou": 0.9087348217783001,
+      "gated_in": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 1,
+      "target": "alarm_cord",
+      "box": [
+        0.77,
+        0.65,
+        0.8,
+        0.93
+      ],
+      "confidence": 0.55,
+      "presence": 0.84,
+      "valid": true,
+      "iou": 0.680721815258174,
+      "gated_in": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "target": "left_grab_bar",
+      "box": [
+        0.06,
+        0.16,
+        0.15,
+        0.63
+      ],
+      "confidence": 0.83,
+      "presence": 0.95,
+      "valid": true,
+      "iou": 0.790378006872852,
+      "gated_in": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "target": "folding_grab_bar",
+      "box": [
+        0.74,
+        0.15,
+        0.82,
+        0.61
+      ],
+      "confidence": 0.7,
+      "presence": 0.84,
+      "valid": true,
+      "iou": 0.9078322784810128,
+      "gated_in": true
+    },
+    {
+      "case": "bathroom",
+      "repeat": 2,
+      "target": "alarm_cord",
+      "box": [
+        0.77,
+        0.59,
+        0.8,
+        0.93
+      ],
+      "confidence": 0.53,
+      "presence": 0.83,
+      "valid": true,
+      "iou": 0.5864245036170539,
+      "gated_in": true
+    },
+    {
+      "case": "cables",
+      "repeat": 1,
+      "target": "power_adapter",
+      "box": [
+        0.56,
+        0.58,
+        0.77,
+        0.77
+      ],
+      "confidence": 0.9,
+      "presence": 0.92,
+      "valid": true,
+      "iou": 0.7881981032665966,
+      "gated_in": true
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "target": "power_adapter",
+      "box": [
+        0.56,
+        0.59,
+        0.77,
+        0.77
+      ],
+      "confidence": 0.9,
+      "presence": 0.92,
+      "valid": true,
+      "iou": 0.8289619504987072,
+      "gated_in": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 1,
+      "target": "blue_bag",
+      "box": [
+        0.69,
+        0.56,
+        0.93,
+        0.88
+      ],
+      "confidence": 0.9,
+      "presence": 0.97,
+      "valid": true,
+      "iou": 0.8815426997245185,
+      "gated_in": true
+    },
+    {
+      "case": "clutter",
+      "repeat": 2,
+      "target": "blue_bag",
+      "box": [
+        0.69,
+        0.56,
+        0.93,
+        0.88
+      ],
+      "confidence": 0.9,
+      "presence": 0.96,
+      "valid": true,
+      "iou": 0.8815426997245185,
+      "gated_in": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "target": "rug",
+      "box": [
+        0.23,
+        0.78,
+        0.42,
+        0.96
+      ],
+      "confidence": 0.93,
+      "presence": 0.96,
+      "valid": true,
+      "iou": 0.8407821229050281,
+      "gated_in": true
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "target": "rug",
+      "box": [
+        0.23,
+        0.78,
+        0.41,
+        0.95
+      ],
+      "confidence": 0.93,
+      "presence": 0.96,
+      "valid": true,
+      "iou": 0.8864297457948657,
+      "gated_in": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 1,
+      "target": "rug",
+      "box": [
+        0.0,
+        0.87,
+        0.22,
+        0.99
+      ],
+      "confidence": 0.93,
+      "presence": 0.98,
+      "valid": true,
+      "iou": 0.8497246262785207,
+      "gated_in": true
+    },
+    {
+      "case": "staged_room",
+      "repeat": 2,
+      "target": "rug",
+      "box": [
+        0.0,
+        0.87,
+        0.22,
+        0.99
+      ],
+      "confidence": 0.91,
+      "presence": 0.98,
+      "valid": true,
+      "iou": 0.8497246262785207,
+      "gated_in": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 1,
+      "target": "handrail",
+      "box": [
+        0.52,
+        0.03,
+        0.87,
+        0.57
+      ],
+      "confidence": 0.68,
+      "presence": 0.96,
+      "valid": true,
+      "iou": 0.9152270573656971,
+      "gated_in": true
+    },
+    {
+      "case": "stairs",
+      "repeat": 2,
+      "target": "handrail",
+      "box": [
+        0.52,
+        0.03,
+        0.87,
+        0.57
+      ],
+      "confidence": 0.71,
+      "presence": 0.95,
+      "valid": true,
+      "iou": 0.9152270573656971,
+      "gated_in": true
+    }
+  ],
+  "absent_boxes": [
+    {
+      "case": "cables",
+      "repeat": 1,
+      "target": "absent_steps",
+      "box": [
+        0.01,
+        0.03,
+        0.99,
+        0.35
+      ],
+      "confidence": 0.04,
+      "presence": 0.03,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    },
+    {
+      "case": "cables",
+      "repeat": 2,
+      "target": "absent_steps",
+      "box": [
+        0.01,
+        0.04,
+        0.99,
+        0.34
+      ],
+      "confidence": 0.04,
+      "presence": 0.03,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    },
+    {
+      "case": "family_room",
+      "repeat": 1,
+      "target": "absent_grab_bar",
+      "box": [
+        0.02,
+        0.44,
+        0.22,
+        0.46
+      ],
+      "confidence": 0.04,
+      "presence": 0.02,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    },
+    {
+      "case": "family_room",
+      "repeat": 2,
+      "target": "absent_grab_bar",
+      "box": [
+        0.02,
+        0.45,
+        0.45,
+        0.54
+      ],
+      "confidence": 0.04,
+      "presence": 0.02,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 1,
+      "target": "absent_rug",
+      "box": [
+        0.64,
+        0.9,
+        0.66,
+        0.99
+      ],
+      "confidence": 0.14,
+      "presence": 0.04,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    },
+    {
+      "case": "upper_room_crop",
+      "repeat": 2,
+      "target": "absent_rug",
+      "box": [
+        0.63,
+        0.9,
+        0.66,
+        0.99
+      ],
+      "confidence": 0.13,
+      "presence": 0.04,
+      "valid": true,
+      "iou": null,
+      "gated_in": false
+    }
+  ],
+  "target_presence_correct": 22,
+  "target_presence_total": 22,
+  "estimated_usd_at_published_rate": 0.001993194,
+  "changed_shared_decisions_on_repeat": []
+}

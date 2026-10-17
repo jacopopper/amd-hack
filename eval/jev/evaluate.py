@@ -69,7 +69,7 @@ def run(manifest, output, repeats, only):
             questions = dict(manifest["questions"])
             for box in case["boxes"]:
                 questions[box["id"] + "_present"] = {"type": "noul", "instructions": "Is " + box["target"] + " visibly present?"}
-                questions[box["id"] + "_box"] = {"type": "box", "instructions": "The smallest box around " + box["target"] + ". Include only the visible extent, not hidden parts."}
+                questions[box["id"] + "_box"] = {"type": "box", "instructions": "The smallest axis-aligned box tightly enclosing only " + box["target"] + ". Follow the object's full visible extent, crop the box where something hides it or where it runs past the image border, and never include adjacent objects, fixtures, or surfaces the target touches or hangs from. For thin or elongated objects keep the box narrow, hugging the object along its entire visible length."}
             reference = str(uuid.uuid4())
             payload = {"model": manifest["model"], "state": {"photo": reference},
                        "assets": {reference: {"type": "image", "format": "jpg", "data_base64": base64.b64encode(data).decode()}},

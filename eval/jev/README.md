@@ -1,5 +1,22 @@
 # Jev image evaluation
 
+## Prompt v2 — 2026-10-17
+
+Tightened the shared box-question template (`evaluate.py`) and the production per-target region instructions (`../../backend/src/step_wise/prompts/jev-visual.json`): tight axis-aligned boxes, crop at occluders and image borders, never include adjacent fixtures, and keep thin objects narrow along their full visible length. Presence texts unchanged. [Summary](results-prompt-v2/summary.json).
+
+| Check | Baseline (2026-10-16) | Prompt v2 |
+|---|---:|---:|
+| Shared binary labels | 42/42 | 42/42 |
+| Boxes with IoU ≥ 0.5 | 8/8 | 8/8 |
+| Mean IoU (pass 1) | 0.839 | 0.832 |
+| Thin red alarm cord | 0.558 (conf 0.48) | **0.681 (conf 0.55)** |
+
+The aggregate mean stayed flat within run noise; the cord — the weakest box, whose confidence also sat below the app's 0.5 evidence gate — improved by 0.123 and now crosses the gate, so its evidence survives in the product. Repeats changed zero shared decisions. Kept as the new baseline instead of further tuning eight boxes.
+
+## Pitch photos — 2026-10-17
+
+The initial object-agnostic prompt produced weak localization on the corridor and bathroom photos. A later fixed set of six visual-object question pairs returned boxes for both rugs and the bathtub, retained on an independent repeat. See the [before/after comparison](../../pitch/jev-results/2026-10-17/optimization/index.html), [clean results](../../pitch/jev-results/2026-10-17/optimization/objects-v2/index.html), and [method/limits](../../pitch/jev-results/2026-10-17/optimization/README.md). The backend now uses these object questions with presence and box-confidence gates. The original [generic-prompt baseline](../../pitch/jev-results/2026-10-17/index.html) is preserved. Neither this two-photo exercise nor the older target-specific evaluation below establishes open-ended hazard-detection accuracy.
+
 ## Results — 2026-10-16
 
 **Jev looks useful for generating visual candidates in the hackathon prototype.** Both passes matched all 42 shared binary labels (7 positives, 35 negatives per pass). This is a small, selected set with simple presence questions; it is not a 100% hazard-detection accuracy claim.

@@ -163,7 +163,7 @@ def estimate_floor(world_points, confidence, world_to_camera, confidence_thresho
 
 def geometry(context):
     scenes = context["outputs"]["reconstruct"]["scenes"]
-    anchors, abstentions = [], []
+    anchors, abstentions, evidence_markers = [], [], []
     for scene in scenes:
         scene.setdefault("floor_state", "unknown")
         scene.setdefault("gravity_state", "unknown")
@@ -216,6 +216,16 @@ def geometry(context):
             background = points[index, y1:y2, x1:x2][ring]
             background_support = (confidence[index, y1:y2, x1:x2][ring] >= scene["confidence_threshold"]).astype(float)
             camera_center = -cameras[index, :, :3].T @ cameras[index, :, 3]
+            # A photo-surface pointer is only a navigation aid, not a validated
+            # object anchor. Thin floor hazards often cannot pass foreground tests.
+            surface = supported_anchor(region, support, camera_center=camera_center) if len(region) else None
+            if surface is not None:
+                evidence_markers.append({
+                    "photo_id": candidate["photo_id"], "category": candidate["category"],
+                    "marker": {"scene_id": scene["id"], "position_world": surface,
+                               "photo_id": candidate["photo_id"], "evidence_box": candidate["evidence"]["box"],
+                               "method": "photo_surface_estimate",
+                               "uncertainty": "Posizione indicativa dalla profondità della foto, non confermata da più viste."}})
             center = foreground_anchor(region, support, background, background_support, camera_center) if len(region) else None
             views = []
             if center is not None:
@@ -252,6 +262,7 @@ def geometry(context):
             anchors.append({"photo_id": candidate["photo_id"], "category": candidate["category"], "evidence_box": candidate["evidence"]["box"],
                             "anchor": {"scene_id": scene["id"], "position_world": center, "method": "foreground_multiview", "source_photo_ids": views,
                                        "uncertainty": "Posizione proposta da una regione e più viste coerenti; verificare che appartenga all’oggetto indicato. Scala metrica sconosciuta."}})
-    return {"scenes": scenes, "measurements": [], "anchors": anchors, "anchor_abstentions": abstentions, "provenance": "derived",
+    return {"scenes": scenes, "measurements": [], "anchors": anchors, "anchor_abstentions": abstentions,
+            "evidence_markers": evidence_markers, "provenance": "derived",
             "status": "degraded" if any(s["status"] != "ready" for s in scenes) else "succeeded",
             "warnings": ["Metric scale unknown; no dimensions are claimed", *context["outputs"]["reconstruct"].get("warnings", [])]}

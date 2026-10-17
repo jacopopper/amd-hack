@@ -24,11 +24,34 @@ from step_wise.pipeline.reports import release
 from step_wise.validation import validate_hazard
 
 
+def room_presentation(scene, assessment):
+    value = scene.get("presentation")
+    if (not value or value.get("source_job_id") != assessment["analysis_job_id"]
+            or value.get("input_revision") != assessment["input_revision"]):
+        return None
+    provenance = value.get("provenance", "illustrative")
+    if provenance not in {"illustrative", "photo_completed"}:
+        return None
+    completed = provenance == "photo_completed"
+    if completed and value.get("coordinate_space") != "raw_scene_relative":
+        return None
+    return {"model_url": f"/api/assets/{value['asset_id']}", "provenance": provenance,
+            "coordinate_space": "raw_scene_relative" if completed else "illustrative",
+            "display_transform": value.get("display_transform") if completed else None,
+            "label": ("Ricostruzione fotografica · superfici mancanti completate a mano" if completed
+                      else "Modello illustrativo · proporzioni e posizioni non misurate"),
+            "hazard_positions": {} if completed else value["hazard_positions"]}
+
+
 def current_findings(conn, job_id, output):
     result = []
     for hazard in conn.execute("SELECT * FROM hazards WHERE job_id=? ORDER BY rowid", (job_id,)):
         review = conn.execute("SELECT * FROM reviews WHERE hazard_id=? ORDER BY review_revision DESC LIMIT 1", (hazard["id"],)).fetchone()
-        result.append({"id": hazard["id"], **json.loads(hazard["payload"]),
+        payload = json.loads(hazard["payload"])
+        marker = output.get("evidence_markers", {}).get(hazard["id"])
+        if review and (review["decision"] == "reject" or json.loads(review["effective"]).get("evidence") != payload["evidence"]):
+            marker = None
+        result.append({"id": hazard["id"], **payload, "evidence_marker": marker,
                        "producer": output.get("producer"), "provenance": output.get("provenance"),
                        "review": {**dict(review), "effective": json.loads(review["effective"])} if review else None})
     return result
@@ -297,11 +320,13 @@ def create_app(settings=None):
     @app.get("/api/assessments/{aid}/scenes")
     def scenes(aid: str, identity=Depends(reviewer)):
         with db.connect(settings) as conn:
-            db.assessment(conn, aid)
+            assessment = db.assessment(conn, aid)
             result = []
             for s in db.active_scenes(conn, aid):
                 payload = json.loads(s["payload"])
-                result.append({"id": s["id"], "label": s["label"], **{k: v for k, v in payload.items() if not k.endswith("path") and k not in {"images"}}, "ply_url": f"/api/assets/{payload['ply_asset_id']}" if payload.get("ply_asset_id") else None})
+                result.append({"id": s["id"], "label": s["label"], **{k: v for k, v in payload.items() if not k.endswith("path") and k not in {"images", "presentation"}},
+                               "presentation": room_presentation(payload, assessment),
+                               "ply_url": f"/api/assets/{payload['ply_asset_id']}" if payload.get("ply_asset_id") else None})
             return result
 
     @app.get("/api/assessments/{aid}/scene-links")
@@ -496,6 +521,7 @@ def create_app(settings=None):
                               "alignment_state": "reviewer_linked" if scene_row["id"] in linked_scene_ids else scene.get("alignment_state", "unregistered"), "coordinate_convention": scene.get("coordinate_convention"),
                               "raw_coordinate_units": scene.get("raw_coordinate_units", "relative"),
                               "display_transform": scene.get("display_transform"), "bounds": scene.get("bounds"),
+                              "presentation": room_presentation(scene, row),
                               "input_revision": scene.get("input_revision"), "reconstruction_job_id": scene.get("reconstruction_job_id"),
                               "manifest_url": f"/api/assets/{scene['manifest_asset_id']}" if scene.get("manifest_asset_id") else None,
                               "analysis_url": f"/api/assets/{scene['analysis_asset_id']}" if scene.get("analysis_asset_id") else None,

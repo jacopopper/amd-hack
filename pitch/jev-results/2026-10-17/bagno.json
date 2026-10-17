@@ -1,0 +1,96 @@
+{
+  "source": "pitch/assets/photos/bagno.jpg",
+  "source_sha256": "b2c3d38e79b768fb75e8b800c4b6e6e4de79ed2a41815c63d1ba5ae00db3bf33",
+  "prepared_sha256": "fa9ac96349e57f89ed4dc7c85c9f57ccc8870a06d2a7af2f106156f556260e9a",
+  "upright_size": [
+    1800,
+    1200
+  ],
+  "transform": {
+    "input_size": [
+      1568,
+      1045
+    ],
+    "scale_xy": [
+      0.8711111111111111,
+      0.8708333333333333
+    ],
+    "offset_xy": [
+      0,
+      0
+    ],
+    "content_box": [
+      0,
+      0,
+      1568,
+      1045
+    ]
+  },
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "requested_model": "jev-1.14.0",
+  "questions": {
+    "hazard_review": {
+      "type": "noul",
+      "instructions": "Inspect the photo without assuming any particular object or hazard is present. Is there a visible feature that warrants review as a potential home-safety hazard for an older adult, particularly a fall risk?"
+    },
+    "hazard_region": {
+      "type": "box",
+      "instructions": "If the answer is yes, draw a tight box around the single visible feature that most warrants review. If none does, return an empty box."
+    }
+  },
+  "at_utc": "2026-10-17T12:14:41.769218+00:00",
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "hazard_review": {
+        "type": "noul",
+        "noul": 0.7
+      },
+      "hazard_region": {
+        "type": "box",
+        "box": {
+          "top": 0.03,
+          "bottom": 0.95,
+          "left": 0.3,
+          "right": 0.35
+        },
+        "confidence": 0.06
+      }
+    },
+    "usage": {
+      "input_tokens": 4637,
+      "output_tokens": 40
+    }
+  },
+  "candidates": [
+    {
+      "photo_id": "02e1f446-c514-45ce-b122-f27a418a9328",
+      "category": "potential_home_safety_hazard",
+      "question_id": "general-home-safety",
+      "presence": "unknown",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.7
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.03,
+            "bottom": 0.95,
+            "left": 0.3,
+            "right": 0.35
+          },
+          "confidence": 0.06
+        }
+      }
+    }
+  ],
+  "status": "succeeded",
+  "elapsed_seconds": 0.45439992699994036
+}

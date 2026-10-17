@@ -1,0 +1,104 @@
+{
+  "source": "pitch/assets/photos/corridoio.jpg",
+  "source_sha256": "babe3cccd77adca87a3411110b52e870e4314e6a64e96f3cdb3f6553c5efaf47",
+  "prepared_sha256": "e1d68d47f5a6621fc3e2a24454aefc431618e675ea9ac943f2f1a4e07cc30e10",
+  "upright_size": [
+    1350,
+    1800
+  ],
+  "transform": {
+    "input_size": [
+      1176,
+      1568
+    ],
+    "scale_xy": [
+      0.8711111111111111,
+      0.8711111111111111
+    ],
+    "offset_xy": [
+      0,
+      0
+    ],
+    "content_box": [
+      0,
+      0,
+      1176,
+      1568
+    ]
+  },
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "requested_model": "jev-1.14.0",
+  "questions": {
+    "hazard_review": {
+      "type": "noul",
+      "instructions": "Inspect the photo without assuming any particular object or hazard is present. Is there a visible feature that warrants review as a potential home-safety hazard for an older adult, particularly a fall risk?"
+    },
+    "hazard_region": {
+      "type": "box",
+      "instructions": "If the answer is yes, draw a tight box around the single visible feature that most warrants review. If none does, return an empty box."
+    }
+  },
+  "at_utc": "2026-10-17T12:14:40.241543+00:00",
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "hazard_review": {
+        "type": "noul",
+        "noul": 0.9
+      },
+      "hazard_region": {
+        "type": "box",
+        "box": {
+          "top": 0.22,
+          "bottom": 0.44,
+          "left": 0.12,
+          "right": 0.26
+        },
+        "confidence": 0.04
+      }
+    },
+    "usage": {
+      "input_tokens": 5084,
+      "output_tokens": 40
+    }
+  },
+  "candidates": [
+    {
+      "photo_id": "c2bd9706-9de9-45c2-b3af-101ec688045e",
+      "category": "potential_home_safety_hazard",
+      "question_id": "general-home-safety",
+      "presence": "present",
+      "coverage": "unknown",
+      "evidence": {
+        "photo_id": "c2bd9706-9de9-45c2-b3af-101ec688045e",
+        "box": [
+          162.00000000000003,
+          396.0,
+          351.0,
+          792.0
+        ]
+      },
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.9
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.22,
+            "bottom": 0.44,
+            "left": 0.12,
+            "right": 0.26
+          },
+          "confidence": 0.04
+        }
+      }
+    }
+  ],
+  "status": "succeeded",
+  "elapsed_seconds": 1.4809170220000851
+}

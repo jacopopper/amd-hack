@@ -71,7 +71,7 @@ def load_context(settings, job, directory=None):
 def fingerprint(stage, context, manifests):
     """Fixed stage-specific inputs; keep reconstruction independent of profile/Jev."""
     settings = context["settings"]
-    files = {"prepare": ["pipeline/photos.py"], "jev": ["pipeline/jev.py", "prompts/jev-general.txt"], "reconstruct": ["pipeline/reconstruction.py", "pipeline/vggt_worker.py"],
+    files = {"prepare": ["pipeline/photos.py"], "jev": ["pipeline/jev.py", "prompts/jev-visual.json"], "reconstruct": ["pipeline/reconstruction.py", "pipeline/vggt_worker.py"],
              "geometry": ["pipeline/geometry.py"], "gemma": ["pipeline/gemma.py", "validation.py", "prompts/assessment.txt"],
              "avatar": ["pipeline/avatar.py", "pipeline/avatar_blender.py", "pipeline/avatar_style.py", "pipeline/mpfb_export.py"],
              "report": ["pipeline/reports.py", "prompts/report.txt", "templates/report.html"]}[stage]
@@ -289,6 +289,7 @@ def publish_analysis(context):
         photo_rows = {p["id"]: p for p in context["photos"]}
         scene_rows = {s["id"]: s for s in context["outputs"]["geometry"]["scenes"]}
         anchor_abstentions = list(context["outputs"]["geometry"].get("anchor_abstentions", []))
+        output["evidence_markers"] = {}
         for hazard in output["hazards"]:
             hazard = dict(hazard)
             if not hazard.get("anchor"):
@@ -311,7 +312,17 @@ def publish_analysis(context):
                         break
             validate_hazard(Hazard.model_validate(hazard), photo_rows, scene_rows, context["guidance"],
                             context["assessment_input"]["profile"], context["measurements"])
-            conn.execute("INSERT INTO hazards VALUES(?,?,?,?)", (db.uid(), row["id"], job["id"], db.dumps(hazard)))
+            hazard_id = db.uid()
+            conn.execute("INSERT INTO hazards VALUES(?,?,?,?)", (hazard_id, row["id"], job["id"], db.dumps(hazard)))
+            from step_wise.pipeline.geometry import box_overlap
+            for proposed in context["outputs"]["geometry"].get("evidence_markers", []):
+                marker = proposed["marker"]
+                if proposed["category"] == hazard["category"] and any(
+                    e["photo_id"] == marker["photo_id"] and e.get("box")
+                    and box_overlap(e["box"], marker["evidence_box"]) >= .5 for e in hazard["evidence"]
+                ):
+                    output["evidence_markers"][hazard_id] = marker
+                    break
         output["avatar"] = publish_local_artifacts(context, conn)
         output["geometry_status"] = context["outputs"]["geometry"].get("status", "unknown")
         output["anchor_abstentions"] = anchor_abstentions

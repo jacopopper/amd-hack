@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="it">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<title>Jev · confronto reale dei prompt</title>
+<style>
+body{font:16px/1.55 system-ui;background:#101214;color:#eee;max-width:1400px;margin:40px auto;padding:0 24px}h1{line-height:1.15}a{color:#9ccaff}p{max-width:980px;color:#c5cbd3}.pair{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0 50px}figure{margin:0;background:#1b1e22;padding:20px;border-radius:12px;min-width:0}img{display:block;width:100%;height:650px;object-fit:contain}figcaption{margin-top:15px;font-size:14px;color:#c5cbd3}h3{margin:0 0 16px}strong{color:#fff}@media(max-width:760px){body{padding:0 14px}.pair{grid-template-columns:1fr}img{height:auto;max-height:700px}}
+</style>
+<h1>Jev: prompt generico → oggetti visibili</h1>
+<p>Stesse due foto, stesso modello <code>jev-1.14.0</code>. Le box sono risposte API reali: nessuna coordinata è stata corretta a mano. Il nuovo prompt chiede presenza e posizione di sei tipi di oggetto, con le stesse domande su entrambe le immagini.</p>
+<p><a href="objects-v2/index.html">Risultati puliti e tutte le risposte</a> · <a href="objects-v2-repeat/index.html">Ripetizione indipendente</a> · <a href="README.md">Metodo e limiti</a> · <a href="summary.json">Riepilogo JSON</a></p>
+<h2>Corridoio</h2>
+<div class="pair">
+<figure><h3>Prima · domanda generica</h3><img src="../corridoio-jev.jpg" alt="Prima: box sul quadro a parete"><figcaption>Presenza <strong>0.90</strong>, confidenza box <strong>0.04</strong>. La regione cade sul quadro a parete.</figcaption></figure>
+<figure><h3>Dopo · oggetti concreti</h3><img src="objects-v2/corridoio-jev.jpg" alt="Dopo: due box sui tappeti visibili"><figcaption>Due tappeti localizzati: confidenza box <strong>0.70 / 0.91</strong>, poi <strong>0.68 / 0.89</strong> nella ripetizione. Il poggiapiedi resta incerto e non viene mostrato.</figcaption></figure>
+</div>
+<h2>Bagno</h2>
+<div class="pair">
+<figure><h3>Prima · domanda generica</h3><img src="../bagno-jev.jpg" alt="Prima: striscia verticale con bassa confidenza"><figcaption>Presenza <strong>0.70</strong>, confidenza box <strong>0.06</strong>. Regione grezza non accettata dal gate.</figcaption></figure>
+<figure><h3>Dopo · oggetti concreti</h3><img src="objects-v2/bagno-jev.jpg" alt="Dopo: box sulla vasca visibile"><figcaption>Vasca localizzata: confidenza box <strong>0.84</strong>, poi <strong>0.77</strong>. Nessuna box viene inventata per rappresentare un maniglione non visibile.</figcaption></figure>
+</div>
+<p>Le tre regioni superano presenza ≥ 0.75 e confidenza box ≥ 0.50 in entrambi i passaggi. Sovrapposizione delle box fra i due passaggi: <strong>0.94–1.00 IoU</strong>. È una verifica di consistenza su due immagini, non una misura di accuratezza generale o di rischio di caduta. Questi sono oggetti candidati alla revisione, non pericoli confermati.</p>
+</html>

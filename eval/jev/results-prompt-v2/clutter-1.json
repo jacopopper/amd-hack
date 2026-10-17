@@ -1,0 +1,128 @@
+{
+  "case_id": "clutter",
+  "repeat": 1,
+  "at_utc": "2026-10-17T12:23:55.908316+00:00",
+  "elapsed_seconds": 0.9770711690002827,
+  "image_sha256": "085e25ef37607b4733c34e75de850ee7252643da0528e8517f92c6fa3abfe467",
+  "questions": {
+    "cables": {
+      "type": "noul",
+      "instructions": "Are any electrical cables or power leads visibly present in `photo`? Do not count plumbing pipes, railings, or an emergency alarm pull cord."
+    },
+    "rug": {
+      "type": "noul",
+      "instructions": "Is a distinct area rug or floor mat visibly present in `photo`? Do not count fitted wall-to-wall carpeting. Count a partially occluded rug if a part is visible."
+    },
+    "stairs": {
+      "type": "noul",
+      "instructions": "Are stair steps visibly present in `photo`?"
+    },
+    "grab_bar": {
+      "type": "noul",
+      "instructions": "Is a bathroom support grab bar visibly present in `photo`, intended to help a person use a toilet or sink? Do not count towel rails or stair handrails."
+    },
+    "stair_handrail": {
+      "type": "noul",
+      "instructions": "Is a handrail following a staircase visibly present in `photo`? Do not count bathroom grab bars."
+    },
+    "clutter": {
+      "type": "noul",
+      "instructions": "Does `photo` visibly show a substantial pile of boxes, bags, or loose household belongings crowding the room? Do not count ordinary arranged furniture, one rug, or electrical wiring alone."
+    },
+    "floor_view": {
+      "type": "choice",
+      "instructions": "How well does `photo` show the floor or stair walking surface? Judge the pictured area only, not the whole room.",
+      "criteria": {
+        "visible": "Some floor or stair surface is directly visible and can be inspected. This does not establish safety.",
+        "obscured": "Piles of belongings obscure essentially all of the floor.",
+        "out_of_frame": "The photo is aimed above floor level or otherwise excludes the walking surface."
+      }
+    },
+    "rug_attachment": {
+      "type": "choice",
+      "instructions": "For any rug visible in `photo`, can you establish from visible evidence whether its underside is secured to the floor? A flat-looking top surface alone cannot establish attachment.",
+      "criteria": {
+        "secured": "An attachment to the floor is actually visible.",
+        "unsecured": "The underside is actually exposed and visibly unattached.",
+        "unknown": "A rug is visible, but its underside or attachment cannot be inspected.",
+        "not_visible": "No rug is visible in this photo."
+      }
+    },
+    "blue_bag_present": {
+      "type": "noul",
+      "instructions": "Is the largest blue plastic bag in the right foreground of `photo` visibly present?"
+    },
+    "blue_bag_box": {
+      "type": "box",
+      "instructions": "The smallest axis-aligned box tightly enclosing only the largest blue plastic bag in the right foreground of `photo`. Follow the object's full visible extent, crop the box where something hides it or where it runs past the image border, and never include adjacent objects, fixtures, or surfaces the target touches or hangs from. For thin or elongated objects keep the box narrow, hugging the object along its entire visible length."
+    }
+  },
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "cables": {
+        "type": "noul",
+        "noul": 0.25
+      },
+      "rug": {
+        "type": "noul",
+        "noul": 0.06
+      },
+      "stairs": {
+        "type": "noul",
+        "noul": 0.04
+      },
+      "grab_bar": {
+        "type": "noul",
+        "noul": 0.03
+      },
+      "stair_handrail": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "clutter": {
+        "type": "noul",
+        "noul": 0.99
+      },
+      "floor_view": {
+        "type": "choice",
+        "choice": "obscured",
+        "confidence": 0.89,
+        "probabilities": {
+          "visible": 0.01,
+          "obscured": 0.9299999999999999,
+          "out_of_frame": 0.06
+        }
+      },
+      "rug_attachment": {
+        "type": "choice",
+        "choice": "not_visible",
+        "confidence": 0.92,
+        "probabilities": {
+          "secured": 0.0,
+          "unsecured": 0.01,
+          "unknown": 0.05,
+          "not_visible": 0.94
+        }
+      },
+      "blue_bag_present": {
+        "type": "noul",
+        "noul": 0.97
+      },
+      "blue_bag_box": {
+        "type": "box",
+        "box": {
+          "top": 0.56,
+          "bottom": 0.88,
+          "left": 0.69,
+          "right": 0.93
+        },
+        "confidence": 0.9
+      }
+    },
+    "usage": {
+      "input_tokens": 3834,
+      "output_tokens": 234
+    }
+  }
+}

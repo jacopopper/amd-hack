@@ -1,0 +1,101 @@
+{
+  "model": "jev-1.14.0",
+  "thresholds": {
+    "presence": 0.75,
+    "box_confidence": 0.5
+  },
+  "scope": "Two pitch images; same six visual target pairs in both. No general accuracy claim.",
+  "images": {
+    "corridoio": {
+      "objects-v2": {
+        "accepted": {
+          "rug_near": {
+            "presence": 0.99,
+            "confidence": 0.7,
+            "box": [
+              40.50000000000001,
+              1386.0000000000002,
+              1323.0,
+              1782.0
+            ]
+          },
+          "rug_far": {
+            "presence": 0.95,
+            "confidence": 0.91,
+            "box": [
+              567.0,
+              1170.0000000000002,
+              796.5,
+              1278.0
+            ]
+          }
+        },
+        "elapsed_seconds": 0.5099510599998212
+      },
+      "objects-v2-repeat": {
+        "accepted": {
+          "rug_near": {
+            "presence": 0.99,
+            "confidence": 0.68,
+            "box": [
+              40.50000000000001,
+              1386.0000000000002,
+              1336.5,
+              1782.0
+            ]
+          },
+          "rug_far": {
+            "presence": 0.95,
+            "confidence": 0.89,
+            "box": [
+              567.0,
+              1170.0000000000002,
+              783.0,
+              1278.0
+            ]
+          }
+        },
+        "elapsed_seconds": 0.7748220660000698
+      },
+      "repeat_box_iou": {
+        "rug_near": 0.9895833333333334,
+        "rug_far": 0.9411764705882352
+      }
+    },
+    "bagno": {
+      "objects-v2": {
+        "accepted": {
+          "bathtub": {
+            "presence": 0.97,
+            "confidence": 0.84,
+            "box": [
+              414.00000000000006,
+              851.9999999999999,
+              1422.0000000000002,
+              1175.9999999999998
+            ]
+          }
+        },
+        "elapsed_seconds": 0.41868841700033954
+      },
+      "objects-v2-repeat": {
+        "accepted": {
+          "bathtub": {
+            "presence": 0.98,
+            "confidence": 0.77,
+            "box": [
+              414.00000000000006,
+              851.9999999999999,
+              1422.0000000000002,
+              1175.9999999999998
+            ]
+          }
+        },
+        "elapsed_seconds": 0.5404060119999485
+      },
+      "repeat_box_iou": {
+        "bathtub": 1.0
+      }
+    }
+  }
+}

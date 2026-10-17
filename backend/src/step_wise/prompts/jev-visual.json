@@ -1,0 +1,34 @@
+{
+  "targets": [
+    {
+      "id": "rug_near",
+      "presence": "Is a distinct floor rug or loose floor mat visible in `photo`? Do not count fitted wall-to-wall carpet.",
+      "region": "The smallest box around a distinct floor rug or loose floor mat nearest the camera in `photo`. Include only its visible extent."
+    },
+    {
+      "id": "rug_far",
+      "presence": "Are at least two separate floor rugs or loose mats visible in `photo`? Do not count parts of the same rug twice.",
+      "region": "The smallest box around the separate floor rug or mat farthest from the camera in `photo`. Include only its visible extent."
+    },
+    {
+      "id": "footstool",
+      "presence": "Is a low footstool or ottoman visible in `photo`? Do not count chairs, tables, or cabinets.",
+      "region": "The smallest box around the low footstool or ottoman nearest the camera in `photo`. Include only its visible extent."
+    },
+    {
+      "id": "floor_cable",
+      "presence": "Is an exposed electrical cable lying on the floor visible in `photo`? Do not count plumbing, railings, or furniture legs.",
+      "region": "The smallest box around an exposed electrical cable lying on the floor in `photo`. Include only its visible extent."
+    },
+    {
+      "id": "bathtub",
+      "presence": "Is a bathtub visible in `photo`?",
+      "region": "The smallest box around the bathtub, including its visible rim and basin in `photo`. Include only its visible extent."
+    },
+    {
+      "id": "grab_bar",
+      "presence": "Is a bathroom safety grab bar visible in `photo`? Do not count taps, shower pipes, shower-curtain rails, cabinet handles, or towel rails.",
+      "region": "The smallest box around a bathroom safety grab bar mounted beside a bathtub, shower, or toilet in `photo`. Include only its visible extent."
+    }
+  ]
+}

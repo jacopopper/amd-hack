@@ -23,4 +23,4 @@ step-wise = "step_wise.cli:main"
 where = ["backend/src"]
 
 [tool.setuptools.package-data]
-step_wise = ["schema.sql", "prompts/*.txt", "templates/*.html"]
+step_wise = ["schema.sql", "prompts/*.txt", "prompts/*.json", "templates/*.html"]

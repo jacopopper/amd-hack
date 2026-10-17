@@ -347,11 +347,21 @@ class FunctionalProfile(StrictModel):
     unknown_fields: list[str]
 
 
+class EvidenceMarker(StrictModel):
+    scene_id: ID
+    position_world: Vector
+    photo_id: ID
+    evidence_box: tuple[float, float, float, float]
+    method: Literal["photo_surface_estimate"]
+    uncertainty: Text
+
+
 class HazardFinding(Hazard):
     id: ID
     producer: str | None
     provenance: str | None
     review: dict | None
+    evidence_marker: EvidenceMarker | None = None
 
 
 class RoomPhoto(StrictModel):
@@ -359,6 +369,15 @@ class RoomPhoto(StrictModel):
     role: Literal["overview", "detail"]
     sha256: str | None
     asset_url: str
+
+
+class RoomPresentation(StrictModel):
+    model_url: Text
+    provenance: Literal["illustrative", "photo_completed"]
+    coordinate_space: Literal["illustrative", "raw_scene_relative"] = "illustrative"
+    display_transform: Transform4 | None = None
+    label: Text
+    hazard_positions: dict[ID, Vector]
 
 
 class RoomBundle(StrictModel):
@@ -392,6 +411,7 @@ class RoomBundle(StrictModel):
     analysis_url: str | None
     warnings: list[str | dict]
     ply_url: str | None
+    presentation: RoomPresentation | None = None
     photos: list[RoomPhoto]
 
 

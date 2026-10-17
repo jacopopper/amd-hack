@@ -37,24 +37,62 @@ class ClientsGeometry(unittest.TestCase):
         self.assertEqual(set(payload), {"model", "state", "assets", "questions"})
         self.assertEqual(len(payload["assets"]), 1)
         self.assertNotIn("profile", json.dumps(payload))
-        prompt = (ROOT / "backend/src/step_wise/prompts/jev-general.txt").read_text().strip()
-        self.assertEqual(payload["questions"]["hazard_review"]["instructions"], prompt)
-        self.assertEqual(set(payload["questions"]), {"hazard_review", "hazard_region"})
-        self.assertNotIn("rug", json.dumps(payload).lower())
-        body = {"model": jev.MODEL, "answers": {
-            "hazard_review": {"type": "noul", "noul": .9},
-            "hazard_region": {"type": "box", "box": {"left": .2, "top": .2, "right": .4, "bottom": .6}},
-        }}
-        prep = {"upright_size": [960, 640], "transform": {"input_size": [960, 640], "scale_xy": [1, 1], "offset_xy": [0, 0], "content_box": [0, 0, 960, 640]}}
-        candidate = jev.interpret(body, {"id": "p"}, prep, [entry])[0]
-        self.assertEqual(candidate["presence"], "present")
-        self.assertEqual(candidate["category"], "potential_home_safety_hazard")
-        body["answers"]["hazard_review"]["noul"] = .01
-        candidate = jev.interpret(body, {"id": "p"}, prep, [entry])[0]
-        self.assertIsNone(candidate["evidence"])
-        body["answers"]["hazard_region"]["box"]["right"] = 2
+        self.assertNotIn("floor-rug", json.dumps(payload))
+        self.assertEqual(len(payload["questions"]), 12)
+        corridor = json.loads((ROOT / "pitch/jev-results/2026-10-17/optimization/objects-v2/corridoio.json").read_text())
+        bathroom = json.loads((ROOT / "pitch/jev-results/2026-10-17/optimization/objects-v2/bagno.json").read_text())
+        self.assertEqual(payload["questions"], corridor["questions"])
+        self.assertEqual(payload["questions"], bathroom["questions"])
+        for saved, expected in ((corridor, {"rug_near", "rug_far"}), (bathroom, {"bathtub"})):
+            prep = {"upright_size": saved["upright_size"], "transform": saved["transform"]}
+            candidates = jev.interpret(saved["response"], {"id": "p"}, prep, [entry])
+            self.assertEqual(len(candidates), 6)
+            self.assertEqual({c["question_id"] for c in candidates},
+                             {"rug_near", "rug_far", "footstool", "floor_cable", "bathtub", "grab_bar"})
+            self.assertEqual({c["question_id"] for c in candidates if c["evidence"]}, expected)
+            for candidate in candidates:
+                self.assertEqual(candidate["category"], "potential_home_safety_hazard")
+                self.assertEqual(candidate["provider_response"]["presence"], saved["response"]["answers"][candidate["question_id"] + "_present"])
+                self.assertEqual(candidate["provider_response"]["box"], saved["response"]["answers"][candidate["question_id"] + "_region"])
+        uncertain = next(c for c in jev.interpret(corridor["response"], {"id": "p"},
+                                                 {"upright_size": corridor["upright_size"], "transform": corridor["transform"]}, [])
+                         if c["question_id"] == "footstool")
+        self.assertEqual(uncertain["presence"], "unknown")
+        self.assertIsNone(uncertain["evidence"])
+
+    def test_jev_presence_box_confidence_and_absent_box_validation(self):
+        saved = json.loads((ROOT / "pitch/jev-results/2026-10-17/optimization/objects-v2/corridoio.json").read_text())
+        body = saved["response"]
+        prep = {"upright_size": saved["upright_size"], "transform": saved["transform"]}
+        near = lambda: next(c for c in jev.interpret(body, {"id": "p"}, prep, []) if c["question_id"] == "rug_near")
+        presence = body["answers"]["rug_near_present"]
+        region = body["answers"]["rug_near_region"]
+        region["confidence"] = jev.BOX_CONFIDENCE_THRESHOLD - .01
+        self.assertEqual(near()["presence"], "present")
+        self.assertIsNone(near()["evidence"])
+        region["confidence"] = jev.BOX_CONFIDENCE_THRESHOLD
+        self.assertIsNotNone(near()["evidence"])
+        presence["noul"] = jev.PRESENCE_THRESHOLD - .01
+        self.assertEqual(near()["presence"], "unknown")
+        self.assertIsNone(near()["evidence"])
+        presence["noul"] = jev.ABSENCE_THRESHOLD
+        self.assertEqual(near()["presence"], "absent")
+        self.assertIsNone(near()["evidence"])
+        region["box"]["right"] = 2
         with self.assertRaises(ValueError):
-            jev.interpret(body, {"id": "p"}, prep, [entry])
+            near()  # Even absent responses must have valid coordinates.
+        region["box"]["right"] = .5
+        region["confidence"] = float("nan")
+        with self.assertRaises(ValueError):
+            near()
+        region["confidence"] = jev.BOX_CONFIDENCE_THRESHOLD
+        region["box"]["right"] = float("inf")
+        with self.assertRaises(ValueError):
+            near()
+        region["box"]["right"] = .5
+        presence["noul"] = float("nan")
+        with self.assertRaises(ValueError):
+            near()
 
     def test_no_ambiguous_transport_retry_and_one_schema_repair(self):
         with patch("step_wise.pipeline.http.requests.post", side_effect=requests.Timeout) as post:
@@ -64,7 +102,7 @@ class ClientsGeometry(unittest.TestCase):
         settings = Settings()
         valid = {"hazards": [], "coverage": [], "follow_up_requests": []}
         make = lambda content, reason="stop": {"model": settings.gemma_model, "choices": [{"finish_reason": reason, "message": {"content": content, "reasoning": "private"}}], "usage": {"completion_tokens": 10}}
-        with patch("step_wise.pipeline.gemma.post_json", side_effect=[make("{"), make(json.dumps(valid))]) as post:
+        with patch("step_wise.pipeline.gemma.post_chat_streaming", side_effect=[make("{"), make(json.dumps(valid))]) as post:
             output, attempts = gemma.complete(settings, AssessmentOutput, "prompt", "data")
             self.assertEqual(len(attempts), 2)
             self.assertEqual(output.hazards, [])
@@ -72,7 +110,7 @@ class ClientsGeometry(unittest.TestCase):
             self.assertEqual(post.call_args.args[1]["response_format"]["type"], "json_schema")
             self.assertTrue(post.call_args.args[1]["response_format"]["json_schema"]["strict"])
             self.assertEqual([m["role"] for m in post.call_args.args[1]["messages"]], ["system", "user"])
-        with patch("step_wise.pipeline.gemma.post_json", return_value=make(json.dumps(valid), "length")) as post:
+        with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=make(json.dumps(valid), "length")) as post:
             with self.assertRaises(ExternalFailure):
                 gemma.complete(settings, AssessmentOutput, "prompt", "data")
             self.assertEqual(post.call_count, 2)
@@ -84,14 +122,14 @@ class ClientsGeometry(unittest.TestCase):
                                hf_token=token, gemma_timeout_seconds=37)
             # HF/Novita normalizes model IDs to lowercase in its response.
             body = {"model": settings.gemma_model.lower(), "choices": [{"finish_reason": "stop", "message": {"content": json.dumps({"hazards": [], "coverage": [], "follow_up_requests": []})}}]}
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body) as post:
                 gemma.complete(settings, AssessmentOutput, "private prompt", "private content", audit_directory=Path(directory))
             self.assertEqual(post.call_args.args[1]["model"], settings.gemma_model + ":test-provider")
             self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer " + token)
             self.assertEqual(post.call_args.kwargs["timeout"], (10, 37))
             self.assertNotIn(token, "".join(p.read_text() for p in Path(directory).glob("*.json")))
             missing = replace(settings, hf_token="")
-            with patch("step_wise.pipeline.gemma.post_json") as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming") as post:
                 with self.assertRaises(ExternalFailure):
                     gemma.complete(missing, AssessmentOutput, "prompt", "content")
                 post.assert_not_called()
@@ -103,7 +141,7 @@ class ClientsGeometry(unittest.TestCase):
                 "content": json.dumps({"hazards": [], "coverage": [], "follow_up_requests": []})}}]}
             def invalid(_):
                 raise ValueError(private)
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body) as post:
                 with self.assertRaises(ExternalFailure):
                     gemma.complete(Settings(), AssessmentOutput, "prompt", "data", invalid, Path(directory))
             self.assertNotIn(private, json.dumps(post.call_args.args[1]))
@@ -136,7 +174,7 @@ class ClientsGeometry(unittest.TestCase):
             context["assessment_input"]["clinical_external_processing_consent"] = True
             context["settings"] = replace(context["settings"], gemma_backend="http", gemma_revision="test-revision")
             body = {"model": context["settings"].gemma_model, "choices": [{"finish_reason": "stop", "message": {"content": json.dumps(response)}}]}
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body) as post:
                 output = gemma.assess(context)
                 self.assertEqual(output["provenance"], "live")  # mocked transport, not hardware evidence
                 content = post.call_args.args[1]["messages"][1]["content"]
@@ -152,12 +190,12 @@ class ClientsGeometry(unittest.TestCase):
             response["coverage"] = [{"photo_id": context["photos"][0]["id"], "guidance_id": "floor-rug",
                                      "coverage": "visible", "note": "Prova sintetica di copertura."}]
             body["choices"][0]["message"]["content"] = json.dumps(response)
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body):
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body):
                 mapped = gemma.assess(context)
                 self.assertTrue(any(c["category"] == "rug" and c["coverage"] == "visible" for c in mapped["coverage"]))
             response["hazards"][0]["evidence"][0]["photo_id"] = "another-assessment"
             body["choices"][0]["message"]["content"] = json.dumps(response)
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body):
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body):
                 with self.assertRaises(ExternalFailure):
                     gemma.assess(context)
 
@@ -187,7 +225,7 @@ class ClientsGeometry(unittest.TestCase):
             context["assessment_input"]["clinical_external_processing_consent"] = True
             body = {"model": settings.gemma_model, "choices": [{"finish_reason": "stop", "message": {
                 "content": json.dumps({"hazards": [], "coverage": [], "follow_up_requests": []})}}]}
-            with patch("step_wise.pipeline.gemma.post_json", side_effect=[body, ExternalFailure("HTTP 504")]) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", side_effect=[body, ExternalFailure("HTTP 504")]) as post:
                 with self.assertRaises(ExternalFailure):
                     gemma.assess(context)
                 self.assertEqual(post.call_count, 2)
@@ -196,13 +234,13 @@ class ClientsGeometry(unittest.TestCase):
                              (db.dumps({"requested_gemma": settings.gemma_identity()}), context["job"]["id"]))
             retry = {**context, "job": {**context["job"], "id": db.uid()}}
             retry["directory"] = settings.data / "assessments" / context["job"]["assessment_id"] / "jobs" / retry["job"]["id"]
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body) as post:
                 output = gemma.assess(retry)
                 self.assertEqual(post.call_count, 1)
             self.assertEqual([call["attempts"][0]["status"] for call in output["calls"]], ["reused", "succeeded"])
             self.assertEqual(output["calls"][0]["attempts"][0]["origin_job_id"], context["job"]["id"])
             changed = {**retry, "settings": replace(settings, gemma_provider="deepinfra")}
-            with patch("step_wise.pipeline.gemma.post_json", return_value=body) as post:
+            with patch("step_wise.pipeline.gemma.post_chat_streaming", return_value=body) as post:
                 gemma.assess(changed)
                 self.assertEqual(post.call_count, 2)
 

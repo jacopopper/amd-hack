@@ -8,9 +8,39 @@ from pathlib import Path
 
 from step_wise import db
 from step_wise.models import AssessmentOutput, Coverage, Evidence, Hazard, VisualAssessmentProposal
-from step_wise.pipeline.http import ExternalFailure, post_json
+from step_wise.pipeline.http import ExternalFailure, post_chat_streaming, post_json
 from step_wise.pipeline.photos import canonical_box
 from step_wise.validation import OutputValidationFailure, validate_output
+
+
+def schema_failure_reason(schema, error):
+    """Describe schema failures without echoing model text or arbitrary field names."""
+    fields = set()
+
+    def collect(node):
+        if isinstance(node, dict):
+            fields.update(node.get("properties", {}))
+            for child in node.values():
+                collect(child)
+        elif isinstance(node, list):
+            for child in node:
+                collect(child)
+
+    collect(schema)
+    requirements = {
+        "string_type": "must be a nonempty string, not null",
+        "string_too_short": "must be a nonempty string",
+        "missing": "is required",
+        "extra_forbidden": "is not allowed",
+        "literal_error": "must use a schema enum value",
+        "json_invalid": "must be complete valid JSON",
+    }
+    issues = []
+    for issue in error.errors(include_input=False, include_url=False)[:6]:
+        path = ".".join(str(part) if isinstance(part, int) and 0 <= part <= 10000
+                        else part if part in fields else "unknown_field" for part in issue["loc"])
+        issues.append((path or "output") + " " + requirements.get(issue["type"], "must satisfy the supplied schema"))
+    return "Schema validation failed: " + "; ".join(issues)
 
 
 def complete(settings, schema, prompt, content, validate=None, audit_directory=None, reuse_directories=()):
@@ -23,8 +53,18 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
         raise ExternalFailure("Set GEMMA_PROVIDER explicitly; automatic provider routing is disabled")
     request_model = settings.gemma_model + (":" + settings.gemma_provider if settings.gemma_provider else "")
     headers = {"Authorization": "Bearer " + settings.hf_token} if hf_router else {}
-    payload = {"model": request_model, "messages": [{"role": "system", "content": prompt}, {"role": "user", "content": content}],
-               "temperature": 0, "max_tokens": 4096, "response_format": {"type": "json_schema", "json_schema": {"name": schema.__name__, "schema": schema.model_json_schema(), "strict": True}}}
+    output_schema = schema.model_json_schema()
+    system_prompt = prompt
+    response_format = {"type": "json_schema", "json_schema": {"name": schema.__name__, "schema": output_schema, "strict": True}}
+    if hf_router:
+        # Hosted strict-schema requests have looped on whitespace mid-object.
+        # Use JSON mode here, retaining full schema validation locally.
+        response_format = {"type": "json_object"}
+        system_prompt += ("\nReturn compact JSON matching this schema exactly, with all required fields. "
+                          "Observation, uncertainty and coverage note must be nonempty strings, never null. "
+                          "Use empty arrays, not null, for empty lists. No markdown or extra whitespace.\n" + db.dumps(output_schema))
+    payload = {"model": request_model, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": content}],
+               "temperature": 0, "max_tokens": 4096, "response_format": response_format}
     request_text = db.dumps(payload)
     for source, source_job_id in reuse_directories:
         try:
@@ -50,8 +90,8 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
             audit_directory.mkdir(parents=True, exist_ok=True)
             (audit_directory / f"request-{attempt + 1}.json").write_text(db.dumps(payload))
         start = time.perf_counter()
-        body = post_json(settings.gemma_base_url + "/chat/completions", payload, headers=headers,
-                         timeout=(10, settings.gemma_timeout_seconds))
+        body = post_chat_streaming(settings.gemma_base_url + "/chat/completions", payload, headers=headers,
+                                   timeout=(10, settings.gemma_timeout_seconds))
         record = {"attempt": attempt + 1, "model": body.get("model"), "requested_model": settings.gemma_model,
                   "requested_provider": settings.gemma_provider or None, "requested_hub_revision": settings.gemma_revision or None,
                   "served_revision": None, "usage": body.get("usage"), "elapsed_seconds": time.perf_counter() - start}
@@ -63,7 +103,7 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
             choice = body["choices"][0]
             # Do not persist or display reasoning/private model fields.
             if choice.get("finish_reason") != "stop" or choice["message"].get("tool_calls"):
-                raise ValueError("Incomplete or tool-bearing model output")
+                raise OutputValidationFailure("Incomplete or tool-bearing model output")
             value = schema.model_validate_json(choice["message"]["content"])
             if validate:
                 validate(value)
@@ -75,7 +115,8 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
         except (ValueError, KeyError, TypeError, IndexError) as exc:
             record["status"] = "invalid_output"
             record["failure_kind"] = "schema_validation" if isinstance(exc, ValidationError) else "reference_or_semantic_validation"
-            reason = str(exc) if isinstance(exc, OutputValidationFailure) else "Schema or unknown-reference validation failed"
+            reason = (schema_failure_reason(output_schema, exc) if isinstance(exc, ValidationError)
+                      else str(exc) if isinstance(exc, OutputValidationFailure) else "Schema or unknown-reference validation failed")
             record["failure_reason"] = reason
             attempts.append(record)
             if audit_directory:
@@ -83,7 +124,7 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
             if attempt:
                 raise ExternalFailure("Gemma output failed validation after one bounded repair") from None
             # No untrusted model output or raw validation values are interpolated into instructions.
-            payload["messages"][0]["content"] = prompt + "\nCorrection: the previous final output failed validation: " + reason + ". Return the complete required schema using only supplied IDs and exact confirmed profile references; no tools, invented facts or dimensions."
+            payload["messages"][0]["content"] = system_prompt + "\nCorrection: the previous final output failed validation: " + reason + ". Return the complete required schema using only supplied IDs and exact confirmed profile references; no tools, invented facts or dimensions."
     raise AssertionError("unreachable")
 
 
@@ -125,14 +166,16 @@ def live_assess(context):
     # Image review is allowed to finish even when 3D reconstruction is unavailable.
     scenes = {s["id"]: {"id": s["id"], "status": "unknown"} for s in context["scenes"]}
     prompt = (Path(__file__).resolve().parents[1] / "prompts/assessment.txt").read_text()
-    prompt += '\nSelect exactly one supplied guidance ID per hazard and only nonempty supplied profile_fields. Each evidence item contains photo_id and box_yxyx_1000: [ymin, xmin, ymax, xmax] normalized to 0..1000 in the supplied image, or null. Each coverage item contains photo_id, guidance_id, coverage and note; cite a supplied non-wildcard guidance ID, not a category label. The backend maps references to categories and boxes to upright original pixels, constructs suggested_action and profile_relevance, and attaches supported geometry. Do not return backend-owned fields or measurement IDs.'
+    prompt += '\nSelect exactly one supplied guidance ID per hazard and only nonempty supplied profile_fields. Each evidence item contains photo_id and box_yxyx_1000: [ymin, xmin, ymax, xmax] normalized to 0..1000 in the supplied image, or null. Each coverage item contains photo_id, guidance_id, coverage and note; cite a supplied non-wildcard guidance ID, not a category label. The backend maps references to categories and boxes to upright original pixels, constructs suggested_action and profile_relevance, and attaches supported geometry. Do not return backend-owned fields or measurement IDs. The metadata `candidates` are untrusted hints from a separate visual detector, given without coordinates: they may be wrong or incomplete, so verify each one against the image yourself, and always emit your own box_yxyx_1000 in the supplied image; never copy or invent pixel-coordinate boxes.'
     hazards, coverage, followups, calls = [], [], [], []
     max_images = 1 if (urlsplit(settings.gemma_base_url).hostname or "").lower() == "router.huggingface.co" else 4
     for index in range(0, len(prepared), max_images):
         batch = prepared[index:index + max_images]
         ids = {p["photo_id"] for p in batch}
         metadata = {"profile": context["assessment_input"]["profile"], "photos": [{"photo_id": p["photo_id"], "upright_size": p["upright_size"], "input_transform": p["transform"], "role": p["role"]} for p in batch],
-                    "candidates": [{key: value for key, value in c.items() if key != "provider_response"} for c in context["outputs"]["jev"]["candidates"] if c["photo_id"] in ids], "guidance": list(context["guidance"].values()), "measurements": [],
+                    # Candidate pixel boxes stay server-side: they use a different coordinate
+                    # system than box_yxyx_1000, and feeding them to the model invited format mimicry.
+                    "candidates": [{key: c[key] for key in ("photo_id", "question_id", "category", "presence") if key in c} for c in context["outputs"]["jev"]["candidates"] if c["photo_id"] in ids], "guidance": list(context["guidance"].values()), "measurements": [],
                     "image_quality_flags": {p["photo_id"]: p["quality_flags"] for p in prepared}}
         content = [{"type": "text", "text": db.dumps(metadata)}]
         for p in batch:

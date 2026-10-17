@@ -13,16 +13,22 @@ from step_wise.pipeline.photos import canonical_box
 
 ENDPOINT = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.14.0"
+PRESENCE_THRESHOLD = .75
+ABSENCE_THRESHOLD = .25
+BOX_CONFIDENCE_THRESHOLD = .5
+
+
+def visual_targets():
+    return json.loads((Path(__file__).resolve().parents[1] / "prompts/jev-visual.json").read_text())["targets"]
 
 
 def request_payload(image_bytes, entries):
-    """Use the approved open-ended question without sending profile or checklist context."""
+    """Ask the same fixed visual questions for every image, without patient context."""
     reference = db.uid()
-    question = (Path(__file__).resolve().parents[1] / "prompts/jev-general.txt").read_text().strip()
-    questions = {
-        "hazard_review": {"type": "noul", "instructions": question},
-        "hazard_region": {"type": "box", "instructions": "If the answer is yes, draw a tight box around the single visible feature that most warrants review. If none does, return an empty box."},
-    }
+    questions = {}
+    for target in visual_targets():
+        questions[target["id"] + "_present"] = {"type": "noul", "instructions": target["presence"]}
+        questions[target["id"] + "_region"] = {"type": "box", "instructions": target["region"]}
     return {"model": MODEL, "state": {"photo": reference}, "assets": {reference: {"type": "image", "format": "jpg", "data_base64": base64.b64encode(image_bytes).decode()}}, "questions": questions}
 
 
@@ -30,20 +36,26 @@ def interpret(body, photo, prepared, entries):
     if body.get("model") != MODEL:
         raise ValueError("Unexpected Jev model version")
     answers = body["answers"]
-    present, box = answers["hazard_review"], answers["hazard_region"]
-    if present.get("type") != "noul" or box.get("type") != "box":
-        raise ValueError("Invalid Jev response types")
-    score = present["noul"]
-    if isinstance(score, bool) or not isinstance(score, (int, float)) or not math.isfinite(score) or not 0 <= score <= 1:
-        raise ValueError("Invalid presence score")
-    coords = [box["box"][k] for k in ("left", "top", "right", "bottom")]
-    mapped = None if coords == [0, 0, 0, 0] else canonical_box(coords, prepared["transform"], prepared["upright_size"])
-    presence = "present" if score >= .75 else "absent" if score <= .25 else "unknown"
-    candidate = Candidate(photo_id=photo["id"], category="potential_home_safety_hazard", question_id="general-home-safety",
-                          presence=presence, coverage="unknown",
-                          evidence=Evidence(photo_id=photo["id"], box=mapped) if mapped and presence == "present" else None,
-                          producer=MODEL, provenance="live", provider_response={"presence": present, "box": box})
-    return [candidate.model_dump(mode="json")]
+    candidates = []
+    for target in visual_targets():
+        key = target["id"]
+        present, box = answers[key + "_present"], answers[key + "_region"]
+        if present.get("type") != "noul" or box.get("type") != "box":
+            raise ValueError("Invalid Jev response types")
+        score, confidence = present["noul"], box["confidence"]
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not 0 <= value <= 1
+               for value in (score, confidence)):
+            raise ValueError("Invalid Jev score or box confidence")
+        coords = [box["box"][k] for k in ("left", "top", "right", "bottom")]
+        if any(isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) for value in coords):
+            raise ValueError("Invalid Jev box coordinates")
+        mapped = canonical_box(coords, prepared["transform"], prepared["upright_size"])
+        presence = "present" if score >= PRESENCE_THRESHOLD else "absent" if score <= ABSENCE_THRESHOLD else "unknown"
+        candidates.append(Candidate(photo_id=photo["id"], category="potential_home_safety_hazard", question_id=key,
+                                    presence=presence, coverage="unknown",
+                                    evidence=Evidence(photo_id=photo["id"], box=mapped) if mapped and presence == "present" and confidence >= BOX_CONFIDENCE_THRESHOLD else None,
+                                    producer=MODEL, provenance="live", provider_response={"presence": present, "box": box}).model_dump(mode="json"))
+    return candidates
 
 
 def fixture(context):

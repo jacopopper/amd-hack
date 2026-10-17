@@ -1,0 +1,65 @@
+{
+  "source": "pitch/assets/photos/bagno.jpg",
+  "source_sha256": "b2c3d38e79b768fb75e8b800c4b6e6e4de79ed2a41815c63d1ba5ae00db3bf33",
+  "prepared_sha256": "fa9ac96349e57f89ed4dc7c85c9f57ccc8870a06d2a7af2f106156f556260e9a",
+  "upright_size": [
+    1800,
+    1200
+  ],
+  "transform": {
+    "input_size": [
+      1568,
+      1045
+    ],
+    "scale_xy": [
+      0.8711111111111111,
+      0.8708333333333333
+    ],
+    "offset_xy": [
+      0,
+      0
+    ],
+    "content_box": [
+      0,
+      0,
+      1568,
+      1045
+    ]
+  },
+  "variant": "spatial-v1",
+  "at_utc": "2026-10-17T12:20:00.151371+00:00",
+  "questions": {
+    "hazard_review": {
+      "type": "noul",
+      "instructions": "Does `photo` show a directly visible, localized physical feature on a walking route or transfer surface that may warrant fall-risk review? Judge visible physical evidence only, not a person or diagnosis. Do not infer dimensions, wetness, instability, or hidden conditions."
+    },
+    "hazard_region": {
+      "type": "box",
+      "instructions": "The smallest box around a directly visible, localized physical feature on a walking route or transfer surface that may warrant fall-risk review in `photo`. Localize the visible physical target itself. Exclude wall art, ceiling decoration, and ordinary background surfaces."
+    }
+  },
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "hazard_review": {
+        "type": "noul",
+        "noul": 0.04
+      },
+      "hazard_region": {
+        "type": "box",
+        "box": {
+          "top": 0.76,
+          "bottom": 0.96,
+          "left": 0.25,
+          "right": 0.8
+        },
+        "confidence": 0.09
+      }
+    },
+    "usage": {
+      "input_tokens": 4671,
+      "output_tokens": 40
+    }
+  },
+  "elapsed_seconds": 0.6088108109997847
+}
