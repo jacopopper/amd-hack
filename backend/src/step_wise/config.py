@@ -81,7 +81,7 @@ class Settings:
     max_photos: int = 40
     max_pixels: int = 40_000_000
     frame_cap: int = 20
-    web_dist: Path = ROOT / "web/dist"
+    web_dist: Path = ROOT / "frontend/out"  # Next.js static export (npm --prefix frontend run build)
     # Extra same-site origins allowed to mutate, e.g. a frontend dev server proxying /api.
     allowed_origins: tuple[str, ...] = ()
 

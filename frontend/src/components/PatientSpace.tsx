@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
 import { api, json } from "@/lib/api";
@@ -37,8 +37,8 @@ function ToolButton({ active, disabled, title, onClick, children }: { active?: b
   );
 }
 
-export default function PatientSpacePage() {
-  const { id } = useParams<{ id: string }>();
+// The patient’s home: preparation while in draft, then the 3D review space.
+export default function PatientSpace({ id }: { id: string }) {
   const router = useRouter();
   const guard = useAuthGuard();
   const [assessment, setAssessment] = useState<Assessment | null>(null);

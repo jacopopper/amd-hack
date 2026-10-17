@@ -74,7 +74,7 @@ export default function PatientsPage() {
             const open = f?.hazards.filter((h) => !h.review).length ?? 0;
             const [name, ...rest] = a.inputs.label.split(" · ");
             return (
-              <Link key={a.id} href={`/pazienti/${a.id}`} className="group block">
+              <Link key={a.id} href={`/pazienti?id=${a.id}`} className="group block">
                 <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 transition group-hover:ring-white/30">
                   {cover && (
                     // eslint-disable-next-line @next/next/no-img-element -- protected same-origin asset behind the session cookie

@@ -57,7 +57,7 @@ export default function NewPatientPage() {
           clinical_facts: [],
         }),
       });
-      router.replace(`/pazienti/${id}`);
+      router.replace(`/pazienti?id=${id}`);
     } catch (e) {
       if (!guard(e)) setError((e as Error).message);
       setBusy(false);

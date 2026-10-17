@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import io
 from contextlib import redirect_stdout
 import json
@@ -210,6 +212,7 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.client.post(f"/api/assessments/{aid}/analyze", json=self.revisions(aid)).status_code, 409)
         self.assertEqual(self.client.delete(f"/api/assessments/{aid}").status_code, 409)
         job = worker.claim(self.settings)
+        assert job is not None
         with worker.worker_lock(self.settings):
             with self.assertRaises(db.Conflict):
                 with worker.worker_lock(self.settings):
@@ -252,6 +255,31 @@ class Workflow(unittest.TestCase):
         current = self.get(aid)
         job_id = db.enqueue(live, aid, "analyze", current["input_revision"], current["review_revision"])
         self.assertTrue(job_id)
+
+    def test_static_frontend_export_pages_assets_and_fallback(self):
+        out = Path(self.temporary.name) / "out"
+        (out / "pazienti").mkdir(parents=True)
+        (out / "_next").mkdir()
+        for name, text in {"index.html": "home", "pazienti.html": "<script>boot()</script><script src=\"/_next/app.js\"></script>space", "pazienti/nuovo.html": "intake", "404.html": "missing", "_next/app.js": "js"}.items():
+            (out / name).write_text(text)
+        (Path(self.temporary.name) / "secret.txt").write_text("private")
+        with TestClient(create_app(replace(self.settings, web_dist=out))) as client:
+            self.assertEqual(client.get("/").text, "home")
+            page = client.get("/pazienti?id=abc")
+            self.assertTrue(page.text.endswith("space"))
+            # Only this page's inline bootstrap is admitted, by hash; API responses keep script-src 'self'.
+            inline = base64.b64encode(hashlib.sha256(b"boot()").digest()).decode()
+            self.assertIn(f"script-src 'self' 'sha256-{inline}';", page.headers["content-security-policy"])
+            self.assertNotIn("unsafe-inline';", page.headers["content-security-policy"].split("script-src")[1].split(";")[0])
+            self.assertIn("script-src 'self';", client.get("/api/health").headers["content-security-policy"])
+            self.assertEqual(client.get("/pazienti/nuovo").text, "intake")
+            self.assertEqual(client.head("/pazienti/nuovo").status_code, 200)
+            self.assertEqual(client.get("/_next/app.js").text, "js")
+            missing = client.get("/unknown-page")
+            self.assertEqual((missing.status_code, missing.text), (404, "missing"))
+            self.assertEqual(client.get("/missing.js").status_code, 404)
+            self.assertEqual(client.get("/..%2Fsecret.txt").status_code, 404)
+            self.assertEqual(client.get("/api/unknown").status_code, 404)
 
     def test_configured_dev_origin_may_mutate_but_others_may_not(self):
         settings = replace(self.settings, allowed_origins=("http://127.0.0.1:3010",))
@@ -308,10 +336,10 @@ class Contracts(unittest.TestCase):
             GuidanceChecklist.model_validate(source)
 
     def test_finite_boxes_and_presence_gate(self):
-        for box in ([10, 0, 2, 1], [0, 0, float("nan"), 10]):
+        for box in ((10, 0, 2, 1), (0, 0, float("nan"), 10)):
             with self.assertRaises(ValueError):
                 Evidence(photo_id="p", box=box)
-        c = Candidate(photo_id="p", category="rug", question_id="q", presence="absent", coverage="visible", evidence=Evidence(photo_id="p", box=[0, 0, 20, 20]), attachment="loose", producer="fixture", provenance="fixture")
+        c = Candidate(photo_id="p", category="rug", question_id="q", presence="absent", coverage="visible", evidence=Evidence(photo_id="p", box=(0, 0, 20, 20)), attachment="loose", producer="fixture", provenance="fixture")
         self.assertIsNone(c.evidence)
         self.assertEqual(c.attachment, "unknown")
         self.assertIsNone(Profile(description="Fictional").mobility_aid)
@@ -323,7 +351,9 @@ class Contracts(unittest.TestCase):
         sx, sy = transform["scale_xy"]
         ox, oy = transform["offset_xy"]
         normalized = [(expected[0] * sx + ox) / prepared.width, (expected[1] * sy + oy) / prepared.height, (expected[2] * sx + ox) / prepared.width, (expected[3] * sy + oy) / prepared.height]
-        self.assertTrue(all(abs(a - b) < 1e-6 for a, b in zip(expected, canonical_box(normalized, transform, image.size))))
+        recovered = canonical_box(normalized, transform, image.size)
+        assert recovered is not None
+        self.assertTrue(all(abs(a - b) < 1e-6 for a, b in zip(expected, recovered)))
         self.assertIsNone(canonical_box([0, 0, .5, .1], transform, image.size))
         source = Image.new("RGB", (300, 600))
         exif = source.getexif()

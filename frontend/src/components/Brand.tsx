@@ -5,7 +5,7 @@ export default function Brand({ size = "md" }: { size?: "md" | "lg" }) {
         <path d="M3.5 10.5 12 4l8.5 6.5V20h-17z" />
         <circle cx="12" cy="14" r="2.2" fill="white" stroke="none" />
       </svg>
-      <span className={`${size === "lg" ? "text-xl" : "text-base"} font-semibold tracking-tight text-white`}>Safe Home</span>
+      <span className={`${size === "lg" ? "text-xl" : "text-base"} font-semibold tracking-tight text-white`}>Step Wise</span>
     </span>
   );
 }

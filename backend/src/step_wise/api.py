@@ -1,6 +1,10 @@
+import base64
+import hashlib
 import json
+import re
 import secrets
 import logging
+from functools import lru_cache
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -71,6 +75,22 @@ class UploadLimit:
         return await self.app(scope, bounded_receive, send)
 
 
+INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S | re.I)
+
+
+def content_security_policy(script_hashes=()):
+    scripts = " ".join(["'self'", *(f"'sha256-{h}'" for h in script_hashes)])
+    return ("default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; "
+            f"script-src {scripts}; connect-src 'self' blob:; object-src 'none'; frame-ancestors 'self'; base-uri 'none'")
+
+
+@lru_cache(maxsize=64)
+def page_script_hashes(path, modified_ns):
+    """Hashes of a static page's inline scripts (Next.js bootstrap), recomputed when the file changes."""
+    html = Path(path).read_text()
+    return tuple(base64.b64encode(hashlib.sha256(body.encode()).digest()).decode() for body in INLINE_SCRIPT.findall(html) if body.strip())
+
+
 def create_app(settings=None):
     settings = settings or Settings.from_env()
     if len(settings.reviewer_password) < 12:
@@ -109,7 +129,8 @@ def create_app(settings=None):
         response.headers["Cache-Control"] = "no-store"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' blob:; object-src 'none'; frame-ancestors 'self'; base-uri 'none'"
+        # Exported frontend pages carry their own policy that admits only their inline scripts by hash.
+        response.headers.setdefault("Content-Security-Policy", content_security_policy())
         return response
 
     @app.exception_handler(db.Missing)
@@ -637,17 +658,26 @@ def create_app(settings=None):
         db.delete_assessment(settings, aid)
         return {"status": "deleted"}
 
-    @app.get("/{path:path}")
+    # HEAD too: the Next.js router probes pages before navigating.
+    @app.api_route("/{path:path}", methods=["GET", "HEAD"])
     def frontend(path: str):
         if path == "api" or path.startswith("api/"):
             raise HTTPException(404, "API route not found")
-        file = (settings.web_dist / path).resolve()
-        if file.is_relative_to(settings.web_dist.resolve()) and file.is_file():
-            return FileResponse(file)
+        root = settings.web_dist.resolve()
+        # Next.js export: /pazienti is pazienti.html, / is index.html, assets keep their names.
+        for candidate in (path, f"{path}.html", f"{path}/index.html") if path else ("index.html",):
+            file = (root / candidate).resolve()
+            if file.is_relative_to(root) and file.is_file():
+                if file.suffix != ".html":
+                    return FileResponse(file)
+                hashes = page_script_hashes(str(file), file.stat().st_mtime_ns)
+                return FileResponse(file, headers={"Content-Security-Policy": content_security_policy(hashes)})
         if Path(path).suffix:
             raise HTTPException(404, "Frontend asset not found")
-        if (settings.web_dist / "index.html").is_file():
-            return HTMLResponse((settings.web_dist / "index.html").read_text())
-        return HTMLResponse("<h1>Step Wise</h1><p>Build the frontend with npm --prefix web run build.</p>")
+        missing = root / "404.html"
+        if missing.is_file():
+            hashes = page_script_hashes(str(missing), missing.stat().st_mtime_ns)
+            return HTMLResponse(missing.read_text(), status_code=404, headers={"Content-Security-Policy": content_security_policy(hashes)})
+        return HTMLResponse("<h1>Step Wise</h1><p>Build the frontend with npm --prefix frontend run build.</p>")
 
     return app

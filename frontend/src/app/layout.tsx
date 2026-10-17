@@ -6,7 +6,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Safe Home · Revisione",
+  title: "Step Wise · Revisione",
   description: "Valutazione remota del rischio di caduta in casa",
 };
 
