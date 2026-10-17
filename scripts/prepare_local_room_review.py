@@ -1,40 +1,43 @@
-"""Stage viewer assets for the local /capture review.
+"""Stage a reconstructed capture for the room view of the demo case.
 
-The reviewed capture (photos IMG_7580-IMG_7618, polished splats and mocked
-hazard findings) is already committed under frontend/public/capture-data, so a
-fresh clone needs nothing here. Run with the project's Python environment
-(numpy is required) only to stage a different local capture or refresh the
-mocked findings:
+The reviewed capture (photos IMG_7580-IMG_7618, compressed polished splats and
+mocked hazard findings) is already committed: viewer assets under
+frontend/public/capture-data, case photos under demo/capture. A fresh clone
+needs nothing here. Run with the project's Python environment (numpy is
+required) only to stage a different local capture or refresh the mocked findings:
   .venv/bin/python scripts/prepare_local_room_review.py /absolute/capture/path
-Then run frontend's dev server bound to 127.0.0.1 and visit /capture.
+Then `python -m step_wise.cli import-capture` builds the reviewable case.
 The two findings are explicitly mocked, not outputs from JEV.
 """
 
 import argparse
 import json
+import subprocess
 from pathlib import Path
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[1]
+# Only what local-room-viewer.html loads; the standalone capture viewer's mesh loader stays out.
+VENDOR = ["three.module.js", "OrbitControls.js", "splats.js", "LICENSE-three.txt", "LICENSE-splats.txt"]
 
-def prepare(source: Path, target: Path) -> None:
+
+def prepare(source: Path, target: Path, photos: Path) -> None:
     source = source.resolve(strict=True)
     data = json.loads((source / "viewpoints.json").read_text())
     expected = [f"IMG_{i}" for i in range(7580, 7619)]
     if [view["id"] for view in data["views"]] != expected:
         raise ValueError("Expected exactly IMG_7580 through IMG_7618, in order.")
-    # Do not expose checkpoints, analysis arrays, or other captures through public/.
-    allowed = ["viewpoints.json", "training.json", "observed.ply"]
-    if (source / "room-polished.ply").is_file():
-        allowed += ["room-polished.ply", "surface-polish.json"]
-    allowed += [view["image"] for view in data["views"]]
-    allowed += [f"vendor/{p.name}" for p in (source / "vendor").iterdir() if p.is_file()]
-    target.mkdir(parents=True, exist_ok=True)
-    for name in allowed:
+    # Do not expose checkpoints, analysis arrays, photos or other captures through public/.
+    staged = [(target, name) for name in ["viewpoints.json", *(f"vendor/{v}" for v in VENDOR)]]
+    staged += [(photos, name) for name in ["training.json", *(view["image"] for view in data["views"])]]
+    if (source / "surface-polish.json").is_file():
+        staged.append((photos, "surface-polish.json"))
+    for directory, name in staged:
         original = (source / name).resolve(strict=True)
         if not original.is_relative_to(source):
             raise ValueError(f"Asset escapes the capture directory: {name}")
-        link = target / name
+        link = directory / name
         link.parent.mkdir(parents=True, exist_ok=True)
         if link.is_symlink() and link.resolve() == original:
             continue
@@ -44,6 +47,9 @@ def prepare(source: Path, target: Path) -> None:
         if link.exists() or link.is_symlink():
             raise FileExistsError(f"Refusing to replace an existing asset: {link}")
         link.symlink_to(original)
+    splats = source / ("room-polished.ply" if (source / "room-polished.ply").is_file() else "room.ply")
+    if not (target / "room.ksplat").exists():
+        subprocess.run(["node", str(ROOT / "scripts/compress_splats.mjs"), str(splats), str(target / "room.ksplat")], check=True)
 
     # Hand-selected photo regions. Depth only gives an indicative navigation pin;
     # neither the mock classification nor the position is clinically validated.
@@ -89,4 +95,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("capture", type=Path)
     args = parser.parse_args()
-    prepare(args.capture, Path(__file__).resolve().parents[1] / "frontend/public/capture-data")
+    prepare(args.capture, ROOT / "frontend/public/capture-data", ROOT / "demo/capture")

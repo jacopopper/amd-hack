@@ -49,13 +49,20 @@ All outputs, including photos and screenshots, stay under gitignored `data/`. No
 
 ## Committed review capture and surface polish
 
-One capture was deliberately reduced to 39 accepted photos (EXIF/GPS-free) and committed under [`frontend/public/capture-data/`](../frontend/public/capture-data/) for the hackathon demo: the photos, the observed surface mesh, camera metadata, the polished splat cloud and the mock hazard findings. `room-polished.ply` (~110 MB) and `observed.ply` are stored with Git LFS; the unpolished `room.ply`, checkpoints and analysis arrays stay in the local `data/` directories.
+One capture was deliberately reduced to 39 accepted photos (EXIF/GPS-free) for the hackathon demo. The repository keeps only what the demo uses:
+
+- [`frontend/public/capture-data/`](../frontend/public/capture-data/): `room.ksplat` (the polished splats compressed to ~20 MB), `viewpoints.json` (cameras), `hazards.json` (mock findings) and the vendored viewer. [`local-room-viewer.html`](../frontend/public/local-room-viewer.html) streams them inside the case's room view.
+- [`demo/capture/`](../demo/capture/): the 8 photos the demo case shows, plus `training.json` and `surface-polish.json`. `python -m step_wise.cli import-capture` builds the reviewable case from them, downscaling the photos to 1600 px; `export-demo` then freezes it as the judge snapshot.
+
+The full-resolution sources (`room-polished.ply` ~110 MB, `observed.ply`, all 39 photos) are no longer in the tree; recover them from commit `fc8228b` (`git checkout fc8228b -- frontend/public/capture-data`). The unpolished `room.ply`, checkpoints and analysis arrays stay in the local `data/` directories.
 
 `scripts/polish_capture_surfaces.py <capture>` fits planes to photo-backed floor and ceiling regions of `capture-analysis.npz`, moves near-plane Gaussians toward the fitted planes and squeezes their covariance along the plane normal (the cord and carpet evidence regions are protected). It writes `room-polished.ply` plus `surface-polish.json` (plane fits, RMS before/after, input/output SHA-256). Colors, opacity and spherical harmonics are untouched, and no holes are filled.
+
+`node scripts/compress_splats.mjs <room-polished.ply> <room.ksplat>` writes the compressed copy: 16-bit positions, 8-bit degree-1 harmonics, and no Gaussians below opacity 5/255, which the viewer already discarded. On the review views it is visually indistinguishable from the 110 MB PLY.
 
 Known caveats for the committed capture:
 
 - The two hazard findings are hand-placed demo marks with depth-estimated pin positions, not JEV outputs.
 - Quaternion norms in both `room.ply` and `room-polished.ply` are inherited from gsplat training output and are not unit-normalized (an integrity check flags this); conversion libraries normalize on load.
 
-`scripts/prepare_local_room_review.py <capture>` stages a capture into the frontend and regenerates `hazards.json`; committed repository assets take precedence when they already exist.
+`scripts/prepare_local_room_review.py <capture>` stages a capture into `frontend/public/capture-data` and `demo/capture`, compresses its splats and regenerates `hazards.json`; committed repository assets take precedence when they already exist.
