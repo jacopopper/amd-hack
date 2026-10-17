@@ -98,13 +98,6 @@ p{margin:0}
 .units.hot i{background:var(--red)}
 .vs .src{margin-top:auto}
 
-/* figures */
-.giant{font:400 340px/.78 var(--serif);letter-spacing:-.04em;margin:0}
-.giant sup{font-size:.34em;vertical-align:1.15em;letter-spacing:0}
-.pair{display:grid;grid-template-columns:auto 1fr;gap:6px 30px;align-items:baseline;padding:26px 0;border-top:1px solid var(--rule)}
-.pair b{font:400 104px/.9 var(--serif);letter-spacing:-.02em}
-.pair p{font-size:28px;line-height:1.38;max-width:20em}
-
 /* OT */
 .ot{display:grid;gap:26px}
 .ot .r{display:grid;grid-template-columns:220px 1fr 150px;gap:22px;align-items:center}
@@ -113,11 +106,32 @@ p{margin:0}
 .ot .r .u{display:flex;flex-wrap:wrap;gap:5px}
 .ot .r .u i{width:18px;height:18px;border-radius:2px;background:#5b5650}
 .ot .r.it span{color:#fff;font-weight:600}.ot .r.it .u i{background:var(--hl)}.ot .r.it b{color:var(--hl)}
-.ratio{font:400 76px/1.02 var(--serif)}
+.ratio{font:400 64px/1.04 var(--serif)}
 
 /* CDC */
-.quote{font:400 72px/1.06 var(--serif);max-width:16em}
+.quote{font:400 44px/1.15 var(--serif);max-width:20em;margin-top:56px;padding-top:40px;border-top:1px solid var(--line)}
 .quote:before{content:"«";color:var(--red)}.quote:after{content:"»";color:var(--red)}
+
+/* three figures */
+.fig3{display:grid;grid-template-columns:repeat(3,1fr);gap:64px;margin-top:110px;border-top:2px solid var(--ink);padding-top:40px}
+.fig3 b{display:block;font:400 250px/.85 var(--serif);letter-spacing:-.03em}
+.fig3 sup{font-size:.4em;vertical-align:1em}
+.fig3 p{font-size:31px;line-height:1.38;margin-top:26px;color:var(--ink-2)}
+.fig3 small{display:block;margin-top:18px;font-size:17px;color:var(--muted)}
+
+/* detection */
+.det{display:grid;grid-template-columns:1.25fr 1.08fr 1.5fr;gap:16px;align-items:start;margin-top:44px}
+.det .shot{border-radius:8px}
+.det .hd{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:12px 14px 26px;font:500 15px/1 var(--mono);color:#fff;background:linear-gradient(rgb(0 0 0 / 80%),rgb(0 0 0 / 40%) 60%,transparent);z-index:3}
+.bb{position:absolute;border:3px solid var(--c);border-radius:3px;box-shadow:0 0 0 1px rgb(0 0 0 / 35%);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.bb.dash{border-style:dashed;background:transparent}
+.bb span{position:absolute;left:-3px;bottom:100%;margin-bottom:3px;white-space:nowrap;background:var(--c);color:var(--tc,#fff);font:700 14px/1 var(--mono);letter-spacing:.04em;padding:6px 8px;border-radius:3px 3px 3px 0}
+.bb.below span{bottom:auto;top:100%;margin:3px 0 0;border-radius:0 3px 3px 3px}
+.bb.right span{left:auto;right:-3px;border-radius:3px 3px 0 3px}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.qa div{background:var(--dark-2);border:1px solid var(--line);border-radius:8px;padding:14px 18px;font:500 18px/1.45 var(--mono);color:#cfc8bb}
+.qa em{display:block;font-style:normal;color:#7f786d;font-size:15px;margin-bottom:4px}
+.qa .y{color:#ff7a66;font-weight:700}.qa .n{color:#bdb6aa;font-weight:700}
 
 /* overview */
 .steps{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-top:56px}
@@ -134,7 +148,6 @@ p{margin:0}
 /* image frames */
 .shot{position:relative;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 0 0 1px var(--line),0 40px 80px -30px rgb(0 0 0 / 85%)}
 .shot img{width:100%;height:auto}
-.jev .shot img{height:380px;object-fit:cover}
 .cap{margin-top:14px;font-size:17px;line-height:1.4;color:var(--dark-muted)}
 .s:not(.dark) .cap{color:var(--muted)}
 .lab{position:absolute;left:14px;top:12px;font:600 14px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:rgb(0 0 0 / 60%);padding:7px 9px;border-radius:4px}
@@ -173,10 +186,11 @@ ol.pts b{color:#fff;font-weight:600}
 .gpu-bar b{font:700 26px/1.2 var(--sans)}
 .gpu-bar span{font:500 18px/1.3 var(--mono);opacity:.92}
 .ext{grid-column:1/-1;font-size:18px;color:var(--dark-muted);line-height:1.5}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:44px}
-.metrics div{border-top:1px solid var(--line);padding-top:16px}
-.metrics b{display:block;font:400 64px/1 var(--serif);color:#fff}
-.metrics span{font-size:19px;color:var(--dark-muted)}
+.live{display:grid;grid-template-columns:auto 1.4fr 1fr 1fr;gap:40px;align-items:center;margin-top:40px;border:1px solid var(--hl);border-radius:12px;padding:26px 32px;background:rgb(255 225 74 / 6%)}
+.live .tag{display:flex;align-items:center;gap:12px;font:700 17px/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--hl)}
+.live .tag i{width:14px;height:14px;border-radius:50%;background:#57d18b;box-shadow:0 0 0 5px rgb(87 209 139 / 20%)}
+.live b{display:block;font:400 56px/1 var(--serif);color:#fff}
+.live span{display:block;margin-top:8px;font-size:19px;line-height:1.35;color:var(--dark-muted)}
 
 /* who */
 .who3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:64px}
@@ -188,19 +202,12 @@ ol.pts b{color:#fff;font-weight:600}
 .why b{display:block;font:600 27px/1.25 var(--sans);margin-bottom:10px}
 .why p{font-size:23px;line-height:1.45;color:var(--ink-2)}
 
-/* status */
-.st{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin-top:44px;flex:1}
-.st h3{font-size:46px;margin-bottom:22px;display:flex;align-items:center;gap:14px}
-.st h3 i{width:16px;height:16px;border-radius:50%;background:var(--green)}
-.st .open h3 i{background:var(--amber)}
-.st ul{list-style:none;margin:0;padding:0}
-.st li{padding:18px 0;border-top:1px solid var(--rule);font-size:25px;line-height:1.4;color:var(--ink-2)}
-.st li b{color:var(--ink);font-weight:600}
 .links{display:flex;gap:64px;margin-top:30px;font:500 23px/1.3 var(--mono);color:var(--ink-2)}
 .links b{font-family:var(--sans);font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:6px}
 
 /* close */
 #close{background:var(--dark);color:#fff;justify-content:center}
+#close .links{color:#bdb6aa;margin-top:48px}
 #close p.big{font:400 108px/1.02 var(--serif);max-width:12em}
 
 /* sources */
@@ -255,41 +262,19 @@ ol.pts b{color:#fff;font-weight:600}
   <span class="pn">02</span>
 </section>
 
-<!-- 3 · WHERE -->
-<section class="s" id="casa">
-  <div class="row r2">
-    <div>
-      <p class="k">Who falls, and where</p>
-      <div class="giant">54<sup>%</sup></div>
-      <h3 style="margin-top:28px;max-width:15em">of falls among people over 65 happen <span class="mark">at home</span>.</h3>
-      <div class="pair" style="margin-top:48px"><b class="red">11%</b><p>were advised by a doctor on how to avoid them.</p></div>
-    </div>
-    <div class="stack">
-      <figure class="src" data-src="iss-casa"></figure>
-      <figure class="src" data-src="iss-consiglio"></figure>
-    </div>
+<!-- 3 · THE GAP -->
+<section class="s" id="gap">
+  <p class="k">Where falls happen, and what works</p>
+  <h2>Falls happen at home. <span class="red">A home visit prevents them.</span></h2>
+  <div class="fig3">
+    <div><b>54<sup>%</sup></b><p>of falls among people over 65 happen <span class="mark">at home</span>.</p><small>ISS · PASSI d'Argento 2023–2024</small></div>
+    <div><b>11<sup>%</sup></b><p>were advised by a doctor on how to avoid them.</p><small>ISS · PASSI d'Argento 2023–2024</small></div>
+    <div><b class="red">−38<sup>%</sup></b><p>falls when an occupational therapist inspects the home and hazards are removed, in high-risk older adults.</p><small>Cochrane review 2023 · 22 studies, 8,463 people</small></div>
   </div>
   <span class="pn">03</span>
 </section>
 
-<!-- 4 · PREVENTION WORKS -->
-<section class="s" id="cura">
-  <div class="row r2">
-    <div>
-      <p class="k">Prevention works</p>
-      <div class="giant red">−38<sup>%</sup></div>
-      <h3 style="margin-top:28px;max-width:16em">falls when an expert inspects the home and hazards are removed, in high-risk older adults: <span class="mark">like someone just discharged from hospital</span>.</h3>
-      <p class="lede" style="margin-top:36px">That expert is the occupational therapist.</p>
-    </div>
-    <div>
-      <figure class="src" data-src="cochrane"></figure>
-      <p class="small muted" style="margin-top:16px">Cochrane systematic review 2023: 22 studies, 8,463 people, high-certainty evidence.</p>
-    </div>
-  </div>
-  <span class="pn">04</span>
-</section>
-
-<!-- 5 · BOTTLENECK -->
+<!-- 4 · BOTTLENECK -->
 <section class="s dark" id="vuoto">
   <div class="row r2">
     <div>
@@ -300,30 +285,15 @@ ol.pts b{color:#fff;font-weight:600}
         <div class="r"><span>United Kingdom</span><div class="u" data-n="40"></div><b>40,000</b></div>
         <div class="r it"><span>Italy</span><div class="u" data-n="3"></div><b>3,000</b></div>
       </div>
-      <p class="small muted" style="margin-top:16px">Occupational therapists. Each square = 1,000.</p>
+      <p class="small muted" style="margin-top:16px">Occupational therapists. Each square = 1,000. Source: FNO TSRM e PSTRP, 2024.</p>
     </div>
     <div>
       <p class="ratio">1 therapist for every <span class="mark">~5,000</span> people over 65.</p>
-      <div class="stack" style="margin-top:44px">
-        <figure class="src" data-src="fno"></figure>
-        <figure class="src" data-src="fno-europa"></figure>
-      </div>
-    </div>
-  </div>
-  <span class="pn">05</span>
-</section>
-
-<!-- 6 · CDC -->
-<section class="s" id="cdc">
-  <div class="row r2">
-    <div>
-      <p class="k">The missing rule</p>
       <p class="quote">If an occupational therapy assessment is not available, review potential home hazards with the patient and family.</p>
-      <p class="lede" style="margin-top:40px">The CDC recommends it at every discharge. <b>Step Wise makes it possible, with an expert eye.</b></p>
+      <p class="lede" style="margin-top:24px">CDC STEADI, at every discharge. <b style="color:#fff">Step Wise makes it possible, with an expert eye.</b></p>
     </div>
-    <div><figure class="src" data-src="cdc"></figure></div>
   </div>
-  <span class="pn">06</span>
+  <span class="pn">04</span>
 </section>
 
 <!-- 7 · HOW IT WORKS -->
@@ -333,14 +303,14 @@ ol.pts b{color:#fff;font-weight:600}
   <p class="lede" style="margin-top:24px">Three AI models do the slow inspection. The professional has the last word.</p>
   <div class="steps">
     <div class="step"><div class="th" style="background-image:url(assets/photos/casa/collega.jpg);background-position:52% 40%"></div><div class="tx"><div class="n">01</div><h4>Capture</h4><p>A relative photographs the home with a phone. The nurse adds the patient's profile.</p><span class="who">Family · nurse</span></div></div>
-    <div class="step"><div class="th" style="background-image:url(jev-results/2026-10-17/optimization/objects-v2/corridoio-jev.jpg);background-position:50% 60%"></div><div class="tx"><div class="n">02</div><h4>Detection</h4><p>Jev answers atomic questions: is there a rug, a cable, a bathtub? Each with its box.</p><span class="who">TypeSafe Jev</span></div></div>
+    <div class="step"><div class="th" style="background-image:url(assets/photos/casa/soggiorno.jpg);background-position:50% 60%"></div><div class="tx"><div class="n">02</div><h4>Detection</h4><p>Jev answers atomic questions: is there a rug, a cable, a bathtub? Each with its box.</p><span class="who">TypeSafe Jev</span></div></div>
     <div class="step"><div class="th" style="background-image:url(assets/photos/casa/splat.jpg)"></div><div class="tx"><div class="n">03</div><h4>3D room</h4><p>VGGT turns the photos into a room the reviewer can walk through.</p><span class="who">VGGT-1B</span></div></div>
     <div class="step"><div class="th" style="background:#141312 url(assets/logos/gemma.png) center/40% no-repeat"></div><div class="tx"><div class="n">04</div><h4>Reasoning</h4><p>Gemma ranks the hazards and explains why each matters for this patient.</p><span class="who">Gemma 4 31B</span></div></div>
     <div class="step hu"><div class="th" style="background-image:url(assets/deck/app-review.png);background-position:100% 0"></div><div class="tx"><div class="n">05</div><h4>Review</h4><p>The discharge nurse confirms, edits, excludes or defers each finding.</p><span class="who">Professional</span></div></div>
     <div class="step hu"><div class="th" style="background-image:url(assets/deck/app-release.png);background-position:20% 0"></div><div class="tx"><div class="n">06</div><h4>Family plan</h4><p>Approved actions, by priority, in plain language, on the family's phone.</p><span class="who">Family</span></div></div>
   </div>
   <div class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
-  <span class="pn">07</span>
+  <span class="pn">05</span>
 </section>
 
 <!-- 8 · CAPTURE + 3D -->
@@ -360,45 +330,53 @@ ol.pts b{color:#fff;font-weight:600}
     <div>
       <div class="strip"><img src="assets/photos/casa/scatto-1.jpg" alt=""><img src="assets/photos/casa/scatto-2.jpg" alt=""><img src="assets/photos/casa/scatto-3.jpg" alt=""><img src="assets/photos/casa/scatto-4.jpg" alt=""><img src="assets/photos/casa/scatto-5.jpg" alt=""><img src="assets/photos/casa/scatto-6.jpg" alt=""><img src="assets/photos/casa/scatto-7.jpg" alt=""><img src="assets/photos/casa/scatto-8.jpg" alt=""></div>
       <div class="arrow">↓ 39 phone photos</div>
-      <div class="shot"><img src="../docs/readme/room-splats-kitchen.jpg" alt="Gaussian-splat render of the reconstructed kitchen and living area"><span class="lab">real prototype output</span></div>
+      <div class="shot"><img src="assets/photos/casa/splat.jpg" alt="Gaussian-splat render of the reconstructed kitchen and living area"><span class="lab">real prototype output</span></div>
       <p class="cap">Real output: 39 phone photos of a real home, camera poses from VGGT-1B, 757,792 Gaussians trained with gsplat. The photographs remain the evidence; the 3D view helps the reviewer navigate. Scale not yet calibrated.</p>
     </div>
   </div>
-  <span class="pn">08</span>
+  <span class="pn">06</span>
 </section>
 
-<!-- 9 · DETECTION + REASONING -->
+<!-- 9 · DETECTION -->
 <section class="s dark" id="ai">
-  <p class="k y">02 Detection · 04 Reasoning</p>
-  <div class="row r46" style="align-items:start;gap:56px">
-    <div>
-      <h2 style="font-size:76px">Every hazard, with its evidence.</h2>
-      <p class="lede" style="margin-top:24px;font-size:24px">Jev answers atomic questions on the areas of the <b>Westmead Home Safety Assessment</b>. A box counts only when presence is confirmed; what a photo cannot show stays “to check in person”.</p>
-      <div class="jev" style="display:grid;grid-template-columns:1fr 1.25fr;gap:14px;margin-top:30px">
-        <div class="shot"><img src="jev-results/2026-10-17/optimization/objects-v2/corridoio-jev.jpg" alt="Corridor with Jev boxes around two rugs"><span class="lab">rugs found</span></div>
-        <div class="shot"><img src="jev-results/2026-10-17/optimization/objects-v2/bagno-jev.jpg" alt="Bathroom with a Jev box around the bathtub"><span class="lab">bathtub found</span></div>
-      </div>
-      <p class="cap">Live Jev 1.14 calls. Photos: Thomas Würth, Point3D Commercial Imaging Ltd. / Unsplash.</p>
+  <div class="row r2" style="flex:none;align-items:end">
+    <div><p class="k y">02 Detection</p><h2 style="font-size:84px">Every hazard, with its evidence.</h2></div>
+    <p class="lede" style="font-size:25px">Jev answers atomic questions on the areas of the <b>Westmead Home Safety Assessment</b>. A box counts only when presence is confirmed; what a photo cannot show stays “to check in person”.</p>
+  </div>
+  <div class="det">
+    <div class="shot" data-box="sogg"><div class="hd"><span>IMG_7579 · living room</span><span>3 found</span></div><img src="assets/photos/casa/soggiorno.jpg" alt="Living room with a table, a folding chair, a cable on the floor and a mat in front of the kitchen"></div>
+    <div class="shot" data-box="borse"><div class="hd"><span>IMG_7614 · sofa</span><span>1 found</span></div><img src="assets/photos/casa/borse.jpg" alt="Backpacks and bags on the floor next to the sofa"></div>
+    <div class="shot" data-box="bagno"><div class="hd"><span>bathroom · sample photo</span><span>3 found</span></div><img src="assets/photos/bagno.jpg" alt="Bathroom with a bathtub and a toilet without grab bars"></div>
+  </div>
+  <div class="qa">
+    <div><em>question</em>Is there a cable on the floor?<br>→ <span class="y">yes</span> · box [0.01, 0.72, 0.31, 0.88]</div>
+    <div><em>question</em>Is there a grab bar next to the bathtub?<br>→ <span class="y">no</span> · area without support</div>
+    <div><em>question</em>Is the floor slippery?<br>→ <span class="n">cannot tell</span> · check in person</div>
+  </div>
+  <p class="cap">Living room and sofa: real photos of the home used in the demo. Bathroom: Point3D Commercial Imaging Ltd. / Unsplash. Boxes are illustrative.</p>
+  <span class="pn">07</span>
+</section>
+
+<!-- 10 · REASONING -->
+<section class="s dark" id="gemma">
+  <div class="row r2" style="flex:none;align-items:end">
+    <div><p class="k y">04 Reasoning</p><h2 style="font-size:84px">Why it matters, for Maria.</h2></div>
+    <p class="lede" style="font-size:25px">Gemma reads the evidence and the confirmed profile, ranks the hazards by urgency and explains why. Every claim must point to a photo and a guideline.</p>
+  </div>
+  <div class="gm" style="flex:1;grid-template-columns:1fr 260px 1fr;gap:40px">
+    <div class="col">
+      <div class="box"><em>confirmed profile</em><span>Walker · hip fracture · lives alone · gets up at night</span></div>
+      <div class="box"><em>evidence</em><span>The hazards found in the photos, each with its box</span></div>
+      <div class="box"><em>guidelines</em><span>CDC STEADI</span></div>
     </div>
-    <div>
-      <h3 style="font-size:52px;margin-top:6px">Why it matters, for Maria.</h3>
-      <p class="lede" style="margin-top:18px;font-size:24px">Gemma reads the evidence and the confirmed profile, ranks the hazards by urgency and explains why. Every claim must point to a photo and a guideline.</p>
-      <div class="gm">
-        <div class="col">
-          <div class="box"><em>confirmed profile</em><span>Walker · hip fracture · lives alone · gets up at night</span></div>
-          <div class="box"><em>evidence</em><span>The hazards found in the photos, each with its box</span></div>
-          <div class="box"><em>guidelines</em><span>CDC STEADI</span></div>
-        </div>
-        <div class="core"><img src="assets/logos/gemma.png" alt="Gemma logo">Gemma 4 31B<small>Google DeepMind<br>on AMD</small></div>
-        <div class="col">
-          <div class="box"><em>priority</em><span>Urgent, before coming home · or within weeks</span></div>
-          <div class="box"><em>why, for this patient</em><span>“The walker's wheels catch on the rug's edge, on her daily route.”</span></div>
-          <div class="box"><em>what to do</em><span>A plain-language action, linked to its photo and source</span></div>
-        </div>
-      </div>
+    <div class="core"><img src="assets/logos/gemma.png" alt="Gemma logo">Gemma 4 31B<small>Google DeepMind<br>running on AMD</small></div>
+    <div class="col">
+      <div class="box"><em>priority</em><span>Urgent, before coming home · or within weeks</span></div>
+      <div class="box"><em>why, for this patient</em><span>“The walker's wheels catch on the rug's edge, on her daily route.”</span></div>
+      <div class="box"><em>what to do</em><span>A plain-language action, linked to its photo and source</span></div>
     </div>
   </div>
-  <span class="pn">09</span>
+  <span class="pn">08</span>
 </section>
 
 <!-- 10 · REVIEW -->
@@ -422,7 +400,7 @@ ol.pts b{color:#fff;font-weight:600}
       <p class="cap">Real prototype screen: guided review inside the room reconstructed from 39 photos. In this demo case the two hazards were marked by hand by the team.</p>
     </div>
   </div>
-  <span class="pn">10</span>
+  <span class="pn">09</span>
 </section>
 
 <!-- 11 · FAMILY PLAN -->
@@ -445,7 +423,7 @@ ol.pts b{color:#fff;font-weight:600}
       <p class="cap">Real prototype screen: the generated home safety plan, released to the family with a private link.</p>
     </div>
   </div>
-  <span class="pn">11</span>
+  <span class="pn">10</span>
 </section>
 
 <!-- 12 · AMD -->
@@ -461,13 +439,13 @@ ol.pts b{color:#fff;font-weight:600}
     <div class="gpu-bar"><b>AMD Instinct MI300X · 192 GB HBM3</b><span>ROCm · reconstruction and model on the same GPU · one job at a time</span></div>
     <p class="ext">02 · Detection: Jev 1.14, external API, receives only prepared photos with no patient data &nbsp;·&nbsp; 05–06 · Review and report: Next.js, three.js, WeasyPrint</p>
   </div>
-  <div class="metrics">
-    <div><b>192 GB</b><span>of HBM3 memory on a single GPU</span></div>
-    <div><b>2 models</b><span>VGGT and Gemma on the same card</span></div>
-    <div><b>0</b><span>clinical data leaving the hospital</span></div>
-    <div><b>ROCm</b><span>open stack: PyTorch and vLLM</span></div>
+  <div class="live">
+    <div class="tag"><i></i>Running on AMD today</div>
+    <div><b>Gemma 4 31B</b><span>on AMD's endpoint: the hazard sweep and the report draft</span></div>
+    <div><b>6.29 s</b><span>one image, vision + strict JSON</span></div>
+    <div><b>11.00 s</b><span>four images in a single call</span></div>
   </div>
-  <span class="pn">12</span>
+  <span class="pn">11</span>
 </section>
 
 <!-- 13 · WHO IT'S FOR -->
@@ -484,40 +462,7 @@ ol.pts b{color:#fff;font-weight:600}
     <div><b>Uses the scarce expert well</b><p>“Check in person” sends to a home visit only what the photos cannot settle.</p></div>
     <div><b>Fits clinical rules</b><p>A professional signs off every finding; data stays inside the hospital.</p></div>
   </div>
-  <span class="pn">13</span>
-</section>
-
-<!-- 14 · STATUS -->
-<section class="s" id="status">
-  <p class="k">The prototype today</p>
-  <h2>What works, and what comes next.</h2>
-  <div class="st">
-    <div>
-      <h3><i></i>Working</h3>
-      <ul>
-        <li><b>End-to-end flow</b>: case → 3D room → guided review → report → release → revocable family link</li>
-        <li><b>Real 3D room</b> from 39 phone photos: VGGT-1B poses, 757,792 Gaussians</li>
-        <li><b>Live object checks</b> with TypeSafe Jev 1.14, with presence and box gates</li>
-        <li><b>Gemma 4 31B</b> wired to AMD's endpoint for hazard sweep and report drafting</li>
-        <li><b>Public judge demo</b>: one frozen, pre-analysed case, a private copy per visitor</li>
-      </ul>
-    </div>
-    <div class="open">
-      <h3><i></i>Next</h3>
-      <ul>
-        <li><b>Self-hosted pipeline</b> on one AMD Instinct MI300X with ROCm</li>
-        <li><b>Calibrated scale</b> and validated 3D hazard positions on real homes</li>
-        <li><b>Guided capture</b> to help a relative take the right photos</li>
-        <li><b>Clinical pilot</b> with a discharge unit: accuracy and reviewer time</li>
-        <li>Step Wise is a hackathon prototype, <b>not a medical device</b></li>
-      </ul>
-    </div>
-  </div>
-  <div class="links">
-    <div><b>Code</b>github.com/jacopopper/amd-hack</div>
-    <div><b>Team</b>@jacopopper · @davideblesse</div>
-  </div>
-  <span class="pn">14</span>
+  <span class="pn">12</span>
 </section>
 
 <!-- 15 · CLOSE -->
@@ -525,6 +470,7 @@ ol.pts b{color:#fff;font-weight:600}
   <p class="big">On Friday, Maria goes home.</p>
   <p class="big" style="margin-top:24px"><span class="mark">This time, someone looked at the hallway.</span></p>
   <div style="display:flex;align-items:center;gap:14px;margin-top:84px;font:600 30px/1 var(--sans)"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
+  <div class="links"><div><b>Code</b>github.com/jacopopper/amd-hack</div><div><b>Team</b>@jacopopper · @davideblesse</div></div>
 </section>
 
 <!-- 16 · SOURCES -->
@@ -532,7 +478,7 @@ ol.pts b{color:#fff;font-weight:600}
   <p class="k">Sources</p>
   <h2 style="font-size:64px">Every number comes from a public institution.</h2>
   <div class="srcs" id="srcs"></div>
-  <span class="pn">16</span>
+  <span class="pn">14</span>
 </section>
 
 <script>
@@ -553,6 +499,26 @@ const card = id => {
 };
 document.querySelectorAll('figure[data-src]').forEach(f => f.innerHTML = card(f.dataset.src));
 document.getElementById('srcs').innerHTML = Object.keys(SRC).map(id => `<div><figure class="src">${card(id)}</figure><p class="who"><b>${esc(SRC[id].org)}</b>: ${esc(SRC[id].who)}<br>${esc(SRC[id].url)}</p></div>`).join('');
+const RED = '#ff3b26', AMB = '#ffb21f';
+const BOX = {
+  sogg: [
+    { x: 75.5, y: 44, w: 15, h: 13.5, c: RED, t: 'RUG', right: 1 },
+    { x: .5, y: 72, w: 30, h: 16, c: RED, t: 'FLOOR CABLE', below: 1 },
+    { x: 7, y: 31.5, w: 20, h: 39, c: AMB, tc: '#111', t: 'FOLDING CHAIR' },
+  ],
+  borse: [{ x: 1, y: 27, w: 71, h: 72, c: RED, t: 'BAGS ON THE FLOOR' }],
+  bagno: [
+    { x: 34, y: 40, w: 36, h: 26, c: RED, t: 'NO GRAB BAR', dash: 1 },
+    { x: 24.5, y: 73, w: 55.5, h: 25, c: AMB, tc: '#111', t: 'BATHTUB EDGE TO STEP OVER', right: 1 },
+    { x: .5, y: 69, w: 24, h: 30.5, c: AMB, tc: '#111', t: 'TOILET WITHOUT SUPPORT' },
+  ],
+};
+document.querySelectorAll('[data-box]').forEach(el => BOX[el.dataset.box].forEach(b => {
+  const d = document.createElement('div');
+  d.className = 'bb' + (b.dash ? ' dash' : '') + (b.below ? ' below' : '') + (b.right ? ' right' : '');
+  d.style.cssText = `left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%;--c:${b.c};--tc:${b.tc || '#fff'}`;
+  d.innerHTML = `<span>${b.t}</span>`; el.appendChild(d);
+}));
 document.querySelectorAll('.units,.ot .u').forEach(u => u.innerHTML = '<i></i>'.repeat(+u.dataset.n));
 </script>
 </body>
