@@ -1,0 +1,65 @@
+{
+ "maria": {
+  "author": null,
+  "profile": null,
+  "page": "https://unsplash.com/photos/a-black-and-white-photo-of-an-old-woman-VVlQer2k1LU",
+  "alt": "a black and white photo of an old woman",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by Pedro Miguel Aires on Unsplash",
+  "free_license_text": true
+ },
+ "dimissione": {
+  "author": "",
+  "profile": "https://unsplash.com/@purzlbaum",
+  "page": "https://unsplash.com/photos/man-in-red-shirt-and-black-pants-sitting-on-black-and-silver-wheel-chair-cw2bX6cQ8Zs",
+  "alt": "man in red shirt and black pants sitting on black and silver wheel chair",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by Claudio Schwarz on Unsplash",
+  "free_license_text": true
+ },
+ "corridoio": {
+  "author": "",
+  "profile": "https://unsplash.com/@lecolonelmoutarde",
+  "page": "https://unsplash.com/photos/ornate-room-with-green-trim-KQTxSW43ios",
+  "alt": "An ornate room with green trim, framed paintings, and a red patterned rug",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by Thomas Würth on Unsplash",
+  "free_license_text": true
+ },
+ "bagno": {
+  "author": "",
+  "profile": "https://unsplash.com/@3dottawa",
+  "page": "https://unsplash.com/photos/white-ceramic-bathtub-near-white-ceramic-bathtub-hWGlQlfoEr0",
+  "alt": "white ceramic bathtub near white ceramic bathtub",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by Point3D Commercial Imaging Ltd. on Unsplash",
+  "free_license_text": true
+ },
+ "notte": {
+  "author": "",
+  "profile": "https://unsplash.com/@charlesdeluvio",
+  "page": "https://unsplash.com/photos/dark-pathway-lit-with-small-light-fixture-pcZvxrAyYoQ",
+  "alt": "dark pathway lit with small light fixture",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by charlesdeluvio on Unsplash",
+  "free_license_text": true
+ },
+ "deambulatore": {
+  "author": "",
+  "profile": "https://unsplash.com/@mobio_be",
+  "page": "https://unsplash.com/photos/a-red-walker-with-four-wheels-on-grass-L_83nl8AjnE",
+  "alt": "A red walker with four wheels on grass",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by Mobio Marketing on Unsplash",
+  "free_license_text": true
+ },
+ "casa-arco": {
+  "author": "",
+  "profile": "https://unsplash.com/@mark_ez_estudio",
+  "page": "https://unsplash.com/photos/long-white-hallway-with-wooden-ceiling-beams-and-antique-furniture-F9g66btBoig",
+  "alt": "Long white hallway with wooden ceiling beams and antique furniture",
+  "src_host": "images.unsplash.com",
+  "title": "Photo by David Marquez on Unsplash",
+  "free_license_text": true
+ }
+}
