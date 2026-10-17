@@ -41,5 +41,6 @@ export default function AvatarModel({url}: {url: string}) {
       scene.environment?.dispose(); environment.dispose(); renderer.dispose(); renderer.domElement.remove();
     };
   }, [url]);
-  return <div className="avatar-model" ref={mount} aria-label="Modello 3D della figura">{message && <p className="avatar-message" role="status">{message}</p>}</div>;
+  // The canvas lives in its own node: React must never reconcile children of the element three.js appends to.
+  return <div className="avatar-model" aria-label="Modello 3D della figura"><div className="avatar-canvas" ref={mount} />{message ? <p className="avatar-message" role="status">{message}</p> : null}</div>;
 }
