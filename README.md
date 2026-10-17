@@ -31,17 +31,6 @@ Step Wise changes that. Her grandson photographs the home with his phone. Three 
 
 ## The problem
 
-<table>
-<tr>
-<td width="50%"><img src="docs/readme/problem-law.jpg" alt="At work, safety is mandatory. At home, it is not."></td>
-<td width="50%"><img src="docs/readme/problem-home.jpg" alt="54% of falls among over-65s happen at home"></td>
-</tr>
-<tr>
-<td width="50%"><img src="docs/readme/problem-prevention.jpg" alt="-38% falls when an expert inspects the home"></td>
-<td width="50%"><img src="docs/readme/problem-bottleneck.jpg" alt="Italy has 3,000 occupational therapists"></td>
-</tr>
-</table>
-
 | | | |
 | ---: | --- | --- |
 | **~6,000** | deaths a year from home accidents in Italy, against 1,189 at work, where risk assessment is mandatory | [ISS](https://www.epicentro.iss.it/cong_leb/balducci) · [INAIL 2025](https://www.inail.it/content/dam/inail-hub-site/documenti/2026/09/relazione-annuale-inail-2025-nota-stampa-infortuni-mp.pdf) |
@@ -81,13 +70,13 @@ A family member photographs the home room by room, with overlapping shots. The n
 </td>
 </tr>
 <tr>
-<td width="55%"><img src="docs/readme/step-3-reconstruction.jpg" alt="Step 3: 3D reconstruction"></td>
+<td width="55%"><img src="docs/readme/room-splats.jpg" alt="Step 3: Gaussian-splat reconstruction of a real room from 39 phone photos"></td>
 <td>
 
 ### 03 · 3D reconstruction
-**VGGT-1B** looks at all the photos at once and, in a single forward pass, recovers camera poses, per-pixel depth and 3D points. A hazard gets a 3D anchor only when several views agree.
+**VGGT-1B** looks at all the photos at once and, in a single forward pass, recovers camera poses, per-pixel depth and 3D points. Gaussian splats trained on those cameras turn the room into a space the reviewer can walk through. A hazard gets a 3D anchor only when several views agree.
 
-<sub>The point cloud in the slide is real prototype output: 4 photos, 90,650 points</sub>
+<sub>Real render: an open-plan living room from 39 phone photos · VGGT-1B + gsplat · scale not calibrated</sub>
 
 </td>
 </tr>
@@ -134,8 +123,6 @@ The family receives the approved plan on their phone: actions by priority, in pl
 ---
 
 ## Why AMD
-
-<img src="docs/readme/amd.jpg" alt="One GPU, inside the hospital: AMD Instinct MI300X" width="100%">
 
 Home photos and clinical data cannot go to just any cloud. The **192 GB of HBM3** on a single **AMD Instinct MI300X** hold both the 3D reconstruction and the model that reasons about the patient, so the whole pipeline can run inside the hospital network on an open ROCm stack.
 
@@ -294,6 +281,19 @@ All figures come from dated runs in [runtime evidence](docs/runtime.md). They ar
 ---
 
 ## Real model outputs
+
+### A real room, from 39 phone photos
+
+<table>
+<tr>
+<td width="50%"><img src="docs/readme/room-splats-kitchen.jpg" alt="Gaussian-splat render of the kitchen and living area"></td>
+<td width="50%"><img src="docs/readme/room-points.jpg" alt="Point cloud of the same room"></td>
+</tr>
+</table>
+
+VGGT-1B recovered the cameras, depth and points for all 39 views; [gsplat](https://github.com/nerfstudio-project/gsplat) 1.5.3 then trained 757,792 Gaussians in 9,000 steps (412 s, 2.2 GB peak GPU memory). Floor and ceiling Gaussians are flattened onto fitted planes (RMS distance to the plane down about 65%, in relative units); colours are untouched and no holes are filled. Photos are EXIF/GPS-free and nothing left the machine. The scale is not calibrated, and the hazard pins in the [`/capture`](frontend/src/app/capture/page.tsx) demo view are hand-placed, not model output. Details in [capture reconstruction](docs/capture-reconstruction.md).
+
+### Object checks and avatar
 
 <table>
 <tr>
