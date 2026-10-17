@@ -31,13 +31,10 @@
   "page": null,
   "note": "Illustrazione AI, non una casa reale"
  },
- "chiusura": {
-  "author": "Generata con gpt-image-2 (Azure OpenAI)",
-  "page": null,
-  "note": "Illustrazione AI, non persone reali"
- },
- "corridoio-aruco": {
-  "author": "Thomas Würth / Unsplash, con marcatore ArUco composto via OpenCV",
-  "page": "https://unsplash.com/photos/ornate-room-with-green-trim-KQTxSW43ios"
+ "gemma-logo": {
+  "author": "Google DeepMind",
+  "page": "https://commons.wikimedia.org/wiki/File:Gemma_icon.png",
+  "license": "Apache License 2.0",
+  "file": "../logos/gemma.png"
  }
 }
