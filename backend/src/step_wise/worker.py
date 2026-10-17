@@ -73,7 +73,7 @@ def fingerprint(stage, context, manifests):
     settings = context["settings"]
     files = {"prepare": ["pipeline/photos.py"], "jev": ["pipeline/jev.py", "prompts/jev-general.txt"], "reconstruct": ["pipeline/reconstruction.py", "pipeline/vggt_worker.py"],
              "geometry": ["pipeline/geometry.py"], "gemma": ["pipeline/gemma.py", "validation.py", "prompts/assessment.txt"],
-             "avatar": ["pipeline/avatar.py", "pipeline/avatar_blender.py", "pipeline/mpfb_export.py"],
+             "avatar": ["pipeline/avatar.py", "pipeline/avatar_blender.py", "pipeline/avatar_style.py", "pipeline/mpfb_export.py"],
              "report": ["pipeline/reports.py", "prompts/report.txt", "templates/report.html"]}[stage]
     common = ["models.py", "schema.sql", "worker.py"]
     if stage in {"jev", "gemma", "report"}:
@@ -266,6 +266,7 @@ def publish_local_artifacts(context, conn):
         conn.execute("UPDATE scenes SET payload=? WHERE id=? AND assessment_id=?", (db.dumps(scene), scene["id"], job["assessment_id"]))
     avatar = deepcopy(context["outputs"].get("avatar", {}))
     for path_key, asset_key, media in (("path", "asset_id", "model/gltf-binary"),
+                                      ("preview_path", "preview_asset_id", "image/png"),
                                       ("profile_json_path", "profile_json_asset_id", "application/json")):
         if avatar.get(path_key):
             avatar[asset_key] = db.store_asset(settings, conn, job["assessment_id"], avatar[path_key], media, avatar["provenance"], "clinical")

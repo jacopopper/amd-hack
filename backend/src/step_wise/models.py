@@ -415,7 +415,12 @@ class HouseReconstruction(StrictModel):
     composition: str
 
 
+class AvatarStyle(StrictModel):
+    walker: bool
+
+
 class AvatarArtifact(StrictModel):
+    """Frontend contract: show preview_url as a plain image, or load glb_url into any glTF viewer."""
     status: str | None = None
     provenance: str | None = None
     reason: str | None = None
@@ -431,9 +436,17 @@ class AvatarArtifact(StrictModel):
     rigged: bool | None = None
     asset_pack_sha256: str | None = None
     profile_json_sha256: str | None = None
+    has_walker: bool | None = None
+    callout_ids: list[str] | None = None
+    style: AvatarStyle | None = None
+    preview_sha256: str | None = None
+    preview_width: int | None = None
+    preview_height: int | None = None
     asset_id: ID | None = None
+    preview_asset_id: ID | None = None
     profile_json_asset_id: ID | None = None
     glb_url: str | None = None
+    preview_url: str | None = None
     profile_json_url: str | None = None
 
 

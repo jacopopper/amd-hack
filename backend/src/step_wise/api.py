@@ -15,7 +15,7 @@ from pydantic import Field
 
 from step_wise import db
 from step_wise.config import Settings
-from step_wise.models import AssessmentBundle, AssessmentEdit, AssessmentInput, CalibrationInput, Hazard, ProfileConfirmation, ReviewInput, Revisions, SceneLinkInput, StrictModel
+from step_wise.models import AssessmentBundle, AssessmentEdit, AvatarArtifact, AssessmentInput, CalibrationInput, Hazard, ProfileConfirmation, ReviewInput, Revisions, SceneLinkInput, StrictModel
 from step_wise.pipeline.photos import ingest
 from step_wise.pipeline import clinical
 from step_wise.pipeline.registration import bind_metric_link, compose_rooms
@@ -462,17 +462,34 @@ def create_app(settings=None):
                          (next_review_revision, status, db.now(), aid))
         return {"status": "removed", "review_revision": next_review_revision}
 
+    def analysis_output(conn, row):
+        """Current analysis output, else the preserved local artifacts of this revision's latest failed attempt."""
+        job = conn.execute("SELECT output FROM jobs WHERE id=?", (row["analysis_job_id"],)).fetchone() if row["analysis_job_id"] else None
+        if job:
+            return json.loads(job["output"])
+        partial = conn.execute("SELECT output FROM jobs WHERE assessment_id=? AND kind='analyze' AND input_revision=? AND status='failed' ORDER BY created_at DESC LIMIT 1",
+                               (row["id"], row["input_revision"])).fetchone()
+        return json.loads(partial["output"]).get("partial_results", {}) if partial else {}
+
+    def avatar_view(output):
+        avatar = output.get("avatar", {})
+
+        def url(key):
+            return f"/api/assets/{avatar[key]}" if avatar.get(key) else None
+        return {**avatar, "glb_url": url("asset_id"), "preview_url": url("preview_asset_id"),
+                "profile_json_url": url("profile_json_asset_id")}
+
+    @app.get("/api/assessments/{aid}/avatar", response_model=AvatarArtifact)
+    def avatar_artifact(aid: str, identity=Depends(reviewer)):
+        with db.connect(settings) as conn:
+            return avatar_view(analysis_output(conn, db.assessment(conn, aid)))
+
     @app.get("/api/assessments/{aid}/bundle", response_model=AssessmentBundle)
     def bundle(aid: str, identity=Depends(reviewer)):
         with db.connect(settings) as conn:
             row = db.assessment(conn, aid)
             inputs = json.loads(row["input_json"])
-            job = conn.execute("SELECT output FROM jobs WHERE id=?", (row["analysis_job_id"],)).fetchone() if row["analysis_job_id"] else None
-            output = json.loads(job["output"]) if job else {}
-            if not job:
-                partial = conn.execute("SELECT output FROM jobs WHERE assessment_id=? AND kind='analyze' AND input_revision=? AND status='failed' ORDER BY created_at DESC LIMIT 1",
-                                       (aid, row["input_revision"])).fetchone()
-                output = json.loads(partial["output"]).get("partial_results", {}) if partial else {}
+            output = analysis_output(conn, row)
             scene_rows = db.active_scenes(conn, aid)
             scene_payloads = {scene["id"]: json.loads(scene["payload"]) for scene in scene_rows}
             links = db.current_scene_links(conn, aid, scene_payloads)
@@ -506,7 +523,6 @@ def create_app(settings=None):
                 if scene_row["id"] not in linked_scene_ids:
                     disconnected.append(scene_row["id"])
             findings = current_findings(conn, row["analysis_job_id"], output)
-            avatar = output.get("avatar", {})
             profile = inputs["profile"]
             facts = inputs.get("clinical_facts", [])
             confirmed_facts = [fact for fact in facts if inputs.get("profile_confirmed") and fact.get("reviewer_confirmed")]
@@ -527,8 +543,7 @@ def create_app(settings=None):
                                                 "composition": "transform_to_reference maps raw scene coordinates directly into the stated component units, including calibration scale before rigid alignment. Do not apply scale or room display transforms twice; room point clouds remain separate assets."},
                     "hazards": findings, "coverage": output.get("coverage", []), "follow_up_requests": output.get("follow_up_requests", []),
                     "anchor_abstentions": output.get("anchor_abstentions", []),
-                    "avatar": {**avatar, "glb_url": f"/api/assets/{avatar['asset_id']}" if avatar.get("asset_id") else None,
-                                                       "profile_json_url": f"/api/assets/{avatar['profile_json_asset_id']}" if avatar.get("profile_json_asset_id") else None},
+                    "avatar": avatar_view(output),
                     "provenance": {"modes": output.get("modes", settings.modes()), "producer": output.get("producer"),
                                    "provenance": output.get("provenance"), "provider": output.get("provider"),
                                    "requested_hub_revision": output.get("requested_hub_revision"), "served_revision": output.get("served_revision"),

@@ -6,7 +6,24 @@ import subprocess
 from pathlib import Path
 
 from step_wise import db
+from step_wise.pipeline import avatar_style
 from step_wise.pipeline.http import ExternalFailure
+
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+
+
+def _read_preview(path):
+    """The preview is a convenience render; an unreadable one is dropped rather than failing the avatar."""
+    try:
+        blob = path.read_bytes()
+    except OSError:
+        return None
+    if len(blob) < 33 or not blob.startswith(PNG_SIGNATURE) or blob[12:16] != b"IHDR":
+        return None
+    width, height = struct.unpack_from(">II", blob, 16)
+    if not 0 < width <= 4096 or not 0 < height <= 4096:
+        return None
+    return {"sha256": db.digest(blob), "width": width, "height": height}
 
 
 def _read_glb(path):
@@ -49,7 +66,9 @@ def generate_glb(context):
     directory.mkdir(parents=True, exist_ok=True)
     profile_path = directory / "profile.json"
     output_path = context["directory"] / "assets" / "avatar.glb"
+    preview_path = context["directory"] / "assets" / "avatar-preview.png"
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    preview_path.unlink(missing_ok=True)
     inputs = context["assessment_input"]
     functional_profile = {**inputs["profile"], "clinical_facts": inputs.get("clinical_facts", [])}
     blender_input = avatar_payload(inputs.get("clinical_facts", []))
@@ -70,7 +89,7 @@ def generate_glb(context):
         match = re.search(r"Blender (\d+)\.(\d+)(?:\.(\d+))?", version.stdout)
         if version.returncode or not match or tuple(map(int, match.groups()[:2])) < (4, 2):
             raise ExternalFailure("Avatar generation requires the configured Blender 4.2 or later binary")
-        result = subprocess.run([binary, "--background", "--python", str(script), "--", str(profile_path), str(output_path)],
+        result = subprocess.run([binary, "--background", "--python", str(script), "--", str(profile_path), str(output_path), str(preview_path)],
                                 capture_output=True, text=True, timeout=context["settings"].avatar_timeout_seconds, check=False,
                                 env=child_env)
     except subprocess.TimeoutExpired:
@@ -83,18 +102,15 @@ def generate_glb(context):
         raise ExternalFailure("MPFB avatar generation failed; verify the isolated Blender and MPFB2 installation")
     gltf, node_names, gltf_json = _read_glb(output_path)
     mesh_names = {re.sub(r"\.\d{3}$", "", mesh.get("name", "")) for mesh in gltf.get("meshes", [])}
-    required_assets = {"low-poly", "eyebrow001", "eyelashes01", "teeth_base", "tongue01",
-                       "short01", "male_casualsuit01", "shoes01"}
-    if not required_assets.issubset(mesh_names):
-        raise ExternalFailure("MPFB output is missing required neutral avatar assets")
+    style = avatar_style.select_style(blender_input["display_traits"])
+    if not avatar_style.required_mesh_names(style).issubset(mesh_names):
+        raise ExternalFailure("MPFB output is missing required avatar assets")
     if "Cube" in node_names:
         raise ExternalFailure("MPFB output contains Blender's default cube")
     required_callouts = {callout["id"] for callout in blender_input["callouts"]}
     if not required_callouts.issubset(node_names):
         raise ExternalFailure("MPFB output is missing a profile callout")
-    wants_walker = any(trait["field"] == "mobility_aid" and trait["value"].casefold().strip() in {"walker", "rollator", "deambulatore"}
-                       for trait in blender_input["display_traits"] if isinstance(trait.get("value"), str))
-    if wants_walker and not any("walker" in name.casefold() for name in node_names):
+    if style["walker"] and not any("walker" in name.casefold() for name in node_names):
         raise ExternalFailure("MPFB output is missing the confirmed mobility aid")
     for fact in functional_profile.get("clinical_facts", []):
         for private_text in (fact.get("quote"), fact.get("source_document_id"),
@@ -108,7 +124,16 @@ def generate_glb(context):
                     if re.search(r"STEP_WISE_MPFB_VERSION=([0-9.]+)", result.stdout) else "version-unreported",
                 "illustrative_only": True, "clinical_text_embedded": False,
                 "mesh_count": len(gltf.get("meshes", [])), "rigged": bool(gltf.get("skins")),
-                "asset_pack_sha256": context["settings"].mpfb_asset_pack_sha256 or "unreported"}
+                "asset_pack_sha256": context["settings"].mpfb_asset_pack_sha256 or "unreported",
+                "has_walker": style["walker"], "callout_ids": sorted(required_callouts),
+                "style": avatar_style.public_summary(style)}
+    preview = _read_preview(preview_path)
+    if preview:
+        manifest.update({"preview_path": preview_path.relative_to(context["settings"].data).as_posix(),
+                         "preview_sha256": preview["sha256"], "preview_width": preview["width"],
+                         "preview_height": preview["height"]})
+    else:
+        preview_path.unlink(missing_ok=True)
     sidecar = context["directory"] / "assets" / "avatar-profile.json"
     facts = [fact for fact in functional_profile.get("clinical_facts", []) if fact.get("reviewer_confirmed")]
     callouts = blender_input["callouts"]
