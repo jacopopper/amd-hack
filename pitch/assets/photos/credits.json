@@ -26,13 +26,18 @@
   "title": "Photo by Point3D Commercial Imaging Ltd. on Unsplash",
   "free_license_text": true
  },
- "notte": {
-  "author": "",
-  "profile": "https://unsplash.com/@charlesdeluvio",
-  "page": "https://unsplash.com/photos/dark-pathway-lit-with-small-light-fixture-pcZvxrAyYoQ",
-  "alt": "dark pathway lit with small light fixture",
-  "src_host": "images.unsplash.com",
-  "title": "Photo by charlesdeluvio on Unsplash",
-  "free_license_text": true
+ "foto-cugino": {
+  "author": "Generata con gpt-image-2 (Azure OpenAI)",
+  "page": null,
+  "note": "Illustrazione AI, non una casa reale"
+ },
+ "chiusura": {
+  "author": "Generata con gpt-image-2 (Azure OpenAI)",
+  "page": null,
+  "note": "Illustrazione AI, non persone reali"
+ },
+ "corridoio-aruco": {
+  "author": "Thomas Würth / Unsplash, con marcatore ArUco composto via OpenCV",
+  "page": "https://unsplash.com/photos/ornate-room-with-green-trim-KQTxSW43ios"
  }
 }
