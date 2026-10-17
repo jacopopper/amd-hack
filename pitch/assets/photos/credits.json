@@ -8,15 +8,6 @@
   "title": "Photo by Pedro Miguel Aires on Unsplash",
   "free_license_text": true
  },
- "dimissione": {
-  "author": "",
-  "profile": "https://unsplash.com/@purzlbaum",
-  "page": "https://unsplash.com/photos/man-in-red-shirt-and-black-pants-sitting-on-black-and-silver-wheel-chair-cw2bX6cQ8Zs",
-  "alt": "man in red shirt and black pants sitting on black and silver wheel chair",
-  "src_host": "images.unsplash.com",
-  "title": "Photo by Claudio Schwarz on Unsplash",
-  "free_license_text": true
- },
  "corridoio": {
   "author": "",
   "profile": "https://unsplash.com/@lecolonelmoutarde",
@@ -42,24 +33,6 @@
   "alt": "dark pathway lit with small light fixture",
   "src_host": "images.unsplash.com",
   "title": "Photo by charlesdeluvio on Unsplash",
-  "free_license_text": true
- },
- "deambulatore": {
-  "author": "",
-  "profile": "https://unsplash.com/@mobio_be",
-  "page": "https://unsplash.com/photos/a-red-walker-with-four-wheels-on-grass-L_83nl8AjnE",
-  "alt": "A red walker with four wheels on grass",
-  "src_host": "images.unsplash.com",
-  "title": "Photo by Mobio Marketing on Unsplash",
-  "free_license_text": true
- },
- "casa-arco": {
-  "author": "",
-  "profile": "https://unsplash.com/@mark_ez_estudio",
-  "page": "https://unsplash.com/photos/long-white-hallway-with-wooden-ceiling-beams-and-antique-furniture-F9g66btBoig",
-  "alt": "Long white hallway with wooden ceiling beams and antique furniture",
-  "src_host": "images.unsplash.com",
-  "title": "Photo by David Marquez on Unsplash",
   "free_license_text": true
  }
 }
