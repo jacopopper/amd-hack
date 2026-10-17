@@ -141,25 +141,30 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 .step-n{font:500 12px/1 var(--mono);color:var(--hl);letter-spacing:.08em;margin-bottom:1.6vh}
 
 /* P1 capture */
-#p-foto{padding:0;background:#000}
-#p-foto>.bg{position:absolute;inset:0;background:url(assets/photos/foto-cugino.jpg) 60% 40%/cover}
-#p-foto:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgb(0 0 0 / 70%),transparent 16%),linear-gradient(90deg,rgb(0 0 0 / 86%) 0%,rgb(0 0 0 / 60%) 34%,rgb(0 0 0 / 0%) 58%)}
-#p-foto .in{position:relative;z-index:3;padding:0 var(--pad);max-width:1380px;width:100%;margin:0 auto}
-#p-foto .txt{max-width:520px}
+#p-foto{padding:0 0 8vh;background:#000;justify-content:flex-end}
+#p-foto>.bg{position:absolute;inset:0;background:url(assets/photos/casa/collega.jpg) 50% 30%/cover}
+#p-foto:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgb(0 0 0 / 80%),rgb(0 0 0 / 35%) 9%,transparent 20%),linear-gradient(0deg,rgb(0 0 0 / 88%) 0%,rgb(0 0 0 / 55%) 38%,transparent 64%),linear-gradient(90deg,rgb(0 0 0 / 45%),transparent 50%)}
+#p-foto .in{position:relative;z-index:3;padding:0 var(--pad);max-width:1380px;width:100%;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:40px}
+#p-foto .txt{max-width:560px}
+@media (max-width:960px){#p-foto .in{flex-direction:column;align-items:flex-start}}
 .flash{position:absolute;inset:0;background:#fff;opacity:0;z-index:4;pointer-events:none}
 .flash.go{animation:flash .6s ease-out}
 @keyframes flash{0%{opacity:.35}100%{opacity:0}}
-.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:520px;margin-top:4vh}
+.shots{flex:none;width:min(500px,36vw)}
+.shots:has(.strip:empty){display:none}
+.shots p{margin:0 0 10px;font:500 11.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#d8d2c6}
+.shots p b{color:var(--hl);font-weight:600}
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .strip:empty{display:none}
-.strip i{aspect-ratio:4/3;border-radius:4px;background:#222 50%/cover;box-shadow:0 0 0 2px rgb(255 255 255 / 85%),0 10px 20px rgb(0 0 0 / 45%);opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s ease;transition-delay:calc(.9s + var(--i) * .25s)}
+.strip i{aspect-ratio:3/4;border-radius:6px;background:#222 50%/cover;box-shadow:0 0 0 1px rgb(255 255 255 / 30%),0 14px 28px rgb(0 0 0 / 55%);opacity:0;transform:translateY(12px);transition:opacity .5s,transform .5s ease;transition-delay:calc(.9s + var(--i) * .25s)}
 .on .strip i{opacity:1;transform:none}
 
 /* P2 detection */
-.det{display:grid;grid-template-columns:1fr 1.2fr;gap:18px;align-items:start;max-width:1080px;margin:0 auto}
+.det{display:grid;grid-template-columns:1.25fr 1.08fr 1.5fr;gap:14px;align-items:start;max-width:min(1240px,165vh);margin:0 auto}
 .det>*{min-width:0}
 .shot{position:relative;overflow:hidden;background:#000;border-radius:6px;box-shadow:0 30px 60px -30px rgb(0 0 0 / 60%)}
 .shot img{width:100%;height:auto}
-.shot .hd{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:8px 10px;font:500 10.5px/1 var(--mono);color:#fff;background:linear-gradient(rgb(0 0 0 / 60%),transparent);z-index:3}
+.shot .hd{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:8px 10px;font:500 10.5px/1 var(--mono);color:#fff;background:linear-gradient(rgb(0 0 0 / 80%),rgb(0 0 0 / 40%) 60%,transparent);padding-bottom:18px;z-index:3}
 .scan{position:absolute;left:0;right:0;top:0;height:22%;background:linear-gradient(transparent,rgb(255 225 74 / 18%) 85%,rgb(255 225 74 / 85%) 100%);transform:translateY(-110%);z-index:2;pointer-events:none}
 .on .scan{animation:scan 1.5s cubic-bezier(.5,0,.5,1) .4s 1 forwards}
 @keyframes scan{0%{transform:translateY(-110%);opacity:1}92%{opacity:1}100%{transform:translateY(460%);opacity:0}}
@@ -169,7 +174,7 @@ h3{font-size:clamp(24px,min(2.3vw,4vh),38px);line-height:1.1}
 .bb span{position:absolute;left:-2.5px;bottom:100%;margin-bottom:3px;white-space:nowrap;background:var(--c);color:var(--tc,#fff);font:700 10.5px/1 var(--mono);letter-spacing:.04em;padding:5px 7px;border-radius:3px 3px 3px 0}
 .bb.below span{bottom:auto;top:100%;margin:3px 0 0;border-radius:0 3px 3px 3px}
 .bb.right span{left:auto;right:-2.5px;border-radius:3px 3px 0 3px}
-.qa{max-width:1080px;margin:1.6vh auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.qa{max-width:min(1240px,165vh);margin:1.6vh auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .qa div{background:var(--dark-2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font:500 12.5px/1.45 var(--mono);color:#cfc8bb;opacity:0;transition:opacity .4s;transition-delay:calc(1.7s + var(--i) * .5s)}
 .on .qa div{opacity:1}
 .qa div em{display:block;font-style:normal;color:#7f786d;font-size:11px;margin-bottom:3px}
@@ -412,10 +417,9 @@ body.show-notes .s.cur>.notes{display:block}
       <h2 class="a" style="--d:.1">Il cugino fotografa la casa.</h2>
       <p class="lede a" style="--d:.3;margin-top:2.4vh">Dal telefono, stanza per stanza: foto sovrapposte da più punti di vista. L'infermiera aggiunge il profilo di Maria: deambulatore, protesi d'anca, si alza di notte.</p>
       <div class="tech a" style="--d:.5"><b>Pillow · NumPy</b><b>orientamento EXIF</b><b>nitidezza e duplicati</b></div>
-      <div class="strip" id="strip"></div>
     </div>
+    <div class="shots"><p><b>40 foto</b> · tutta la zona giorno</p><div class="strip" id="strip"></div></div>
   </div>
-  <span class="cred">Immagine illustrativa generata con AI</span>
   <aside class="notes"><b>Pipeline · 10 s</b> "Tutto parte da foto normali, fatte dal telefono."</aside>
 </section>
 
@@ -428,15 +432,16 @@ body.show-notes .s.cur>.notes{display:block}
         <div class="tech a" style="--d:.5;margin-top:1.4vh"><b>Jev 1.14 · TypeSafe API</b><b>presenza + riquadro</b></div></div>
     </div>
     <div class="det">
-      <div class="shot a" style="--d:.2" id="sh-corr"><div class="hd"><span>IMG_0412 · corridoio</span><span>4 rilevati · 1 da verificare</span></div><div class="scan"></div><img src="assets/photos/corridoio.jpg" alt="Corridoio con un grande tappeto rosso e mobili"></div>
-      <div class="shot a" style="--d:.3" id="sh-bagno"><div class="hd"><span>IMG_0415 · bagno</span><span>3 rilevati</span></div><div class="scan"></div><img src="assets/photos/bagno.jpg" alt="Bagno con vasca e WC senza maniglioni"></div>
+      <div class="shot a" style="--d:.2" id="sh-sogg"><div class="hd"><span>IMG_7579 · soggiorno</span><span>3 rilevati</span></div><div class="scan"></div><img src="assets/photos/casa/soggiorno.jpg" alt="Soggiorno con tavolo, sedia pieghevole, un cavo a terra e un tappetino davanti alla cucina"></div>
+      <div class="shot a" style="--d:.25" id="sh-borse"><div class="hd"><span>IMG_7614 · divano</span><span>1 rilevato</span></div><div class="scan"></div><img src="assets/photos/casa/borse.jpg" alt="Zaini e borse appoggiati sul pavimento accanto al divano"></div>
+      <div class="shot a" style="--d:.3" id="sh-bagno"><div class="hd"><span>bagno · foto di esempio</span><span>3 rilevati</span></div><div class="scan"></div><img src="assets/photos/bagno.jpg" alt="Bagno con vasca e WC senza maniglioni"></div>
     </div>
     <div class="qa">
-      <div style="--i:0"><em>domanda</em>C'è un tappeto sul percorso?<br>→ <span class="y">sì</span> · riquadro [0.02, 0.66, 0.98, 1.00]</div>
+      <div style="--i:0"><em>domanda</em>C'è un cavo sul pavimento?<br>→ <span class="y">sì</span> · riquadro [0.01, 0.72, 0.31, 0.88]</div>
       <div style="--i:1"><em>domanda</em>C'è un maniglione accanto alla vasca?<br>→ <span class="y">no</span> · area senza appoggio</div>
-      <div style="--i:2"><em>domanda</em>La soglia ha un dislivello?<br>→ <span class="n">non valutabile</span> · da verificare</div>
+      <div style="--i:2"><em>domanda</em>Il pavimento è scivoloso?<br>→ <span class="n">non valutabile</span> · da verificare</div>
     </div>
-    <p class="small muted" style="max-width:1080px;margin:1.2vh auto 0">Foto: Thomas Würth e Point3D Commercial Imaging Ltd. / Unsplash. Riquadri a scopo dimostrativo.</p>
+    <p class="small muted" style="max-width:min(1240px,165vh);margin:1.2vh auto 0">Soggiorno e divano: foto reali della casa usata nella demo. Bagno: Point3D Commercial Imaging Ltd. / Unsplash. Riquadri a scopo dimostrativo.</p>
   </div>
   <aside class="notes"><b>Pipeline · 20 s</b> Lascia comparire i riquadri. "Ogni pericolo ha la sua prova. E quello che una foto non può dire, lo dichiara."</aside>
 </section>
@@ -481,7 +486,7 @@ body.show-notes .s.cur>.notes{display:block}
       </div>
       <div class="core a" style="--d:.9"><img src="assets/logos/gemma.png" alt="Logo Gemma">Gemma 4<small>Google DeepMind · su AMD MI300X</small></div>
       <div class="res">
-        <div style="--i:0"><div class="t" style="color:var(--red)">Urgente</div><b>Tappeto nel corridoio</b><p>Maria usa un deambulatore: le ruote si impigliano nei bordi. Ed è sul percorso che fa di notte, dalla camera al bagno.</p><small>Prova: foto del corridoio · Fonte: CDC STEADI</small></div>
+        <div style="--i:0"><div class="t" style="color:var(--red)">Urgente</div><b>Tappeto libero in cucina</b><p>Maria usa un deambulatore: le ruote si impigliano nei bordi. Ed è proprio davanti ai fornelli, dove passa ogni giorno.</p><small>Prova: foto della cucina · Fonte: CDC STEADI</small></div>
         <div style="--i:1"><div class="t" style="color:#a86a00">Importante</div><b>Nessun maniglione vicino alla vasca</b><p>Con la protesi d'anca deve scavalcare il bordo senza un appoggio.</p><small>Prova: foto del bagno · Fonte: CDC STEADI</small></div>
       </div>
     </div>
@@ -501,10 +506,10 @@ body.show-notes .s.cur>.notes{display:block}
     </div>
     <div class="c7 rev">
       <div class="stack">
-        <div class="card" style="--i:0"><div class="th" style="background-image:url(assets/photos/corridoio.jpg);background-position:50% 90%"></div><div><b>Tappeto sul percorso</b><small>Urgente · le ruote del deambulatore si impigliano</small></div><span class="stamp st-ok">APPROVATO</span></div>
+        <div class="card" style="--i:0"><div class="th" style="background-image:url(assets/photos/casa/cucina.jpg);background-position:62% 61%;background-size:180%"></div><div><b>Tappeto libero in cucina</b><small>Urgente · le ruote del deambulatore si impigliano</small></div><span class="stamp st-ok">APPROVATO</span></div>
         <div class="card" style="--i:1"><div class="th" style="background-image:url(assets/photos/bagno.jpg);background-position:50% 50%"></div><div><b>Maniglione assente</b><small>Azione corretta: "installare" → "far valutare da un tecnico"</small></div><span class="stamp st-ed">MODIFICATO</span></div>
-        <div class="card rej" style="--i:2"><div class="th" style="background-image:url(assets/photos/corridoio.jpg);background-position:20% 60%"></div><div><b>Ostacolo basso</b><small>È un poggiapiedi fisso, verificato con la famiglia</small></div><span class="stamp st-no">SCARTATO</span></div>
-        <div class="card" style="--i:3"><div class="th" style="background-image:url(assets/photos/corridoio.jpg);background-position:50% 50%"></div><div><b>Soglia tra le stanze</b><small>Da verificare di persona alla prima visita</small></div><span class="stamp st-df">RIMANDATO</span></div>
+        <div class="card rej" style="--i:2"><div class="th" style="background-image:url(assets/photos/casa/soggiorno.jpg);background-position:14% 50%;background-size:240%"></div><div><b>Sedia pieghevole</b><small>Maria non la usa, verificato con la famiglia</small></div><span class="stamp st-no">SCARTATO</span></div>
+        <div class="card" style="--i:3"><div class="th" style="background-image:url(assets/photos/casa/cucina.jpg);background-position:50% 85%"></div><div><b>Pavimento scivoloso?</b><small>Da verificare di persona alla prima visita</small></div><span class="stamp st-df">RIMANDATO</span></div>
       </div>
     </div>
   </div>
@@ -527,8 +532,8 @@ body.show-notes .s.cur>.notes{display:block}
           <div class="t" style="color:#6b665e">Piano approvato</div>
           <h4>La casa di Maria: cosa fare</h4>
           <div class="meta">Laura R., infermiera di dimissione · 17 ottobre</div>
-          <div class="it"><div class="t" style="color:var(--red)">Prima del rientro</div><b>Togliere il tappeto del corridoio</b>È sul percorso camera → bagno.</div>
-          <div class="it"><div class="t" style="color:var(--red)">Prima del rientro</div><b>Luce notturna sul percorso</b>Maria si alza di notte.</div>
+          <div class="it"><div class="t" style="color:var(--red)">Prima del rientro</div><b>Togliere il tappeto in cucina</b>È davanti ai fornelli, dove passa ogni giorno.</div>
+          <div class="it"><div class="t" style="color:var(--red)">Prima del rientro</div><b>Fissare il cavo a terra</b>Attraversa il passaggio vicino al tavolo.</div>
           <div class="it"><div class="t" style="color:#a86a00">Entro due settimane</div><b>Maniglione accanto alla vasca</b>Far valutare l'installazione.</div>
           <div class="foot">Fonte: CDC STEADI. Non sostituisce una visita di persona.</div>
         </div></div>
@@ -627,12 +632,13 @@ const SRC = {
   /* detections */
   const RED = '#ff3b26', AMB = '#ffb21f', VER = '#f5f1e8';
   const BOX = {
-    'sh-corr': [
-      { x: 2, y: 66, w: 96, h: 33.5, c: RED, t: 'TAPPETO · SUL PERCORSO', right: 1 },
-      { x: 42, y: 43, w: 17.5, h: 6.7, c: RED, t: 'TAPPETO · SULLA SOGLIA', right: 1 },
-      { x: 20, y: 50.8, w: 16, h: 15.8, c: AMB, tc: '#111', t: 'OSTACOLO BASSO' },
-      { x: .5, y: 55, w: 19, h: 35, c: AMB, tc: '#111', t: 'MOBILE SUL PASSAGGIO', below: 1 },
-      { x: 37, y: 50.3, w: 26, h: 5.3, c: VER, tc: '#111', t: 'SOGLIA · DA VERIFICARE', dash: 1, below: 1 },
+    'sh-sogg': [
+      { x: 75.5, y: 44, w: 15, h: 13.5, c: RED, t: 'TAPPETO', right: 1 },
+      { x: .5, y: 72, w: 30, h: 16, c: RED, t: 'CAVO A TERRA', below: 1 },
+      { x: 7, y: 31.5, w: 20, h: 39, c: AMB, tc: '#111', t: 'SEDIA PIEGHEVOLE' },
+    ],
+    'sh-borse': [
+      { x: 1, y: 27, w: 71, h: 72, c: RED, t: 'BORSE SUL PAVIMENTO' },
     ],
     'sh-bagno': [
       { x: 34, y: 40, w: 36, h: 26, c: RED, t: 'MANIGLIONE ASSENTE', dash: 1 },
@@ -655,7 +661,7 @@ const SRC = {
   });
 
   /* P1 · foto reali dell'appartamento (max 4), es. 'assets/photos/casa-1.jpg' */
-  const SHOTS = [];
+  const SHOTS = [1, 2, 3, 4].map(i => `assets/photos/casa/scatto-${i}.jpg`);
   $('#strip').innerHTML = SHOTS.slice(0, 4).map((u, i) => `<i style="--i:${i};background-image:url('${esc(u)}')"></i>`).join('');
   let flashed = false;
   const runShots = () => {

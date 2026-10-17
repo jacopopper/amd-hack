@@ -26,15 +26,15 @@
   "title": "Photo by Point3D Commercial Imaging Ltd. on Unsplash",
   "free_license_text": true
  },
- "foto-cugino": {
-  "author": "Generata con gpt-image-2 (Azure OpenAI)",
-  "page": null,
-  "note": "Illustrazione AI, non una casa reale"
- },
  "gemma-logo": {
   "author": "Google DeepMind",
   "page": "https://commons.wikimedia.org/wiki/File:Gemma_icon.png",
   "license": "Apache License 2.0",
   "file": "../logos/gemma.png"
+ },
+ "casa": {
+  "author": "Team Step Wise",
+  "page": null,
+  "note": "Foto reali della casa usata nella demo (IMG_7565–7618), ricodificate senza metadati EXIF/GPS"
  }
 }
