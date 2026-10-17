@@ -126,7 +126,11 @@ class Workflow(unittest.TestCase):
         self.assertEqual(self.client.post(f"/api/reports/{report['id']}/release", json=self.revisions(aid)).status_code, 409)
         payload = {**self.get(aid)["inputs"], "expected_input_revision": self.get(aid)["input_revision"]}
         self.assertEqual(self.client.patch(f"/api/assessments/{aid}", json=payload).status_code, 409)
+        released = self.client.get(f"/api/reports/{report['id']}").json()
+        self.assertFalse(released["revoked"])
+        self.assertTrue(released["family_expires_at"])
         self.assertEqual(self.client.post(f"/api/reports/{report['id']}/revoke").status_code, 200)
+        self.assertTrue(self.client.get(f"/api/reports/{report['id']}").json()["revoked"])
         self.assertEqual(family.get(f"/api/family/{token}").status_code, 404)
         self.assertEqual(self.client.delete(f"/api/assessments/{aid}").status_code, 200)
         self.assertEqual(self.client.get(f"/api/assessments/{aid}").status_code, 404)

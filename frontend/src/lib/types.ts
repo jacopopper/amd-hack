@@ -21,4 +21,4 @@ export type Findings = { hazards: Hazard[]; provenance: string | null; coverage:
 export type Scene = { id: string; label: string; status?: string; ply_url: string | null; provenance?: string; warning?: string; scale_state?: string; scale_factor?: number | null; display_transform?: number[][]; cameras?: [number, number, number][]; bounds?: [[number, number, number], [number, number, number]] };
 export type Stage = { status: string; elapsed_seconds: number | null; provenance: string; warnings?: unknown[] };
 export type Job = JobSummary & { stages: Record<string, Stage> };
-export type Report = { id: string; status: string; snapshot_sha256: string; html_url: string; pdf_url: string; snapshot: { draft_provenance: string }; input_revision: number; review_revision: number };
+export type Report = { id: string; status: string; snapshot_sha256: string; html_url: string; pdf_url: string; snapshot: { draft_provenance: string }; input_revision: number; review_revision: number; released_at: string | null; family_expires_at: string | null; revoked: boolean };

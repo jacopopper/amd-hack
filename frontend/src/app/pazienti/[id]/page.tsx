@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
 import { api, json } from "@/lib/api";
@@ -16,6 +16,7 @@ import Reel from "@/components/space/Reel";
 import TourSummary from "@/components/space/TourSummary";
 import PipelineStatus from "@/components/PipelineStatus";
 import PreparePanel from "@/components/PreparePanel";
+import ReleaseDialog from "@/components/ReleaseDialog";
 
 const SpaceViewer = dynamic(() => import("@/components/space/SpaceViewer"), { ssr: false });
 const ACTIVE = ["queued", "processing", "report_drafting"];
@@ -38,6 +39,7 @@ function ToolButton({ active, disabled, title, onClick, children }: { active?: b
 
 export default function PatientSpacePage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const guard = useAuthGuard();
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [findings, setFindings] = useState<Findings | null>(null);
@@ -52,6 +54,7 @@ export default function PatientSpacePage() {
   const [touring, setTouring] = useState(false);
   const [summary, setSummary] = useState(false);
   const [editingPhotos, setEditingPhotos] = useState(false);
+  const [releasing, setReleasing] = useState(false);
   const [modes, setModes] = useState<Modes | null>(null);
   const [error, setError] = useState("");
 
@@ -153,6 +156,11 @@ export default function PatientSpacePage() {
     }
   }
 
+  async function deleteAssessment() {
+    await api(`/assessments/${id}`, { method: "DELETE" });
+    router.replace("/");
+  }
+
   async function draftReport() {
     if (!assessment) return;
     try {
@@ -171,7 +179,7 @@ export default function PatientSpacePage() {
     return (
       <div className="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,#23272d_0%,#0e1013_55%,#0a0b0d_100%)] p-4 pt-20 text-white">
         <div className="absolute left-4 top-4 z-10">
-          <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} />
+          <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment} />
         </div>
         <div className="flex h-full max-h-[860px] w-full items-start justify-center">
           <PreparePanel assessment={assessment} scenes={scenes} modes={modes} reload={load} />
@@ -199,7 +207,7 @@ export default function PatientSpacePage() {
 
       {/* Top-left: whose home this is */}
       <div className="absolute left-4 top-4 z-10">
-        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} />
+        <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment} />
       </div>
 
       {/* Top-center: rooms */}
@@ -241,9 +249,9 @@ export default function PatientSpacePage() {
             </button>
           )}
           {reportCurrent ? (
-            <a href={report!.html_url} target="_blank" rel="noreferrer" className="flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
-              <FileText className="h-4 w-4" /> {released ? "Report rilasciato" : "Apri il report"}
-            </a>
+            <button onClick={() => setReleasing(true)} className="flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
+              <FileText className="h-4 w-4" /> {released ? "Report rilasciato" : "Rivedi e rilascia"}
+            </button>
           ) : (
             <button onClick={() => setSummary(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
               <FileText className="h-4 w-4" /> Riepilogo
@@ -328,6 +336,8 @@ export default function PatientSpacePage() {
           </div>
         </div>
       )}
+
+      {releasing && report && <ReleaseDialog assessment={assessment} report={report} reload={load} onClose={() => setReleasing(false)} />}
 
       {summary && (
         <TourSummary

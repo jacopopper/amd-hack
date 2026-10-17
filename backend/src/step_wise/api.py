@@ -592,7 +592,7 @@ def create_app(settings=None):
             r = conn.execute("SELECT * FROM reports WHERE id=?", (rid,)).fetchone()
             if r is None:
                 raise db.Missing("Report not found")
-            return {k: r[k] for k in ("id", "assessment_id", "input_revision", "review_revision", "status", "snapshot_sha256", "approver", "released_at")} | {"snapshot": json.loads(r["snapshot"]), "html_url": f"/api/assets/{r['html_asset_id']}", "pdf_url": f"/api/assets/{r['pdf_asset_id']}"}
+            return {k: r[k] for k in ("id", "assessment_id", "input_revision", "review_revision", "status", "snapshot_sha256", "approver", "released_at", "family_expires_at")} | {"revoked": bool(r["revoked"]), "snapshot": json.loads(r["snapshot"]), "html_url": f"/api/assets/{r['html_asset_id']}", "pdf_url": f"/api/assets/{r['pdf_asset_id']}"}
 
     @app.post("/api/reports/{rid}/release")
     def release_report(rid: str, payload: Revisions, identity=Depends(reviewer)):
