@@ -142,10 +142,10 @@ Home photos and clinical data cannot go to just any cloud. The **192 GB of HBM3*
 docker compose -f compose.demo.yaml up --build
 ```
 
-Open <http://localhost:8000>. You land on Maria's case and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
+Open <http://localhost:8000>. You open Maria's case and walk the professional's part of the flow: **review each hazard → prepare the report → release it to the family**. Every visitor gets a private copy of the same frozen, pre-analysed case, so nothing calls an external model. The same image deploys to Render through [`render.yaml`](render.yaml).
 
 > [!IMPORTANT]
-> The bundled snapshot is a **control case**: its analysis is deterministic fixture output, not a model run, and the landing page states this. It demonstrates the review workflow, not image analysis or clinical accuracy.
+> The bundled snapshot is a **control case**: its analysis is deterministic fixture output, not a model run, and the room view labels its geometry as synthetic. It demonstrates the review workflow, not image analysis or clinical accuracy.
 
 <details>
 <summary><b>Full local setup (fixture pipeline, API + worker)</b></summary>
