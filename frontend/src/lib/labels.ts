@@ -33,5 +33,6 @@ export const stageLabel: Record<string, string> = {
   reconstruct: "Ricostruzione 3D",
   geometry: "Geometria e scala",
   gemma: "Valutazione sul paziente",
+  avatar: "Avatar del paziente",
   report: "Report e PDF",
 };

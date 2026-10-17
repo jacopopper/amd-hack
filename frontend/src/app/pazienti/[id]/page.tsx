@@ -3,10 +3,10 @@
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Box, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
+import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
 import { api, json } from "@/lib/api";
 import { byPriority, effective, sceneOf } from "@/lib/hazards";
-import type { Anchor, Assessment, Findings, Report, Scene } from "@/lib/types";
+import type { Anchor, Assessment, Findings, Modes, Report, Scene } from "@/lib/types";
 import { useAuthGuard } from "@/lib/useAuthGuard";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
 import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
@@ -15,9 +15,11 @@ import PhotoView from "@/components/space/PhotoView";
 import Reel from "@/components/space/Reel";
 import TourSummary from "@/components/space/TourSummary";
 import PipelineStatus from "@/components/PipelineStatus";
+import PreparePanel from "@/components/PreparePanel";
 
 const SpaceViewer = dynamic(() => import("@/components/space/SpaceViewer"), { ssr: false });
 const ACTIVE = ["queued", "processing", "report_drafting"];
+const PREPARING = ["draft", "failed"];
 type View = ViewMode | "photos";
 
 function ToolButton({ active, disabled, title, onClick, children }: { active?: boolean; disabled?: boolean; title: string; onClick: () => void; children: React.ReactNode }) {
@@ -49,6 +51,8 @@ export default function PatientSpacePage() {
   const [pickedAnchor, setPickedAnchor] = useState<Anchor | null>(null);
   const [touring, setTouring] = useState(false);
   const [summary, setSummary] = useState(false);
+  const [editingPhotos, setEditingPhotos] = useState(false);
+  const [modes, setModes] = useState<Modes | null>(null);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -59,7 +63,15 @@ export default function PatientSpacePage() {
     setScenes(s);
     setSceneId((old) => (s.some((x) => x.id === old) ? old : (s[0]?.id ?? "")));
     setReport(a.reports[0] ? await api<Report>(`/reports/${a.reports[0].id}`) : null);
+    if (PREPARING.includes(a.status)) setEditingPhotos(false);
+    return a;
   }, [id]);
+
+  useEffect(() => {
+    api<{ modes: Modes }>("/health")
+      .then((h) => setModes(h.modes))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const initial = setTimeout(() => load().catch((e) => guard(e) || setError((e as Error).message)));
@@ -155,6 +167,19 @@ export default function PatientSpacePage() {
     return <div className="grid h-full place-items-center bg-[#0a0b0d] text-sm text-white/50">{error || "Apertura della casa…"}</div>;
   }
 
+  if (PREPARING.includes(assessment.status)) {
+    return (
+      <div className="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,#23272d_0%,#0e1013_55%,#0a0b0d_100%)] p-4 pt-20 text-white">
+        <div className="absolute left-4 top-4 z-10">
+          <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} />
+        </div>
+        <div className="flex h-full max-h-[860px] w-full items-start justify-center">
+          <PreparePanel assessment={assessment} scenes={scenes} modes={modes} reload={load} />
+        </div>
+      </div>
+    );
+  }
+
   const scene = scenes.find((s) => s.id === sceneId);
   const roomPhotos = assessment.photos.filter((p) => p.scene_id === sceneId);
   const unassessed = [...new Set(findings.coverage.filter((c) => c.coverage !== "visible").map((c) => c.category))];
@@ -210,6 +235,11 @@ export default function PatientSpacePage() {
               {decided} di {hazards.length}
             </span>
           </div>
+          {!released && !busy && (
+            <button onClick={() => setEditingPhotos(true)} className="glass flex h-11 items-center gap-2 rounded-2xl px-4 text-sm hover:bg-white/10">
+              <Camera className="h-4 w-4" /> Foto
+            </button>
+          )}
           {reportCurrent ? (
             <a href={report!.html_url} target="_blank" rel="noreferrer" className="flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black">
               <FileText className="h-4 w-4" /> {released ? "Report rilasciato" : "Apri il report"}
@@ -289,6 +319,15 @@ export default function PatientSpacePage() {
       )}
       {touring && hazard && <span className="pointer-events-none absolute left-1/2 top-[76px] z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">Revisione guidata · rispondi per passare al successivo</span>}
       {error && <p className="glass absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl px-4 py-2 text-sm text-[var(--urgent)]">{error}</p>}
+
+      {editingPhotos && (
+        <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="flex h-full max-h-[860px] flex-col items-center gap-2">
+            <p className="rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Cambiare le foto annulla l’analisi attuale e le risposte date finora.</p>
+            <PreparePanel assessment={assessment} scenes={scenes} modes={modes} reload={load} onClose={() => setEditingPhotos(false)} />
+          </div>
+        </div>
+      )}
 
       {summary && (
         <TourSummary

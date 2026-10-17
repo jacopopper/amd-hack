@@ -2,10 +2,12 @@
 export type Priority = "urgent" | "important" | "recommended";
 export type Decision = "approve" | "edit" | "reject" | "defer";
 export type Profile = { description: string; mobility_aid: string | null; aid_width_m: number | null; vision: string | null; support_needs: string | null; relevant_history: string | null; daily_routes: string[] };
-export type Inputs = { label: string; profile: Profile; profile_confirmed: boolean; staged_data_confirmed: true; processing_consent: true; external_processing_consent: boolean };
+export type ClinicalClaim = { field: string; value: string | number | boolean | null; status: "current" | "historical" | "negated" | "unknown"; source_document_id: string | null; page: number | null; quote: string | null; origin: "document" | "manual"; reviewer_confirmed: boolean };
+export type Inputs = { label: string; profile: Profile; profile_confirmed: boolean; staged_data_confirmed: true; processing_consent: true; external_processing_consent: boolean; clinical_external_processing_consent: boolean; clinical_facts: ClinicalClaim[] };
+export type Modes = { reconstruction: string; gemma: string; avatar: string; jev: string };
 export type Photo = { id: string; scene_id: string; role: "overview" | "detail"; asset_url: string; width: number; height: number };
 export type JobSummary = { id: string; kind: string; status: string; stage: string | null; error: string | null };
-export type Assessment = { id: string; inputs: Inputs; status: string; input_revision: number; review_revision: number; created_at: string; photos: Photo[]; jobs: JobSummary[]; reports: { id: string; status: string; input_revision: number; review_revision: number }[] };
+export type Assessment = { id: string; inputs: Inputs; status: string; input_revision: number; review_revision: number; created_at: string; photos: Photo[]; clinical_documents: { id: string }[]; jobs: JobSummary[]; reports: { id: string; status: string; input_revision: number; review_revision: number }[] };
 export type Listing = { id: string; label: string; status: string; created_at: string }[];
 export type Evidence = { photo_id: string; box: [number, number, number, number] | null };
 // box_world arrives with the 3D geometry work (piano-3d-locale, fase 4c); optional until then.

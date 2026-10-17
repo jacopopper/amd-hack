@@ -44,9 +44,9 @@ export default function PatientsPage() {
             <Search className="h-4 w-4" />
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca un paziente" className="w-full bg-transparent text-white outline-none placeholder:text-white/40" />
           </label>
-          <button className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90">
+          <Link href="/pazienti/nuovo" className="flex h-10 items-center gap-2 rounded-xl bg-white px-4 text-sm font-medium text-black hover:bg-white/90">
             <Plus className="h-4 w-4" /> Nuovo paziente
-          </button>
+          </Link>
           <button
             title="Esci"
             onClick={async () => {

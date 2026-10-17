@@ -12,8 +12,13 @@ const where: Record<string, string> = {
   reconstruct: "GPU · VGGT",
   geometry: "CPU",
   gemma: "Gemma",
+  avatar: "Blender · MPFB",
   report: "CPU",
 };
+
+// Worker order (backend worker.STAGES); unknown stages keep their response order at the end.
+const ORDER = ["prepare", "jev", "reconstruct", "gemma", "geometry", "avatar", "report"];
+const rank = (name: string) => (ORDER.includes(name) ? ORDER.indexOf(name) : ORDER.length);
 
 // Live view of the worker pipeline; each stage shows where it runs and how long it took.
 export default function PipelineStatus({ jobId }: { jobId: string }) {
@@ -41,7 +46,9 @@ export default function PipelineStatus({ jobId }: { jobId: string }) {
       <h2 className="text-lg font-semibold">Stiamo analizzando la casa</h2>
       <p className="mt-1 text-sm text-white/55">Puoi lasciare questa pagina: il lavoro continua sul server.</p>
       <ol className="mt-5 space-y-3.5">
-        {Object.entries(job.stages).map(([name, stage]) => {
+        {Object.entries(job.stages)
+          .sort(([a], [b]) => rank(a) - rank(b))
+          .map(([name, stage]) => {
           const running = job.stage === name && stage.status !== "succeeded";
           const done = stage.status === "succeeded";
           return (
