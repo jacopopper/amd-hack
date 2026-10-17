@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { AlertTriangle, Loader2, Play, Upload, X } from "lucide-react";
 import { api, json } from "@/lib/api";
-import type { Assessment, Modes, Scene } from "@/lib/types";
+import type { Assessment, Modes, PhotoLimits, Scene } from "@/lib/types";
 
 const field = "h-10 rounded-xl bg-white/[0.06] px-3 text-sm text-white outline-none ring-1 ring-white/10 transition placeholder:text-white/30 focus:bg-white/10 focus:ring-white/30";
 
 // Before analysis: photos room by room, the consents the configured models need, then start.
-export default function PreparePanel({ assessment, scenes, modes, reload, onClose }: { assessment: Assessment; scenes: Scene[]; modes: Modes | null; reload: () => Promise<Assessment>; onClose?: () => void }) {
+export default function PreparePanel({ assessment, scenes, modes, limits, reload, onClose }: { assessment: Assessment; scenes: Scene[]; modes: Modes | null; limits: PhotoLimits | null; reload: () => Promise<Assessment>; onClose?: () => void }) {
   const [room, setRoom] = useState(scenes[0]?.label ?? "");
   const [role, setRole] = useState<"overview" | "detail">("overview");
   const [progress, setProgress] = useState<string | null>(null);
@@ -19,11 +19,16 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
   const rooms = scenes.map((s) => ({ ...s, photos: assessment.photos.filter((p) => p.scene_id === s.id) }));
   const overview = assessment.photos.filter((p) => p.role === "overview").length;
   const thinRooms = rooms.filter((r) => r.photos.filter((p) => p.role === "overview").length < 2).map((r) => r.label);
+  const overCap = limits && modes?.reconstruction === "vggt" ? rooms.filter((r) => r.photos.filter((p) => p.role === "overview").length > limits.frame_cap) : [];
+  const selectedRoom = rooms.find((r) => r.label === room.trim());
+  const roomOverviews = selectedRoom?.photos.filter((p) => p.role === "overview").length ?? 0;
   const needsPhotoConsent = modes?.jev === "live" || modes?.gemma === "http";
   const needsClinicalConsent = modes?.gemma === "http";
   const synthetic = modes?.reconstruction === "fixture" && modes?.gemma === "fixture";
   const failed = assessment.status === "failed" ? assessment.jobs.find((j) => j.kind === "analyze" && j.error) : undefined;
   const blockers = [
+    (!modes || !limits) && "Caricamento della configurazione…",
+    ...overCap.map((r) => `${r.label}: supera il limite di ${limits?.frame_cap} panoramiche. Rimuovi gli scatti meno utili prima dell’analisi.`),
     !inputs.profile_confirmed && "Il profilo non è confermato.",
     overview === 0 && "Serve almeno una foto panoramica.",
     needsPhotoConsent && !inputs.external_processing_consent && "Manca il consenso all’analisi esterna delle foto.",
@@ -44,8 +49,12 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
   }
 
   // Each upload bumps the input revision, so files go one at a time against the latest one.
-  const upload = (files: FileList) =>
+  const upload = (files: File[]) =>
     run(async () => {
+      if (!limits || !modes) throw new Error("Attendi il caricamento della configurazione.");
+      if (assessment.photos.length + files.length > limits.max_photos) throw new Error(`Massimo ${limits.max_photos} foto per casa. Nessun file caricato.`);
+      if (role === "overview" && modes.reconstruction === "vggt" && roomOverviews + files.length > limits.frame_cap) throw new Error(`Questa stanza ha ${roomOverviews} panoramiche: puoi aggiungerne ancora ${Math.max(0, limits.frame_cap - roomOverviews)}. Nessun file caricato.`);
+      if (files.some((file) => !/\.(jpe?g|png)$/i.test(file.name) || file.size > limits.max_file_bytes)) throw new Error(`Usa file JPG o PNG, massimo ${Math.round(limits.max_file_bytes / 1024 / 1024)} MB ciascuno. Nessun file caricato.`);
       let current = assessment;
       for (const [i, file] of [...files].entries()) {
         setProgress(`Caricamento ${i + 1} di ${files.length}…`);
@@ -82,16 +91,25 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
       <header className="flex items-start gap-3 px-6 pb-3 pt-5">
         <div>
           <h2 className="text-xl font-semibold">Foto della casa</h2>
-          <p className="mt-0.5 text-sm text-white/50">Per ogni stanza, foto panoramiche che si sovrappongono girando lungo le pareti. Per il 3D ne servono almeno 2, meglio 12–20.</p>
+          <p className="mt-0.5 text-sm text-white/50">Aggiungi le nuove foto alla stessa stanza: verranno ricostruite insieme a quelle già presenti.</p>
         </div>
         {onClose && (
-          <button onClick={onClose} className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white" aria-label="Chiudi">
+          <button disabled={busy} onClick={onClose} className="ml-auto grid h-8 w-8 shrink-0 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-30" aria-label="Chiudi">
             <X className="h-4 w-4" />
           </button>
         )}
       </header>
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 pb-6">
+        <details className="rounded-xl bg-white/[0.04] px-4 py-3 text-sm text-white/65">
+          <summary className="cursor-pointer font-medium text-white/85">Come fotografare la stanza per il 3D</summary>
+          <ul className="mt-2 list-disc space-y-1 pl-4">
+            <li>Punta a 12–20 scatti d’insieme nitidi. Spostati lungo le pareti, mantenendo circa due terzi della scena in comune tra scatti vicini.</li>
+            <li>Inquadra ogni angolo, il pavimento, le pareti e i lati nascosti dei mobili da più posizioni.</li>
+            <li>Usa la stessa lente, luce stabile e mobili fermi. Carica gli originali JPG/PNG, evitando screenshot e panorami cuciti.</li>
+            <li>“Panoramiche” indica normali scatti d’insieme. I “Dettagli” aiutano la revisione, ma non entrano nel 3D.</li>
+          </ul>
+        </details>
         {failed && (
           <p className="flex gap-2 rounded-xl bg-[var(--urgent)]/10 px-3.5 py-3 text-sm text-[var(--urgent)]">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> L’ultima analisi non è riuscita: {failed.error}
@@ -102,7 +120,7 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
         {rooms.map((r) => (
           <section key={r.id}>
             <h3 className="text-sm font-medium">
-              {r.label} <span className="font-normal text-white/40">· {r.photos.length} foto</span>
+              {r.label} <span className="font-normal text-white/40">· {r.photos.filter((p) => p.role === "overview").length} panoramiche · {r.photos.filter((p) => p.role === "detail").length} dettagli</span>
             </h3>
             <div className="mt-2 grid grid-cols-5 gap-2">
               {r.photos.map((p) => (
@@ -121,13 +139,13 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
 
         <section className="rounded-xl bg-white/[0.04] p-3.5">
           <div className="flex flex-wrap items-center gap-2">
-            <input value={room} onChange={(e) => setRoom(e.target.value)} list="rooms" maxLength={120} placeholder="Stanza, es. Bagno" aria-label="Stanza" className={`${field} min-w-0 flex-1`} />
+            <input disabled={busy} value={room} onChange={(e) => setRoom(e.target.value)} list="rooms" maxLength={120} placeholder="Stanza, es. Bagno" aria-label="Stanza" className={`${field} min-w-0 flex-1`} />
             <datalist id="rooms">
               {scenes.map((s) => (
                 <option key={s.id} value={s.label} />
               ))}
             </datalist>
-            <select value={role} onChange={(e) => setRole(e.target.value as "overview" | "detail")} aria-label="Tipo di foto" className={field}>
+            <select disabled={busy} value={role} onChange={(e) => setRole(e.target.value as "overview" | "detail")} aria-label="Tipo di foto" className={field}>
               <option value="overview">Panoramiche</option>
               <option value="detail">Dettaglio</option>
             </select>
@@ -135,17 +153,20 @@ export default function PreparePanel({ assessment, scenes, modes, reload, onClos
               {progress ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               {progress ?? "Aggiungi foto"}
               <input
+                disabled={busy || !room.trim() || !limits || !modes}
                 type="file"
                 accept="image/jpeg,image/png"
                 multiple
                 hidden
                 onChange={(e) => {
-                  if (e.target.files?.length) upload(e.target.files);
+                  if (e.target.files?.length) upload([...e.target.files]);
                   e.target.value = "";
                 }}
               />
             </label>
           </div>
+          {limits && <p className="mt-2 text-xs text-white/45">{assessment.photos.length}/{limits.max_photos} foto nella casa · JPG/PNG fino a {Math.round(limits.max_file_bytes / 1024 / 1024)} MB.{modes?.reconstruction === "vggt" && ` Per questa stanza: ${roomOverviews}/${limits.frame_cap} panoramiche.`}</p>}
+          <p className="mt-2 text-xs text-white/45">Le nuove foto richiedono una nuova analisi e revisione. Le superfici completate a mano vanno riadattate alla nuova ricostruzione.</p>
         </section>
 
         <section className="space-y-2">

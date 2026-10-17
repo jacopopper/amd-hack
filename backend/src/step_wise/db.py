@@ -180,6 +180,16 @@ def enqueue(settings, aid, kind, expected_input, expected_review, parent_id=None
         if kind == "analyze":
             if not conn.execute("SELECT 1 FROM photos WHERE assessment_id=? AND role='overview' AND active=1", (aid,)).fetchone():
                 raise Conflict("Upload at least one overview photo")
+            if settings.recon_backend == "vggt" and "reconstruct" in scope:
+                oversized = conn.execute(
+                    "SELECT s.label,COUNT(*) AS photo_count FROM photos p JOIN scenes s ON s.id=p.scene_id "
+                    "WHERE p.assessment_id=? AND p.active=1 AND p.role='overview' "
+                    "GROUP BY p.scene_id HAVING COUNT(*)>? ORDER BY s.rowid LIMIT 1",
+                    (aid, settings.frame_cap)).fetchone()
+                if oversized:
+                    raise Conflict(f"Room {oversized['label']} has {oversized['photo_count']} overview photos; "
+                                   f"VGGT allows at most {settings.frame_cap} per room. Remove excess overview photos "
+                                   "or explicitly adjust VGGT_FRAME_CAP before analyzing; no photos are silently dropped.")
             if ((settings.jev_enabled and "jev" in scope) or (settings.gemma_backend == "http" and "gemma" in scope)) and not data.get("external_processing_consent"):
                 raise Conflict("Acknowledge external photo processing before live visual models run")
             if settings.gemma_backend == "http" and "gemma" in scope and not data.get("clinical_external_processing_consent"):

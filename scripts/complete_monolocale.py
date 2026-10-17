@@ -5,16 +5,51 @@ The normalized photo selections below are specific to this room. Original
 analysis and photos are read only; all output is a separate visual GLB.
 """
 import argparse
+import hashlib
 import io
 import json
 import sqlite3
 import struct
 from pathlib import Path
 
-import cv2
 import numpy as np
 from PIL import Image
-from scipy.ndimage import median_filter
+
+
+SOURCE_ANALYSIS_SHA256 = "b1632187394fdaeba89e6fcd29a90a2f34ddc6f749c66dea6342007d8332b715"
+SOURCE_PHOTO_SHA256 = (
+    "38ac06d2d592a62ddf3b77dd733662d330c5d131cf17ffbdf3666fc726603e70",
+    "b90944ab171331dc25aacab512063d39f87bdc683e89e45b97babcd2d2b33df2",
+    "2b3282c5f05b1442b25c5001dbd51ad2f9556c8cd7482ca6459e31377909c8d5",
+    "943a0a44d260810f7f2ff0bb9d9611faeb584430dc8353b3c8630ec4aca0f398",
+    "9edd9ac992a9767acb4a60d25ebe46cc877ce0b32082a7f74568a33addd4fd5f",
+)
+
+
+def file_sha256(path):
+    with Path(path).open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def validate_manual_source(data, scene, photo_rows):
+    """The hand-fitted coordinates cannot be transferred to another VGGT result."""
+    refit = "This manual completion requires its original five-photo analysis. Refit the room selections and planes for the new photos/reconstruction."
+    try:
+        images = scene["images"]
+        if (scene["analysis_sha256"] != SOURCE_ANALYSIS_SHA256
+                or file_sha256(data / scene["analysis_path"]) != SOURCE_ANALYSIS_SHA256
+                or [image["tensor_index"] for image in images] != list(range(5))
+                or len(photo_rows) != 5 or any(row is None for row in photo_rows)):
+            raise ValueError(refit)
+        source_photos = [{"id": image["photo_id"], "sha256": file_sha256(data / row["path"])}
+                         for image, row in zip(images, photo_rows, strict=True)]
+        if (tuple(photo["sha256"] for photo in source_photos) != SOURCE_PHOTO_SHA256
+                or any(photo["sha256"] != row["sha256"] for photo, row in zip(source_photos, photo_rows, strict=True))
+                or scene.get("selected_photo_ids") != [photo["id"] for photo in source_photos]):
+            raise ValueError(refit)
+    except (OSError, KeyError, TypeError):
+        raise ValueError(refit) from None
+    return source_photos
 
 
 # Clean photographic regions selected by hand, in original-image fractions.
@@ -45,6 +80,8 @@ PHOTO_PANELS = [
 
 
 def polygon_mask(shape, polygon, box):
+    import cv2
+
     left, top, right, bottom = box
     polygon = np.asarray(polygon) * [right - left, bottom - top] + [left, top]
     mask = np.zeros(shape, np.uint8)
@@ -134,23 +171,35 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--assessment", required=True)
     parser.add_argument("--data", type=Path, default=Path("data"))
-    parser.add_argument("--output", type=Path, default=Path("data/live-tests/monolocale-completed"))
+    parser.add_argument("--output", type=Path, required=True, help="New, unused output directory; existing results are never overwritten")
     args = parser.parse_args()
-    args.output.mkdir(parents=True, exist_ok=True)
+    if args.output.exists():
+        raise ValueError("Output directory already exists; choose a new directory to preserve the previous completion")
     conn = sqlite3.connect(f"file:{args.data / 'assessment.sqlite3'}?mode=ro", uri=True)
     conn.row_factory = sqlite3.Row
     scenes = conn.execute("SELECT * FROM scenes WHERE assessment_id=?", (args.assessment,)).fetchall()
-    assert len(scenes) == 1, "This manual study expects the Monolocale's single room"
+    if len(scenes) != 1:
+        raise ValueError("This manual study expects the Monolocale's single room; refit for a different capture")
     scene = json.loads(scenes[0]["payload"])
-    source = np.load(args.data / scene["analysis_path"])
-    depth, points = source["depth"][..., 0], source["world_points"].copy()
-    extrinsics, intrinsics = source["extrinsics"], source["intrinsics"]
-    photos = []
-    for item in scene["images"]:
-        row = conn.execute("SELECT a.path FROM photos p JOIN assets a ON p.asset_id=a.id WHERE p.id=? AND p.active=1", (item["photo_id"],)).fetchone()
-        photos.append(np.asarray(Image.open(args.data / row["path"]).convert("RGB")))
-    assert len(photos) == 5, "Selections are hand-authored for these five views"
+    photo_rows = [conn.execute("SELECT a.path,a.sha256 FROM photos p JOIN assets a ON p.asset_id=a.id "
+                              "WHERE p.id=? AND p.scene_id=? AND p.active=1 AND p.role='overview'",
+                              (image["photo_id"], scenes[0]["id"])).fetchone() for image in scene.get("images", [])]
+    source_photos = validate_manual_source(args.data, scene, photo_rows)
+    assessment = conn.execute("SELECT input_revision,analysis_job_id FROM assessments WHERE id=?", (args.assessment,)).fetchone()
     conn.close()
+    if not assessment["analysis_job_id"]:
+        raise ValueError("Analyze the current photos before completing this room")
+    import cv2
+    from scipy.ndimage import median_filter
+
+    with np.load(args.data / scene["analysis_path"], allow_pickle=False) as source:
+        depth, points = source["depth"][..., 0], source["world_points"].copy()
+        extrinsics, intrinsics = source["extrinsics"], source["intrinsics"]
+    photos = []
+    for row in photo_rows:
+        with Image.open(args.data / row["path"]) as image:
+            photos.append(np.asarray(image.convert("RGB")))
+    args.output.mkdir(parents=True, exist_ok=False)
     boxes = [i["transform"]["content_box"] for i in scene["images"]]
     floor_mask = polygon_mask(depth.shape[1:], FLOOR_PATCH[1], boxes[FLOOR_PATCH[0]])
     floor_down, floor_offset = fit_plane(points[FLOOR_PATCH[0]][floor_mask])
@@ -168,6 +217,7 @@ def main():
     xmin, xmax, zmin, zmax, height = -.99, .285, -1.415, .22, .738
     floor_depth = -.006
     glb = Glb()
+    glb.doc["asset"]["extras"] = {"source_analysis_sha256": SOURCE_ANALYSIS_SHA256, "source_photos": source_photos}
     metrics = []
 
     def raw(local_points):
@@ -338,11 +388,12 @@ def main():
         metrics.append({"name": f"photo-{i+1}", "faces": len(faces)})
     glb.save(args.output / "room.glb")
     report = {"assessment_id": args.assessment, "scene_id": scenes[0]["id"], "source_analysis_sha256": scene["analysis_sha256"],
+              "source_photos": source_photos, "input_revision": assessment["input_revision"], "source_job_id": assessment["analysis_job_id"],
               "provenance": "photo_completed", "coordinate_space": "raw_scene_relative", "display_transform": transform.tolist(),
               "alignment_matrix": transform.tolist(), "floor_plane": {"normal": floor_down.tolist(), "offset": floor_offset},
               "manual_room_bounds": [[xmin, 0, zmin], [xmax, height, zmax]], "surfaces": metrics,
               "limitations": ["Room extents and unseen surfaces manually inferred; not a surveyed model", "Textures on unseen floor repeat a photographed wood patch", "No metric measurements or new analytical anchors"],
-              "model_bytes": (args.output / "room.glb").stat().st_size}
+              "model_bytes": (args.output / "room.glb").stat().st_size, "model_sha256": file_sha256(args.output / "room.glb")}
     (args.output / "completion.json").write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
 

@@ -59,6 +59,7 @@ class Settings:
     gemma_base_url: str = "http://vllm:8000/v1"
     gemma_model: str = "google/gemma-4-31B-it"
     gemma_provider: str = ""
+    gemma_api_key: str = ""
     hf_token: str = ""
     gemma_revision: str = ""
     gemma_timeout_seconds: int = 120
@@ -128,13 +129,14 @@ class Settings:
             worker_lock_path=Path(_project_env("WORKER_LOCK")).resolve() if _project_env("WORKER_LOCK") else None,
             reviewer_identity=os.getenv("REVIEWER_IDENTITY", "Team member — simulated reviewer"),
             recon_backend=os.getenv("RECON_BACKEND", "vggt" if local_checkpoint else "fixture"),
-            gemma_backend=os.getenv("GEMMA_BACKEND", "http" if os.getenv("HF_TOKEN") else "fixture"),
+            gemma_backend=os.getenv("GEMMA_BACKEND", "http" if os.getenv("HF_TOKEN") or os.getenv("GEMMA_API_KEY") else "fixture"),
             avatar_backend=os.getenv("AVATAR_BACKEND", "mpfb" if os.getenv("BLENDER_BIN") else "fixture"),
             jev_enabled=os.getenv("JEV_ENABLED", "false").lower() == "true",
             jev_api_key=os.getenv("JEV_API_KEY", ""),
             gemma_base_url=os.getenv("GEMMA_BASE_URL", "https://router.huggingface.co/v1").rstrip("/"),
             gemma_model=os.getenv("GEMMA_MODEL", "google/gemma-4-31B-it"),
             gemma_provider=os.getenv("GEMMA_PROVIDER", ""),
+            gemma_api_key=os.getenv("GEMMA_API_KEY", ""),
             hf_token=os.getenv("HF_TOKEN", ""),
             gemma_revision=os.getenv("GEMMA_MODEL_REVISION", ""),
             gemma_timeout_seconds=int(os.getenv("GEMMA_TIMEOUT_SECONDS", "120")),

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One explicit non-clinical Hugging Face image/JSON smoke, with a pinned provider."""
+"""One explicit synthetic image/JSON smoke against the configured Gemma endpoint."""
 import argparse
 import base64
 import io
@@ -28,13 +28,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--timeout", type=int, choices=range(10, 121), default=60)
-    parser.add_argument("--provider", help="Explicit provider for this standalone attempt; no fallback")
+    parser.add_argument("--provider", help="Explicit Hugging Face provider for this standalone attempt; no fallback")
     args = parser.parse_args()
     settings = replace(Settings.from_env(), gemma_timeout_seconds=args.timeout)
     if args.provider:
         settings = replace(settings, gemma_provider=args.provider)
-    if urlsplit(settings.gemma_base_url).hostname != "router.huggingface.co":
-        parser.error("This smoke requires the configured Hugging Face router")
+    endpoint = urlsplit(settings.gemma_base_url)
+    if endpoint.scheme not in {"http", "https"} or not endpoint.hostname:
+        parser.error("Set GEMMA_BASE_URL to the intended OpenAI-compatible endpoint")
+    if endpoint.scheme != "https" and endpoint.hostname not in {"localhost", "127.0.0.1", "::1", "vllm"}:
+        parser.error("Use HTTPS for remote inference")
+    if args.provider and endpoint.hostname != "router.huggingface.co":
+        parser.error("--provider applies only to the Hugging Face router")
     output = args.output or settings.data / "live-tests" / "gemma-smoke" / db.uid()
     output.mkdir(parents=True, exist_ok=False)
     picture = Image.new("RGB", (256, 256), "blue")

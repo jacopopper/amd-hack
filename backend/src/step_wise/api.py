@@ -167,7 +167,9 @@ def create_app(settings=None):
 
     @app.get("/api/health")
     def health():
-        return {"status": "ok", "schema_version": 3, "modes": settings.modes(), "staged_data_only": True}
+        return {"status": "ok", "schema_version": 3, "modes": settings.modes(), "staged_data_only": True,
+                "photo_limits": {"max_photos": settings.max_photos, "max_file_bytes": settings.max_file_bytes,
+                                 "frame_cap": settings.frame_cap}}
 
     @app.post("/api/assessments", status_code=201)
     def create(payload: AssessmentInput, identity=Depends(reviewer)):

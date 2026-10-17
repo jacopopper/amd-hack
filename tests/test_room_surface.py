@@ -48,6 +48,11 @@ class RoomSurfaceTests(unittest.TestCase):
             chunk = b'{"asset":{"version":"2.0"}}'
             model = root / "room.glb"
             model.write_bytes(struct.pack("<4sIIII", b"glTF", 2, 20 + len(chunk), len(chunk), 0x4E4F534A) + chunk)
+            (root / "completion.json").write_text(json.dumps({
+                "provenance": "photo_completed", "coordinate_space": "raw_scene_relative",
+                "assessment_id": "assessment", "scene_id": "scene", "input_revision": 1, "source_job_id": "job",
+                "model_bytes": model.stat().st_size, "model_sha256": db.digest(model.read_bytes()),
+                "display_transform": np.eye(4).tolist()}))
             pins, transform = root / "pins.json", root / "transform.json"
             pins.write_text(json.dumps({"hazard": [9, 9, 9]}))
             transform.write_text(json.dumps(np.diag([2, 1, 1, 1]).tolist()))

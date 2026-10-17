@@ -230,10 +230,14 @@ def live_reconstruct(context):
     for scene in context["scenes"]:
         selected = [p for p in context["photos"] if p["scene_id"] == scene["id"] and p["role"] == "overview"]
         if not selected:
-            scenes.append({"id": scene["id"], "status": "insufficient_coverage", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": "Upload an overview photo for this room"})
+            reason = "Upload an overview photo for this room"
+            scenes.append({"id": scene["id"], "status": "insufficient_coverage", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": reason})
+            warnings.append({"scene_id": scene["id"], "message": reason})
             continue
         if len(selected) > context["settings"].frame_cap:
-            scenes.append({"id": scene["id"], "status": "failed", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": f"Room has {len(selected)} overview photos, above the configured cap of {context['settings'].frame_cap}; no implicit frame dropping"})
+            reason = f"Room has {len(selected)} overview photos, above the configured cap of {context['settings'].frame_cap}; no implicit frame dropping"
+            scenes.append({"id": scene["id"], "status": "failed", "provenance": "live", "scale_state": "unknown", "scale_factor": None, "reason": reason})
+            warnings.append({"scene_id": scene["id"], "message": reason})
             continue
         try:
             scenes.append(live_scene(context, scene, selected))

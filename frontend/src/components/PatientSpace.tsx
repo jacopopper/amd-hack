@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Camera, FileText, Images, Map as MapIcon, Ruler } from "lucide-react";
 import { api, json } from "@/lib/api";
 import { byPriority, effective, sceneOf } from "@/lib/hazards";
-import type { Anchor, Assessment, Findings, Modes, Report, Scene } from "@/lib/types";
+import type { Anchor, Assessment, Findings, Modes, PhotoLimits, Report, Scene } from "@/lib/types";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
 import HazardCard, { type ReviewPayload } from "@/components/space/HazardCard";
 import AvatarViewer from "@/components/space/AvatarViewer";
@@ -55,6 +55,7 @@ export default function PatientSpace({ id }: { id: string }) {
   const [editingPhotos, setEditingPhotos] = useState(false);
   const [releasing, setReleasing] = useState(false);
   const [modes, setModes] = useState<Modes | null>(null);
+  const [photoLimits, setPhotoLimits] = useState<PhotoLimits | null>(null);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -65,13 +66,13 @@ export default function PatientSpace({ id }: { id: string }) {
     setScenes(s);
     setSceneId((old) => (s.some((x) => x.id === old) ? old : (s[0]?.id ?? "")));
     setReport(a.reports[0] ? await api<Report>(`/reports/${a.reports[0].id}`) : null);
-    if (PREPARING.includes(a.status)) setEditingPhotos(false);
+    if (ACTIVE.includes(a.status)) setEditingPhotos(false);
     return a;
   }, [id]);
 
   useEffect(() => {
-    api<{ modes: Modes }>("/health")
-      .then((h) => setModes(h.modes))
+    api<{ modes: Modes; photo_limits: PhotoLimits }>("/health")
+      .then((h) => { setModes(h.modes); setPhotoLimits(h.photo_limits); })
       .catch(() => undefined);
   }, []);
 
@@ -175,14 +176,14 @@ export default function PatientSpace({ id }: { id: string }) {
     return <div className="grid h-full place-items-center bg-[#0a0b0d] text-sm text-white/50">{error || "Apertura della casa…"}</div>;
   }
 
-  if (PREPARING.includes(assessment.status)) {
+  if (PREPARING.includes(assessment.status) && !editingPhotos) {
     return (
       <div className="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,#23272d_0%,#0e1013_55%,#0a0b0d_100%)] p-4 pt-20 text-white">
         <div className="absolute left-4 top-4 z-10">
           <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment} />
         </div>
         <div className="flex h-full max-h-[860px] w-full items-start justify-center">
-          <PreparePanel assessment={assessment} scenes={scenes} modes={modes} reload={load} />
+          <PreparePanel assessment={assessment} scenes={scenes} modes={modes} limits={photoLimits} reload={load} />
         </div>
       </div>
     );
@@ -334,7 +335,7 @@ export default function PatientSpace({ id }: { id: string }) {
         <div className="absolute inset-0 z-20 grid place-items-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="flex h-full max-h-[860px] flex-col items-center gap-2">
             <p className="rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Cambiare le foto annulla l’analisi attuale e le risposte date finora.</p>
-            <PreparePanel assessment={assessment} scenes={scenes} modes={modes} reload={load} onClose={() => setEditingPhotos(false)} />
+            <PreparePanel assessment={assessment} scenes={scenes} modes={modes} limits={photoLimits} reload={load} onClose={() => setEditingPhotos(false)} />
           </div>
         </div>
       )}

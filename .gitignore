@@ -1,11 +1,45 @@
+# Local credentials and workstation metadata
 .env
 .env.*
 !.env.example
-__pycache__/
-.venv/
+/.aws/
+/.codex/
+/.agents/
+*.pem
+*.key
+
+# Private captures, assessments, downloaded models and local previews
 data/
 model-cache/
 /web/
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+*.db
+*.db-wal
+*.db-shm
+
+# Python environments, packages and test output
+__pycache__/
+.venv/
 *.egg-info/
+/build/
+/dist/
 .pytest_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Browser and frontend output (frontend/.gitignore also applies)
+node_modules/
 .playwright-mcp/
+playwright-report/
+test-results/
+
+# Local logs and OS metadata
+*.log
+.DS_Store

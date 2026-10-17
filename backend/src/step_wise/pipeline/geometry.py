@@ -183,7 +183,13 @@ def geometry(context):
             for key in ("analysis_path", "ply_path"):
                 scene.pop(key, None)
             continue
-        floor = estimate_floor(points, confidence, cameras, scene["confidence_threshold"]) if scene.get("reconstruction_kind") == "multiview" else {
+        observed = np.zeros_like(confidence, dtype=bool)
+        for image in scene["images"]:
+            l, t, r, b = image["transform"]["content_box"]
+            observed[image["tensor_index"], t:b, l:r] = True
+        # The padded model input is not room evidence, even when its depth is confident.
+        floor_confidence = np.where(observed & (depth > 0), confidence, -np.inf)
+        floor = estimate_floor(points, floor_confidence, cameras, scene["confidence_threshold"]) if scene.get("reconstruction_kind") == "multiview" else {
             "floor_state": "unknown", "gravity_state": "unknown", "floor_plane": None}
         scene.update(floor)
         by_photo = {p["photo_id"]: p for p in scene["images"]}

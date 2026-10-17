@@ -16,8 +16,10 @@ def run(base_url, executable=None):
     output = ROOT / "data/browser-smoke"
     output.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True, **({"executable_path": executable} if executable else {}))
+        browser = playwright.chromium.launch(headless=True, args=["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"], **({"executable_path": executable} if executable else {}))
         context = browser.new_context(viewport={"width": 1440, "height": 900})
+        health = context.request.get(base_url + "/api/health").json()
+        assert all(health["modes"][key] == value for key, value in {"reconstruction": "fixture", "gemma": "fixture", "jev": "disabled"}.items()), "Browser smoke requires fixture API and worker"
         page = context.new_page()
         errors = []
         page.on("pageerror", lambda e: errors.append(str(e)))
@@ -41,14 +43,76 @@ def run(base_url, executable=None):
         assert match, page.url
         assessment_id = match.group(1)
         page.get_by_label("Stanza").fill("Soggiorno")
-        page.locator("input[type=file]").set_input_files([str(ROOT / "data/demo/synthetic-1.png"), str(ROOT / "data/demo/synthetic-2.png")])
-        expect(page.get_by_text("2 foto")).to_be_visible(timeout=30000)
+        photos = [str(ROOT / "data/demo/synthetic-1.png"), str(ROOT / "data/demo/synthetic-2.png")]
+        page.locator("input[type=file]").set_input_files(photos)
+        expect(page.get_by_text("2 panoramiche · 0 dettagli", exact=False)).to_be_visible(timeout=30000)
         page.get_by_role("button", name="Avvia l’analisi").click()
 
         page.get_by_role("button", name="Avvia revisione").wait_for(timeout=60000)
         expect(page.get_by_text("Stiamo analizzando la casa")).to_be_hidden(timeout=60000)
         page.locator("canvas").wait_for(timeout=20000)
         page.screenshot(path=str(output / "desktop-scene.png"))
+
+        # Validate the whole selection before any upload, even when an earlier file is valid.
+        page.get_by_role("button", name="Foto", exact=True).click()
+        page.get_by_role("heading", name="Foto della casa").wait_for()
+        uploads = []
+        upload_url = f"{base_url}/api/assessments/{assessment_id}/photos"
+        page.on("request", lambda request: uploads.append(request.url) if request.method == "POST" and request.url == upload_url else None)
+        png = (ROOT / "data/demo/synthetic-1.png").read_bytes()
+        page.locator("input[type=file]").set_input_files([
+            {"name": "valid.png", "mimeType": "image/png", "buffer": png},
+            {"name": "unsupported.heic", "mimeType": "image/heic", "buffer": b"unsupported test file"},
+        ])
+        expect(page.get_by_text("Usa file JPG o PNG", exact=False)).to_be_visible()
+        assert not uploads, "An invalid mixed batch uploaded a file before validation"
+        before = context.request.get(f"{base_url}/api/assessments/{assessment_id}").json()
+        assert len(before["photos"]) == 2
+        original_scene = before["photos"][0]["scene_id"]
+
+        # The first upload changes ready -> draft. The modal must survive to send the second.
+        def inspect_batch(route):
+            if route.request.method == "POST" and len(uploads) == 2:
+                expect(page.get_by_role("heading", name="Foto della casa")).to_be_visible()
+                expect(page.get_by_text("3 panoramiche · 0 dettagli", exact=False)).to_be_visible()
+                expect(page.get_by_role("button", name="Chiudi", exact=True)).to_be_disabled()
+                expect(page.get_by_label("Stanza", exact=True)).to_be_disabled()
+                expect(page.get_by_label("Tipo di foto", exact=True)).to_be_disabled()
+                expect(page.get_by_role("button", name="Avvia l’analisi")).to_be_disabled()
+                page.screenshot(path=str(output / "desktop-batch-upload.png"))
+            route.continue_()
+
+        page.route(upload_url, inspect_batch)
+        page.locator("input[type=file]").set_input_files(photos)
+        expect(page.get_by_text("4 panoramiche · 0 dettagli", exact=False)).to_be_visible(timeout=30000)
+        expect(page.get_by_role("button", name="Chiudi", exact=True)).to_be_enabled()
+        page.unroute(upload_url, inspect_batch)
+        after = context.request.get(f"{base_url}/api/assessments/{assessment_id}").json()
+        assert len(uploads) == 2 and len(after["photos"]) == 4
+        assert {photo["scene_id"] for photo in after["photos"]} == {original_scene}, "Batch created another room"
+        assert after["input_revision"] == before["input_revision"] + 2 and after["status"] == "draft"
+        page.get_by_role("button", name="Chiudi", exact=True).click()
+        expect(page.get_by_role("heading", name="Foto della casa")).to_be_visible()
+        expect(page.get_by_role("button", name="Chiudi", exact=True)).to_have_count(0)
+        page.get_by_role("button", name="Avvia l’analisi").click()
+        page.get_by_role("button", name="Avvia revisione").wait_for(timeout=60000)
+
+        # Exercise VGGT's client-side frame cap without configuring or calling a live model.
+        capped = context.new_page()
+        capped.route("**/api/health", lambda route: route.fulfill(json={**health, "modes": {**health["modes"], "reconstruction": "vggt"}}))
+        mutations = []
+        capped.on("request", lambda request: mutations.append(request.url) if request.method == "POST" else None)
+        capped.goto(f"{base_url}/pazienti?id={assessment_id}")
+        capped.wait_for_load_state("networkidle")
+        capped.get_by_role("button", name="Foto", exact=True).click()
+        capacity = health["photo_limits"]["frame_cap"] - 4
+        capped.locator("input[type=file]").set_input_files([
+            {"name": f"over-cap-{i}.png", "mimeType": "image/png", "buffer": png} for i in range(capacity + 1)
+        ])
+        expect(capped.get_by_text(f"puoi aggiungerne ancora {capacity}", exact=False)).to_be_visible()
+        assert not mutations, "Over-cap selection sent a mutation"
+        capped.screenshot(path=str(output / "desktop-upload-cap.png"))
+        capped.close()
 
         page.get_by_role("button", name="Avvia revisione").click()
         card = page.locator("aside")
@@ -97,7 +161,7 @@ def run(base_url, executable=None):
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"), "Phone intake overflows"
         assert not errors, errors
         browser.close()
-    print(f"PASS: intake, room photos, fixture analysis, 3D scene, guided review, PDF, release, family link, revoke, WebGL fallback, phone intake. Screenshots: {output}")
+    print(f"PASS: intake, mixed-file rejection, same-room batch upload, frame-cap preflight, fixture rerun, 3D scene, guided review, PDF, release, family link, revoke, WebGL fallback, phone intake. Screenshots: {output}")
 
 
 if __name__ == "__main__":

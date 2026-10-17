@@ -7,6 +7,7 @@ export type Inputs = { label: string; profile: Profile; profile_confirmed: boole
 // GET /api/assessments/{id}/avatar. Every field is null until an avatar has been generated.
 export type Avatar = { status: string | null; reason: string | null; has_walker: boolean | null; preview_url: string | null; preview_width: number | null; preview_height: number | null; glb_url: string | null; illustrative_only: boolean | null };
 export type Modes = { reconstruction: string; gemma: string; avatar: string; jev: string };
+export type PhotoLimits = { max_photos: number; max_file_bytes: number; frame_cap: number };
 export type Photo = { id: string; scene_id: string; role: "overview" | "detail"; asset_url: string; width: number; height: number };
 export type JobSummary = { id: string; kind: string; status: string; stage: string | null; error: string | null };
 export type Assessment = { id: string; inputs: Inputs; status: string; input_revision: number; review_revision: number; created_at: string; photos: Photo[]; clinical_documents: { id: string }[]; jobs: JobSummary[]; reports: { id: string; status: string; input_revision: number; review_revision: number }[] };

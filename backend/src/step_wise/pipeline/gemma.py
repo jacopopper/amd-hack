@@ -51,8 +51,9 @@ def complete(settings, schema, prompt, content, validate=None, audit_directory=N
         raise ExternalFailure("HF_TOKEN is required for Hugging Face Inference Providers")
     if hf_router and not settings.gemma_provider:
         raise ExternalFailure("Set GEMMA_PROVIDER explicitly; automatic provider routing is disabled")
-    request_model = settings.gemma_model + (":" + settings.gemma_provider if settings.gemma_provider else "")
-    headers = {"Authorization": "Bearer " + settings.hf_token} if hf_router else {}
+    request_model = settings.gemma_model + (":" + settings.gemma_provider if hf_router else "")
+    token = settings.hf_token if hf_router else settings.gemma_api_key
+    headers = {"Authorization": "Bearer " + token} if token else {}
     output_schema = schema.model_json_schema()
     system_prompt = prompt
     response_format = {"type": "json_schema", "json_schema": {"name": schema.__name__, "schema": output_schema, "strict": True}}
