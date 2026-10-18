@@ -1,0 +1,81 @@
+{
+  "runs": [
+    {
+      "photo_id": "IMG_7580",
+      "status": "succeeded",
+      "elapsed_seconds": 0.979,
+      "usage": {
+        "input_tokens": 5382,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7588",
+      "status": "succeeded",
+      "elapsed_seconds": 1.222,
+      "usage": {
+        "input_tokens": 5377,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "status": "succeeded",
+      "elapsed_seconds": 1.214,
+      "usage": {
+        "input_tokens": 5381,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7599",
+      "status": "succeeded",
+      "elapsed_seconds": 0.653,
+      "usage": {
+        "input_tokens": 5381,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7603",
+      "status": "succeeded",
+      "elapsed_seconds": 0.943,
+      "usage": {
+        "input_tokens": 5379,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7608",
+      "status": "succeeded",
+      "elapsed_seconds": 1.254,
+      "usage": {
+        "input_tokens": 5380,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7613",
+      "status": "succeeded",
+      "elapsed_seconds": 1.309,
+      "usage": {
+        "input_tokens": 5381,
+        "output_tokens": 228
+      }
+    },
+    {
+      "photo_id": "IMG_7616",
+      "status": "succeeded",
+      "elapsed_seconds": 0.866,
+      "usage": {
+        "input_tokens": 5382,
+        "output_tokens": 228
+      }
+    }
+  ],
+  "gates": {
+    "presence": 0.75,
+    "box_confidence": 0.5
+  },
+  "model": "jev-1.14.0"
+}

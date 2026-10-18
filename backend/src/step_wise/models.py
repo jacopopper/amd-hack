@@ -184,7 +184,8 @@ class Evidence(StrictModel):
 class Anchor(StrictModel):
     scene_id: ID
     position_world: Vector
-    method: Literal["foreground_multiview", "reviewer_corrected", "synthetic_fixture"]
+    method: Literal["foreground_multiview", "reviewer_corrected", "synthetic_fixture",
+                    "jev_box_foreground_anchor", "jev_box_depth_estimate"]
     source_photo_ids: list[ID] = Field(min_length=1, max_length=40)
     uncertainty: Text
 

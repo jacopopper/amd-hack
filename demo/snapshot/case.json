@@ -1,39 +1,29 @@
 {
  "schema_version": 3,
- "exported_at": "2026-10-17T18:26:19.559603+00:00",
+ "exported_at": "2026-10-18T09:36:12.743063+00:00",
  "assessment": {
-  "id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
+  "id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
   "input_json": "{\"clinical_external_processing_consent\":false,\"clinical_facts\":[],\"external_processing_consent\":false,\"label\":\"Maria R. · 84\",\"processing_consent\":true,\"profile\":{\"aid_width_m\":0.62,\"daily_routes\":[\"bedroom → bathroom (night)\",\"bedroom → kitchen\"],\"description\":\"Going home after a hip fracture. Lives alone; her daughter lives in another city. Often gets up at night to go to the bathroom.\",\"mobility_aid\":\"walker\",\"relevant_history\":\"Hip fracture (September 2026)\",\"support_needs\":\"Caregiver 3 hours in the morning\",\"vision\":\"Cataracts, reduced vision in low light\"},\"profile_confirmed\":true,\"staged_data_confirmed\":true}",
   "status": "review_ready",
   "input_revision": 9,
   "review_revision": 0,
-  "analysis_job_id": "850ab51b-1dbe-4916-be32-e9a2ac2e7949",
-  "created_at": "2026-10-17T18:26:11.633642+00:00",
-  "updated_at": "2026-10-17T18:26:12.381738+00:00"
+  "analysis_job_id": "76dff860-9dca-4889-a986-735835ced63b",
+  "created_at": "2026-10-18T09:36:11.890296+00:00",
+  "updated_at": "2026-10-18T09:36:12.549749+00:00"
  },
  "scenes": [
   {
-   "id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
+   "id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
    "label": "Living room and kitchen",
-   "payload": "{\"capture\":{\"pins\":{\"4e162f67-8671-43d9-80b9-9610920542da\":{\"pin\":\"cord\",\"view\":19},\"6460a78f-1101-48bf-9c3c-dcc73cce9e33\":{\"pin\":\"carpet\",\"view\":23}},\"viewer_url\":\"/local-room-viewer.html\",\"views\":39},\"provenance\":\"live\",\"reconstruction_kind\":\"multiview\",\"scale_state\":\"unknown\",\"status\":\"ready\"}"
+   "payload": "{\"bounds\":[[-1.1513229613772782,-0.7040999587403296,-0.5406047092762023],[1.2578970901507889,0.611780529638881,1.6964874229014273]],\"capture\":{\"pins\":{\"06c14533-329d-4509-971a-9ec9eb353a50\":{\"pin\":\"cord\",\"view\":19},\"7c362778-d15f-4356-9115-89e51fa8ed9b\":{\"pin\":\"carpet\",\"view\":23}},\"viewer_url\":\"/local-room-viewer.html\",\"views\":39},\"provenance\":\"live\",\"reconstruction_kind\":\"multiview\",\"scale_state\":\"unknown\",\"status\":\"ready\"}"
   }
  ],
  "assets": [
   {
-   "id": "07781a7d-1d5d-474f-9a65-2d3c52faf49d",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/07781a7d-1d5d-474f-9a65-2d3c52faf49d.jpg",
-   "media_type": "image/jpeg",
-   "byte_size": 592816,
-   "sha256": "a024cfb8c92843b1806d1cb305e9064cf60a51dee68345accc9dee39a0833163",
-   "provenance": "upload",
-   "scope": "source"
-  },
-  {
-   "id": "73cf7b05-7999-474e-a863-c11601e02034",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/73cf7b05-7999-474e-a863-c11601e02034.jpg",
+   "id": "701798af-0cf3-4ebe-abe5-a2203a4eda51",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/701798af-0cf3-4ebe-abe5-a2203a4eda51.jpg",
    "media_type": "image/jpeg",
    "byte_size": 795126,
    "sha256": "ef357d09fa059fd70756fee61c0c22e45bc0d58e260e55a6973f15303b0bcdd5",
@@ -41,9 +31,19 @@
    "scope": "source"
   },
   {
-   "id": "9b79744c-7939-4fb4-89b5-582ab4e3ad48",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/9b79744c-7939-4fb4-89b5-582ab4e3ad48.jpg",
+   "id": "28e3e340-0695-445a-a468-10c7e1f53708",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/28e3e340-0695-445a-a468-10c7e1f53708.jpg",
+   "media_type": "image/jpeg",
+   "byte_size": 592816,
+   "sha256": "a024cfb8c92843b1806d1cb305e9064cf60a51dee68345accc9dee39a0833163",
+   "provenance": "upload",
+   "scope": "source"
+  },
+  {
+   "id": "b26eb747-3f6d-4a7f-9e00-c404e0eb5ef5",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/b26eb747-3f6d-4a7f-9e00-c404e0eb5ef5.jpg",
    "media_type": "image/jpeg",
    "byte_size": 672586,
    "sha256": "fc230ab779f1b4a155c0f9b22d54239202e5972817ddcbf6279a6c82a1167b5a",
@@ -51,9 +51,9 @@
    "scope": "source"
   },
   {
-   "id": "effa90e3-be8b-400e-bd24-cacc1cea1962",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/effa90e3-be8b-400e-bd24-cacc1cea1962.jpg",
+   "id": "bcadb8f3-4fa6-4060-89ac-92dc666d10c9",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/bcadb8f3-4fa6-4060-89ac-92dc666d10c9.jpg",
    "media_type": "image/jpeg",
    "byte_size": 628153,
    "sha256": "6e605f43128fb2a6c0aebb6d14841b462eb8e84af58dbb293df87d476b95f6f7",
@@ -61,9 +61,9 @@
    "scope": "source"
   },
   {
-   "id": "2ada6f47-d142-4ad8-8b21-5375f2ae5aea",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/2ada6f47-d142-4ad8-8b21-5375f2ae5aea.jpg",
+   "id": "a137dfa2-fae1-40a4-b969-aa1ac9c605be",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/a137dfa2-fae1-40a4-b969-aa1ac9c605be.jpg",
    "media_type": "image/jpeg",
    "byte_size": 625406,
    "sha256": "39cde08d5398c5105682472c2d4a51a56012e34a066b2a8bfe25698ac2c2f8f3",
@@ -71,9 +71,9 @@
    "scope": "source"
   },
   {
-   "id": "3035a02d-f14e-4b54-b2eb-51e7216c9ce1",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/3035a02d-f14e-4b54-b2eb-51e7216c9ce1.jpg",
+   "id": "544462b7-4f98-4db0-8dc7-edfacaaefbb0",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/544462b7-4f98-4db0-8dc7-edfacaaefbb0.jpg",
    "media_type": "image/jpeg",
    "byte_size": 578702,
    "sha256": "55c4e7f3530e03e38b3fa5671e166e3519ad8b2ce3c4c6a6a0ce9d707f2b472b",
@@ -81,9 +81,9 @@
    "scope": "source"
   },
   {
-   "id": "c688948d-2f9a-4457-9320-9a13c8f68580",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/c688948d-2f9a-4457-9320-9a13c8f68580.jpg",
+   "id": "d5f7b078-aead-4318-8528-f561220acbc5",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/d5f7b078-aead-4318-8528-f561220acbc5.jpg",
    "media_type": "image/jpeg",
    "byte_size": 652674,
    "sha256": "e172271a7b2523cf205f68642e19c1dce8de26403e4e6fa14be03b5df30a5be7",
@@ -91,9 +91,9 @@
    "scope": "source"
   },
   {
-   "id": "9e1006b2-0ac2-46c9-903e-8a283be3adcc",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "path": "assessments/f4ae2568-c6d2-42f8-b1a2-30275deecf3d/uploads/9e1006b2-0ac2-46c9-903e-8a283be3adcc.jpg",
+   "id": "1a77060e-aec6-44d2-8c8b-28af4ab2e530",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "path": "assessments/04429fa4-5e31-4f7f-b8fa-48c1051f11a4/uploads/1a77060e-aec6-44d2-8c8b-28af4ab2e530.jpg",
    "media_type": "image/jpeg",
    "byte_size": 804668,
    "sha256": "425c106dcb7baecf89a0dc1869ab2d73caa61388127ddfc2f8df0d6936695af9",
@@ -103,73 +103,73 @@
  ],
  "photos": [
   {
-   "id": "44235e1f-f4f0-4468-9228-13ff224c6085",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "07781a7d-1d5d-474f-9a65-2d3c52faf49d",
+   "id": "ffbbac58-b8c7-42bf-a025-463c7b982fe0",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "701798af-0cf3-4ebe-abe5-a2203a4eda51",
    "role": "overview",
-   "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"23cb27f8408cfb59b4fd21d671c8f0c5a8e73d51638393080a5c0418056ae8cc\",\"raw_size\":[1200,1600],\"upright_sha256\":\"a024cfb8c92843b1806d1cb305e9064cf60a51dee68345accc9dee39a0833163\",\"upright_size\":[1200,1600],\"width\":1200}",
-   "active": 1
-  },
-  {
-   "id": "a1c29c33-4723-4f1f-b2ec-261573357038",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "73cf7b05-7999-474e-a863-c11601e02034",
-   "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"e6abd4c9edbe2f6b17a74dbfdd2f03e2d4f5929ca7b781d5d639ed734edc20a6\",\"raw_size\":[1200,1600],\"upright_sha256\":\"ef357d09fa059fd70756fee61c0c22e45bc0d58e260e55a6973f15303b0bcdd5\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "59abc07c-2ca4-47a1-9288-522adc986c98",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "9b79744c-7939-4fb4-89b5-582ab4e3ad48",
+   "id": "cbe740fb-61b1-40ff-80ef-fa129920ccf5",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "28e3e340-0695-445a-a468-10c7e1f53708",
+   "role": "detail",
+   "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"23cb27f8408cfb59b4fd21d671c8f0c5a8e73d51638393080a5c0418056ae8cc\",\"raw_size\":[1200,1600],\"upright_sha256\":\"a024cfb8c92843b1806d1cb305e9064cf60a51dee68345accc9dee39a0833163\",\"upright_size\":[1200,1600],\"width\":1200}",
+   "active": 1
+  },
+  {
+   "id": "6e4afdcb-c8bb-44dc-9a9d-12619a551d28",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "b26eb747-3f6d-4a7f-9e00-c404e0eb5ef5",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"4985238ee2fe00580cd0083c36e7311c5f53204ab112935d824a9b2a5a60c698\",\"raw_size\":[1200,1600],\"upright_sha256\":\"fc230ab779f1b4a155c0f9b22d54239202e5972817ddcbf6279a6c82a1167b5a\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "760340d1-6942-4f77-8475-9d70d2c1d251",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "effa90e3-be8b-400e-bd24-cacc1cea1962",
+   "id": "7420f569-05cb-429f-b6c5-ca9a1b3e0277",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "bcadb8f3-4fa6-4060-89ac-92dc666d10c9",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"7a1fd58c24451c960213069ee9b14fb9d9b958f9d2f0b887c0b136725e6a109f\",\"raw_size\":[1200,1600],\"upright_sha256\":\"6e605f43128fb2a6c0aebb6d14841b462eb8e84af58dbb293df87d476b95f6f7\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "90bdaafc-b72a-4d11-9ad8-589cc16cf1c9",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "2ada6f47-d142-4ad8-8b21-5375f2ae5aea",
+   "id": "45596fba-83b9-4d5b-8600-81019e175336",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "a137dfa2-fae1-40a4-b969-aa1ac9c605be",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"396d12159f6ae8844df582b874351a66c7e1560b301a7fbe445f6827a5856625\",\"raw_size\":[1200,1600],\"upright_sha256\":\"39cde08d5398c5105682472c2d4a51a56012e34a066b2a8bfe25698ac2c2f8f3\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "ea84df7c-882a-4cbd-a39d-435149b2bc31",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "3035a02d-f14e-4b54-b2eb-51e7216c9ce1",
+   "id": "499b8fb4-6368-4716-b8b6-de7e4ee32704",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "544462b7-4f98-4db0-8dc7-edfacaaefbb0",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"269f2f1bd825a49005294b0661df191755a4010e53d3cf8bbe5421fe89f480aa\",\"raw_size\":[1200,1600],\"upright_sha256\":\"55c4e7f3530e03e38b3fa5671e166e3519ad8b2ce3c4c6a6a0ce9d707f2b472b\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "bd5e528d-6e58-4cab-8cb2-c16805c52dbf",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "c688948d-2f9a-4457-9320-9a13c8f68580",
+   "id": "0b60fba2-c367-45c6-ae81-d1751d716b74",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "d5f7b078-aead-4318-8528-f561220acbc5",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"d37ef97ad021fdc5638a876b1d03f41d440bbab6b84c76dcfbd7ee9259db7765\",\"raw_size\":[1200,1600],\"upright_sha256\":\"e172271a7b2523cf205f68642e19c1dce8de26403e4e6fa14be03b5df30a5be7\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
   },
   {
-   "id": "3edb0f43-9505-4e75-9705-44e54dc7521c",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "scene_id": "af7a649d-578c-4ea8-85d9-ff34736c521a",
-   "asset_id": "9e1006b2-0ac2-46c9-903e-8a283be3adcc",
+   "id": "a32082ea-43ea-492e-b52e-1e952067cd41",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "scene_id": "bb247d03-1d4e-4eda-916b-55191b562a8e",
+   "asset_id": "1a77060e-aec6-44d2-8c8b-28af4ab2e530",
    "role": "detail",
    "payload": "{\"exif_orientation_applied\":1,\"height\":1600,\"raw_sha256\":\"8e2f6e82168e2170d844e3ae609b4a956bc3622a33d54fd34dfde7e567056242\",\"raw_size\":[1200,1600],\"upright_sha256\":\"425c106dcb7baecf89a0dc1869ab2d73caa61388127ddfc2f8df0d6936695af9\",\"upright_size\":[1200,1600],\"width\":1200}",
    "active": 1
@@ -177,8 +177,8 @@
  ],
  "jobs": [
   {
-   "id": "850ab51b-1dbe-4916-be32-e9a2ac2e7949",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
+   "id": "76dff860-9dca-4889-a986-735835ced63b",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
    "kind": "analyze",
    "status": "succeeded",
    "input_revision": 9,
@@ -186,26 +186,26 @@
    "parent_id": null,
    "stage": null,
    "stages": "{}",
-   "output": "{\"coverage\":[{\"category\":\"bathroom\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"44235e1f-f4f0-4468-9228-13ff224c6085\"},{\"category\":\"stairs\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"44235e1f-f4f0-4468-9228-13ff224c6085\"},{\"category\":\"lighting\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"44235e1f-f4f0-4468-9228-13ff224c6085\"}],\"evidence_markers\":{},\"follow_up_requests\":[\"The bathroom and bedroom were not photographed: photos of the night route bedroom → bathroom are needed.\"],\"hazards\":[{\"anchor\":null,\"category\":\"cable\",\"evidence\":[{\"box\":[30.0,512.0,516.0,1584.0],\"photo_id\":\"44235e1f-f4f0-4468-9228-13ff224c6085\"}],\"guidance_ids\":[\"floor-cable\"],\"measurement_ids\":[],\"observation\":\"A cable runs down from the table to the floor next to the chair.\",\"priority\":\"important\",\"profile_fields\":[\"vision\",\"mobility_aid\"],\"profile_relevance\":\"With reduced vision in low light, Maria may not see the cable while she walks around the table with her walker.\",\"suggested_action\":\"Run the cable along the furniture, away from the walkway around the table.\",\"uncertainty\":\"Marked by hand by the team on the photo, not by a model. Approximate 3D position, not validated.\"},{\"anchor\":null,\"category\":\"rug\",\"evidence\":[{\"box\":[480.0,903.9999999999999,1008.0,1056.0],\"photo_id\":\"a1c29c33-4723-4f1f-b2ec-261573357038\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"A lightweight rug with a raised edge in front of the kitchen cabinets.\",\"priority\":\"urgent\",\"profile_fields\":[\"mobility_aid\",\"daily_routes\"],\"profile_relevance\":\"Maria uses a walker: the wheels catch on the edges. It lies right where she stops to cook, on her bedroom → kitchen route.\",\"suggested_action\":\"Remove the rug in front of the kitchen before she comes home, or secure it with a non-slip backing.\",\"uncertainty\":\"Marked by hand by the team on the photo, not by a model. Approximate 3D position, not validated.\"}],\"modes\":{\"avatar\":\"fixture\",\"gemma\":\"not_run\",\"jev\":\"disabled\",\"reconstruction\":\"vggt_gaussian_splats_offline\"},\"producer\":\"Manual team marks (demo)\",\"provenance\":\"manual_demo_marks\",\"warnings\":[]}",
+   "output": "{\"coverage\":[{\"category\":\"bathroom\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"},{\"category\":\"stairs\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"},{\"category\":\"lighting\",\"coverage\":\"out_of_frame\",\"note\":\"Room not photographed\",\"photo_id\":\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"}],\"evidence_markers\":{},\"follow_up_requests\":[\"The bathroom and bedroom were not photographed: photos of the night route bedroom → bathroom are needed.\"],\"hazards\":[{\"anchor\":{\"method\":\"jev_box_foreground_anchor\",\"position_world\":[-0.035169,0.310833,1.241861],\"scene_id\":\"bb247d03-1d4e-4eda-916b-55191b562a8e\",\"source_photo_ids\":[\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"],\"uncertainty\":\"Detected by a live TypeSafe Jev run on the case photos; the 3D pin is an approximate depth estimate for navigation, not a validated metric position.\"},\"category\":\"rug\",\"evidence\":[{\"box\":[504.0,911.9999999999999,983.9999999999999,1040.0],\"photo_id\":\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"A lightweight carpet with an uneven edge lies in front of the kitchen cabinets.\",\"priority\":\"urgent\",\"profile_fields\":[\"mobility_aid\",\"daily_routes\"],\"profile_relevance\":\"Maria uses a walker: the wheels catch on the edges. It lies right where she stops to cook, on her bedroom → kitchen route.\",\"suggested_action\":\"Check that the rug is secured; consider removing it or adding a non-slip backing.\",\"uncertainty\":\"Detected by a live TypeSafe Jev run on the case photos; the 3D pin is an approximate depth estimate for navigation, not a validated metric position. Recorded response: presence 0.98, box confidence 0.88 - pitch/jev-results/2026-10-17/room-capture/IMG_7603.json.\"},{\"anchor\":{\"method\":\"jev_box_foreground_anchor\",\"position_world\":[-0.197183,0.40187,0.754139],\"scene_id\":\"bb247d03-1d4e-4eda-916b-55191b562a8e\",\"source_photo_ids\":[\"cbe740fb-61b1-40ff-80ef-fa129920ccf5\"],\"uncertainty\":\"Jev flagged this on a live run (presence 0.78, above the presence gate) but its localization scored 0.18, below the automatic box gate, so the pin is kept as reviewer-confirmed and approximate rather than model-localized.\"},\"category\":\"cable\",\"evidence\":[{\"box\":[36.0,384.0,528.0,1584.0],\"photo_id\":\"cbe740fb-61b1-40ff-80ef-fa129920ccf5\"}],\"guidance_ids\":[\"floor-cable\"],\"measurement_ids\":[],\"observation\":\"A cord hangs from the table and reaches the floor beside the chair.\",\"priority\":\"important\",\"profile_fields\":[\"vision\",\"mobility_aid\"],\"profile_relevance\":\"With reduced vision in low light, Maria may not see the cable while she walks around the table with her walker.\",\"suggested_action\":\"Route cables along the wall and keep the walkway clear.\",\"uncertainty\":\"Jev flagged this on a live run (presence 0.78, above the presence gate) but its localization scored 0.18, below the automatic box gate, so the pin is kept as reviewer-confirmed and approximate rather than model-localized. Recorded response: presence 0.78, box confidence 0.18 - pitch/jev-results/2026-10-17/room-capture/IMG_7599.json.\"}],\"modes\":{\"avatar\":\"fixture\",\"gemma\":\"not_run\",\"jev\":\"live\",\"reconstruction\":\"vggt_gaussian_splats_offline\"},\"producer\":\"TypeSafe Jev 1.14 · recorded live runs over the case photos\",\"provenance\":\"live\",\"warnings\":[]}",
    "heartbeat": null,
    "error": null,
-   "created_at": "2026-10-17T18:26:12.381610+00:00",
-   "finished_at": "2026-10-17T18:26:12.381618+00:00"
+   "created_at": "2026-10-18T09:36:12.549661+00:00",
+   "finished_at": "2026-10-18T09:36:12.549667+00:00"
   }
  ],
  "candidates": [],
  "hazards": [
   {
-   "id": "4e162f67-8671-43d9-80b9-9610920542da",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "job_id": "850ab51b-1dbe-4916-be32-e9a2ac2e7949",
-   "payload": "{\"anchor\":null,\"category\":\"cable\",\"evidence\":[{\"box\":[30.0,512.0,516.0,1584.0],\"photo_id\":\"44235e1f-f4f0-4468-9228-13ff224c6085\"}],\"guidance_ids\":[\"floor-cable\"],\"measurement_ids\":[],\"observation\":\"A cable runs down from the table to the floor next to the chair.\",\"priority\":\"important\",\"profile_fields\":[\"vision\",\"mobility_aid\"],\"profile_relevance\":\"With reduced vision in low light, Maria may not see the cable while she walks around the table with her walker.\",\"suggested_action\":\"Run the cable along the furniture, away from the walkway around the table.\",\"uncertainty\":\"Marked by hand by the team on the photo, not by a model. Approximate 3D position, not validated.\"}"
+   "id": "7c362778-d15f-4356-9115-89e51fa8ed9b",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "job_id": "76dff860-9dca-4889-a986-735835ced63b",
+   "payload": "{\"anchor\":{\"method\":\"jev_box_foreground_anchor\",\"position_world\":[-0.035169,0.310833,1.241861],\"scene_id\":\"bb247d03-1d4e-4eda-916b-55191b562a8e\",\"source_photo_ids\":[\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"],\"uncertainty\":\"Detected by a live TypeSafe Jev run on the case photos; the 3D pin is an approximate depth estimate for navigation, not a validated metric position.\"},\"category\":\"rug\",\"evidence\":[{\"box\":[504.0,911.9999999999999,983.9999999999999,1040.0],\"photo_id\":\"ffbbac58-b8c7-42bf-a025-463c7b982fe0\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"A lightweight carpet with an uneven edge lies in front of the kitchen cabinets.\",\"priority\":\"urgent\",\"profile_fields\":[\"mobility_aid\",\"daily_routes\"],\"profile_relevance\":\"Maria uses a walker: the wheels catch on the edges. It lies right where she stops to cook, on her bedroom → kitchen route.\",\"suggested_action\":\"Check that the rug is secured; consider removing it or adding a non-slip backing.\",\"uncertainty\":\"Detected by a live TypeSafe Jev run on the case photos; the 3D pin is an approximate depth estimate for navigation, not a validated metric position. Recorded response: presence 0.98, box confidence 0.88 - pitch/jev-results/2026-10-17/room-capture/IMG_7603.json.\"}"
   },
   {
-   "id": "6460a78f-1101-48bf-9c3c-dcc73cce9e33",
-   "assessment_id": "f4ae2568-c6d2-42f8-b1a2-30275deecf3d",
-   "job_id": "850ab51b-1dbe-4916-be32-e9a2ac2e7949",
-   "payload": "{\"anchor\":null,\"category\":\"rug\",\"evidence\":[{\"box\":[480.0,903.9999999999999,1008.0,1056.0],\"photo_id\":\"a1c29c33-4723-4f1f-b2ec-261573357038\"}],\"guidance_ids\":[\"floor-rug\"],\"measurement_ids\":[],\"observation\":\"A lightweight rug with a raised edge in front of the kitchen cabinets.\",\"priority\":\"urgent\",\"profile_fields\":[\"mobility_aid\",\"daily_routes\"],\"profile_relevance\":\"Maria uses a walker: the wheels catch on the edges. It lies right where she stops to cook, on her bedroom → kitchen route.\",\"suggested_action\":\"Remove the rug in front of the kitchen before she comes home, or secure it with a non-slip backing.\",\"uncertainty\":\"Marked by hand by the team on the photo, not by a model. Approximate 3D position, not validated.\"}"
+   "id": "06c14533-329d-4509-971a-9ec9eb353a50",
+   "assessment_id": "04429fa4-5e31-4f7f-b8fa-48c1051f11a4",
+   "job_id": "76dff860-9dca-4889-a986-735835ced63b",
+   "payload": "{\"anchor\":{\"method\":\"jev_box_foreground_anchor\",\"position_world\":[-0.197183,0.40187,0.754139],\"scene_id\":\"bb247d03-1d4e-4eda-916b-55191b562a8e\",\"source_photo_ids\":[\"cbe740fb-61b1-40ff-80ef-fa129920ccf5\"],\"uncertainty\":\"Jev flagged this on a live run (presence 0.78, above the presence gate) but its localization scored 0.18, below the automatic box gate, so the pin is kept as reviewer-confirmed and approximate rather than model-localized.\"},\"category\":\"cable\",\"evidence\":[{\"box\":[36.0,384.0,528.0,1584.0],\"photo_id\":\"cbe740fb-61b1-40ff-80ef-fa129920ccf5\"}],\"guidance_ids\":[\"floor-cable\"],\"measurement_ids\":[],\"observation\":\"A cord hangs from the table and reaches the floor beside the chair.\",\"priority\":\"important\",\"profile_fields\":[\"vision\",\"mobility_aid\"],\"profile_relevance\":\"With reduced vision in low light, Maria may not see the cable while she walks around the table with her walker.\",\"suggested_action\":\"Route cables along the wall and keep the walkway clear.\",\"uncertainty\":\"Jev flagged this on a live run (presence 0.78, above the presence gate) but its localization scored 0.18, below the automatic box gate, so the pin is kept as reviewer-confirmed and approximate rather than model-localized. Recorded response: presence 0.78, box confidence 0.18 - pitch/jev-results/2026-10-17/room-capture/IMG_7599.json.\"}"
   }
  ],
  "measurements": [],

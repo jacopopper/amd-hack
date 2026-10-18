@@ -43,3 +43,7 @@ test-results/
 # Local logs and OS metadata
 *.log
 .DS_Store
+
+# Local authoring notes and duplicate exports that never ship
+/docs/room-cover-prompt.txt
+/pitch/step-wise-pitch.pdf

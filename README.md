@@ -48,7 +48,7 @@ docker compose -f compose.demo.yaml up --build
 
 Open <http://localhost:8000> and follow the reviewer's part of the flow on a fictional patient, Maria R., 84: **review the hazards → prepare the report → release it to the family**. Each visitor gets a private copy of the same pre-analysed case. The same image deploys to Render through [`render.yaml`](render.yaml).
 
-The demo room is real: 39 phone photos reconstructed offline with VGGT and Gaussian splats. Its two hazards were **marked by hand by the team**, and the app labels them that way. The demo shows the review workflow; it says nothing about detection accuracy.
+The demo room is real: 39 phone photos reconstructed offline with VGGT and Gaussian splats. Its two hazards were flagged by **live TypeSafe Jev 1.14 runs** on the case photos, with the raw responses committed under [`pitch/jev-results/2026-10-17/room-capture/`](pitch/jev-results/2026-10-17/room-capture/README.md): the rug cleared the automatic localization gate (presence 0.98, box 0.88), while the cable was flagged on presence (0.78) and kept as a reviewer-confirmed approximate pin because its box scored below the localization gate. Every finding carries its scores and points at its record. The demo shows the review workflow; it says nothing about detection accuracy.
 
 ## Architecture
 

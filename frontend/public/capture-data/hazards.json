@@ -1,50 +1,66 @@
 [
   {
-    "id": "cord",
-    "label": "Cord in the walkway",
-    "category": "cable",
-    "view_index": 19,
-    "color": "#ff6b5e",
-    "box": [
-      0.025,
-      0.32,
-      0.43,
-      0.99
-    ],
-    "observation": "A cord hangs from the table and reaches the floor beside the chair.",
-    "action": "Gather and secure the cord along the furniture, away from the walkway.",
-    "position_world": [
-      -0.2509686335091281,
-      0.32046973260751255,
-      0.45809700022421707
-    ],
-    "photo_id": "IMG_7599",
-    "provenance": "mock_user_requested",
-    "position_method": "manual_photo_region_depth_estimate",
-    "uncertainty": "Manually marked demo finding. Approximate, unvalidated 3D position. Not a JEV result."
-  },
-  {
     "id": "carpet",
     "label": "Carpet in front of the kitchen",
     "category": "rug",
     "view_index": 23,
     "color": "#f5b54a",
     "box": [
-      0.4,
-      0.565,
-      0.84,
-      0.66
+      0.42,
+      0.57,
+      0.82,
+      0.65
     ],
     "observation": "A lightweight carpet with an uneven edge lies in front of the kitchen cabinets.",
-    "action": "Remove it from the walkway or secure it with non-slip backing; check the edges.",
+    "action": "Check that the rug is secured; consider removing it or adding a non-slip backing.",
     "position_world": [
-      -0.05080863641681843,
-      0.31259499471914454,
-      1.2298718790174519
+      -0.035169,
+      0.310833,
+      1.241861
     ],
     "photo_id": "IMG_7603",
-    "provenance": "mock_user_requested",
-    "position_method": "manual_photo_region_depth_estimate",
-    "uncertainty": "Manually marked demo finding. Approximate, unvalidated 3D position. Not a JEV result."
+    "producer": "jev-1.14.0",
+    "provenance": "live",
+    "presence": 0.98,
+    "box_confidence": 0.88,
+    "localization": "gate_passed",
+    "source_photo_ids": [
+      "IMG_7603"
+    ],
+    "position_method": "jev_box_foreground_anchor",
+    "detection_record": "pitch/jev-results/2026-10-17/room-capture/IMG_7603.json",
+    "uncertainty": "Detected by a live TypeSafe Jev run on the case photos; the 3D pin is an approximate depth estimate for navigation, not a validated metric position."
+  },
+  {
+    "id": "cord",
+    "label": "Cord in the walkway",
+    "category": "cable",
+    "view_index": 19,
+    "color": "#ff6b5e",
+    "box": [
+      0.03,
+      0.24,
+      0.44,
+      0.99
+    ],
+    "observation": "A cord hangs from the table and reaches the floor beside the chair.",
+    "action": "Route cables along the wall and keep the walkway clear.",
+    "position_world": [
+      -0.197183,
+      0.40187,
+      0.754139
+    ],
+    "photo_id": "IMG_7599",
+    "producer": "jev-1.14.0",
+    "provenance": "live",
+    "presence": 0.78,
+    "box_confidence": 0.18,
+    "localization": "below_box_gate",
+    "source_photo_ids": [
+      "IMG_7599"
+    ],
+    "position_method": "jev_box_foreground_anchor",
+    "detection_record": "pitch/jev-results/2026-10-17/room-capture/IMG_7599.json",
+    "uncertainty": "Jev flagged this on a live run (presence 0.78, above the presence gate) but its localization scored 0.18, below the automatic box gate, so the pin is kept as reviewer-confirmed and approximate rather than model-localized."
   }
 ]

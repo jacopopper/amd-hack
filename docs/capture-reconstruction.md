@@ -51,7 +51,7 @@ All outputs, including photos and screenshots, stay under gitignored `data/`. No
 
 One capture was deliberately reduced to 39 accepted photos (EXIF/GPS-free) for the hackathon demo. The repository keeps only what the demo uses:
 
-- [`frontend/public/capture-data/`](../frontend/public/capture-data/): `room.ksplat` (the polished splats compressed to ~20 MB), `viewpoints.json` (cameras), `hazards.json` (mock findings) and the vendored viewer. [`local-room-viewer.html`](../frontend/public/local-room-viewer.html) streams them inside the case's room view.
+- [`frontend/public/capture-data/`](../frontend/public/capture-data/): `room.ksplat` (the polished splats compressed to ~20 MB), `viewpoints.json` (cameras), `hazards.json` (findings recorded from the live Jev runs kept in [`pitch/jev-results/2026-10-17/room-capture/`](../pitch/jev-results/2026-10-17/room-capture/README.md)) and the vendored viewer. [`local-room-viewer.html`](../frontend/public/local-room-viewer.html) streams them inside the case's room view.
 - [`demo/capture/`](../demo/capture/): the 8 photos the demo case shows, plus `training.json` and `surface-polish.json`. `python -m step_wise.cli import-capture` builds the reviewable case from them, downscaling the photos to 1600 px; `export-demo` then freezes it as the judge snapshot.
 
 The full-resolution sources (`room-polished.ply` ~110 MB, `observed.ply`, all 39 photos) are no longer in the tree; recover them from commit `fc8228b` (`git checkout fc8228b -- frontend/public/capture-data`). The unpolished `room.ply`, checkpoints and analysis arrays stay in the local `data/` directories.

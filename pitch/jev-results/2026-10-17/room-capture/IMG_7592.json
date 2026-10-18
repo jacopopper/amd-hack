@@ -1,0 +1,341 @@
+{
+  "source": "demo/capture/images/012-IMG_7592.jpg",
+  "source_sha256": "e46e646297e394dc6d892664d3cd9a5f40fb5d0980b096194f19715af12e37f2",
+  "prepared_sha256": "e75821d81541deedff96052760292b08e30895d1e34a1a8a59c860fec4ba195e",
+  "upright_size": [
+    1536,
+    2048
+  ],
+  "transform": {
+    "input_size": [
+      1176,
+      1568
+    ],
+    "scale_xy": [
+      0.765625,
+      0.765625
+    ],
+    "offset_xy": [
+      0,
+      0
+    ],
+    "content_box": [
+      0,
+      0,
+      1176,
+      1568
+    ]
+  },
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "requested_model": "jev-1.14.0",
+  "questions": {
+    "rug_near_present": {
+      "type": "noul",
+      "instructions": "Is a distinct floor rug or loose floor mat visible in `photo`? Do not count fitted wall-to-wall carpet."
+    },
+    "rug_near_region": {
+      "type": "box",
+      "instructions": "The smallest box around a distinct floor rug or loose floor mat nearest the camera in `photo`. Include only its visible extent."
+    },
+    "rug_far_present": {
+      "type": "noul",
+      "instructions": "Are at least two separate floor rugs or loose mats visible in `photo`? Do not count parts of the same rug twice."
+    },
+    "rug_far_region": {
+      "type": "box",
+      "instructions": "The smallest box around the separate floor rug or mat farthest from the camera in `photo`. Include only its visible extent."
+    },
+    "footstool_present": {
+      "type": "noul",
+      "instructions": "Is a low footstool or ottoman visible in `photo`? Do not count chairs, tables, or cabinets."
+    },
+    "footstool_region": {
+      "type": "box",
+      "instructions": "The smallest box around the low footstool or ottoman nearest the camera in `photo`. Include only its visible extent."
+    },
+    "floor_cable_present": {
+      "type": "noul",
+      "instructions": "Is an exposed electrical cable lying on the floor visible in `photo`? Do not count plumbing, railings, or furniture legs."
+    },
+    "floor_cable_region": {
+      "type": "box",
+      "instructions": "The smallest box around an exposed electrical cable lying on the floor in `photo`. Include only its visible extent."
+    },
+    "bathtub_present": {
+      "type": "noul",
+      "instructions": "Is a bathtub visible in `photo`?"
+    },
+    "bathtub_region": {
+      "type": "box",
+      "instructions": "The smallest box around the bathtub, including its visible rim and basin in `photo`. Include only its visible extent."
+    },
+    "grab_bar_present": {
+      "type": "noul",
+      "instructions": "Is a bathroom safety grab bar visible in `photo`? Do not count taps, shower pipes, shower-curtain rails, cabinet handles, or towel rails."
+    },
+    "grab_bar_region": {
+      "type": "box",
+      "instructions": "The smallest box around a bathroom safety grab bar mounted beside a bathtub, shower, or toilet in `photo`. Include only its visible extent."
+    }
+  },
+  "at_utc": "2026-10-18T09:24:36.648736+00:00",
+  "response": {
+    "model": "jev-1.14.0",
+    "answers": {
+      "rug_near_present": {
+        "type": "noul",
+        "noul": 0.13
+      },
+      "rug_near_region": {
+        "type": "box",
+        "box": {
+          "top": 0.87,
+          "bottom": 0.98,
+          "left": 0.06,
+          "right": 0.24
+        },
+        "confidence": 0.6
+      },
+      "rug_far_present": {
+        "type": "noul",
+        "noul": 0.06
+      },
+      "rug_far_region": {
+        "type": "box",
+        "box": {
+          "top": 0.87,
+          "bottom": 0.98,
+          "left": 0.06,
+          "right": 0.24
+        },
+        "confidence": 0.51
+      },
+      "footstool_present": {
+        "type": "noul",
+        "noul": 0.04
+      },
+      "footstool_region": {
+        "type": "box",
+        "box": {
+          "top": 0.81,
+          "bottom": 0.97,
+          "left": 0.02,
+          "right": 0.24
+        },
+        "confidence": 0.2
+      },
+      "floor_cable_present": {
+        "type": "noul",
+        "noul": 0.36
+      },
+      "floor_cable_region": {
+        "type": "box",
+        "box": {
+          "top": 0.87,
+          "bottom": 0.93,
+          "left": 0.14,
+          "right": 0.23
+        },
+        "confidence": 0.67
+      },
+      "bathtub_present": {
+        "type": "noul",
+        "noul": 0.01
+      },
+      "bathtub_region": {
+        "type": "box",
+        "box": {
+          "top": 0.53,
+          "bottom": 0.64,
+          "left": 0.01,
+          "right": 0.54
+        },
+        "confidence": 0.05
+      },
+      "grab_bar_present": {
+        "type": "noul",
+        "noul": 0.02
+      },
+      "grab_bar_region": {
+        "type": "box",
+        "box": {
+          "top": 0.52,
+          "bottom": 0.54,
+          "left": 0.02,
+          "right": 0.1
+        },
+        "confidence": 0.09
+      }
+    },
+    "usage": {
+      "input_tokens": 5381,
+      "output_tokens": 228
+    }
+  },
+  "candidates": [
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "rug_near",
+      "presence": "absent",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.13
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.87,
+            "bottom": 0.98,
+            "left": 0.06,
+            "right": 0.24
+          },
+          "confidence": 0.6
+        }
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "rug_far",
+      "presence": "absent",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.06
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.87,
+            "bottom": 0.98,
+            "left": 0.06,
+            "right": 0.24
+          },
+          "confidence": 0.51
+        }
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "footstool",
+      "presence": "absent",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.04
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.81,
+            "bottom": 0.97,
+            "left": 0.02,
+            "right": 0.24
+          },
+          "confidence": 0.2
+        }
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "floor_cable",
+      "presence": "unknown",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.36
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.87,
+            "bottom": 0.93,
+            "left": 0.14,
+            "right": 0.23
+          },
+          "confidence": 0.67
+        }
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "bathtub",
+      "presence": "absent",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.01
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.53,
+            "bottom": 0.64,
+            "left": 0.01,
+            "right": 0.54
+          },
+          "confidence": 0.05
+        }
+      }
+    },
+    {
+      "photo_id": "IMG_7592",
+      "category": "potential_home_safety_hazard",
+      "question_id": "grab_bar",
+      "presence": "absent",
+      "coverage": "unknown",
+      "evidence": null,
+      "attachment": "unknown",
+      "producer": "jev-1.14.0",
+      "provenance": "live",
+      "provider_response": {
+        "presence": {
+          "type": "noul",
+          "noul": 0.02
+        },
+        "box": {
+          "type": "box",
+          "box": {
+            "top": 0.52,
+            "bottom": 0.54,
+            "left": 0.02,
+            "right": 0.1
+          },
+          "confidence": 0.09
+        }
+      }
+    }
+  ],
+  "status": "succeeded",
+  "elapsed_seconds": 1.214162467000051
+}
