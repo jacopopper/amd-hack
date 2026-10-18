@@ -635,7 +635,7 @@ footer .copy{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;
     <p class="k a">{{ t.team.k }}</p>
     <h2 class="a" style="--d:.1">{{ t.team.h2 }}</h2>
     <div class="team">
-      {% for p in team %}<div class="person a" style="--d:{{ 0.3 + loop.index0 * 0.2 }}"><img src="{{ base }}assets/team/{{ p.photo }}" alt="{{ p.name }}"><div><h3>{{ p.name }}</h3><div class="role">{{ t.team.roles[loop.index0] }}</div><dl><dt>{{ t.team.studied }}</dt><dd>{{ t.team.universities[loop.index0] }}</dd><dt>{{ t.team.works }}</dt><dd>{{ t.team.jobs[loop.index0] }}</dd><dt>{{ t.team.does }}</dt><dd>{{ t.team.focus[loop.index0] }}</dd></dl>
+      {% for p in team %}<div class="person a" style="--d:{{ 0.3 + loop.index0 * 0.2 }}"><img src="{{ base }}assets/team/{{ p.photo }}" alt="{{ p.name }}"><div><h3>{{ p.name }}</h3><div class="role">{{ t.team.roles[loop.index0] }}</div><dl><dt>{{ t.team.studied }}</dt><dd>{{ t.team.universities[loop.index0] }}</dd><dt>{{ t.team.does }}</dt><dd>{{ t.team.focus[loop.index0] }}</dd></dl>
         {%- if p.linkedin %}<a class="li" href="{{ p.linkedin }}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>LinkedIn</a>{% endif %}</div></div>
       {% endfor %}
     </div>
