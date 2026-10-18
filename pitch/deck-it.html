@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Step Wise — presentazione per i bandi italiani</title>
+<!-- Italian 16:9 deck for Italian calls (Jazz'Inn, Get it!, Start Cup...). Same story, style and sources as deck.html,
+     without the hackathon framing, plus innovation, market, roadmap and team slides.
+     Export: google-chrome --headless --no-pdf-header-footer --print-to-pdf=step-wise-deck-it.pdf deck-it.html -->
+<style>
+@font-face{font-family:"Instrument Serif";src:url(assets/fonts/InstrumentSerif-normal.woff2) format("woff2");font-style:normal;font-weight:400}
+@font-face{font-family:"Instrument Serif";src:url(assets/fonts/InstrumentSerif-italic.woff2) format("woff2");font-style:italic;font-weight:400}
+@font-face{font-family:"Inter";src:url(assets/fonts/Inter-normal.woff2) format("woff2");font-style:normal;font-weight:100 900}
+:root{
+  --paper:#f3efe6;--ink:#161513;--ink-2:#3d3a35;--muted:#78726a;--rule:#d5cdbd;
+  --red:#d2321f;--amber:#f0a417;--green:#2f9a5c;--hl:#ffe14a;--dark:#0e0d0c;--dark-2:#1a1917;--line:#2e2b27;--dark-ink:#efeae0;--dark-muted:#a19b90;
+  --serif:"Instrument Serif",Georgia,serif;--sans:"Inter",system-ui,sans-serif;--mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@page{size:1920px 1080px;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+html,body{margin:0;background:#555}
+body{font:400 26px/1.45 var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+@media screen{.s{margin:0 auto 24px;box-shadow:0 10px 40px rgb(0 0 0 / 40%)}}
+
+.s{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--paper);padding:96px 120px 90px;display:flex;flex-direction:column;break-after:page;page-break-after:always}
+.s:last-child{break-after:auto}
+.dark{background:var(--dark);color:var(--dark-ink)}
+.pn{position:absolute;right:120px;bottom:40px;font:500 16px/1 var(--mono);color:var(--muted)}
+.dark .pn{color:#6f695f}
+.brandmark{position:absolute;left:120px;bottom:40px;display:flex;align-items:center;gap:10px;font:600 17px/1 var(--sans);color:var(--muted)}
+.brandmark svg{width:20px;height:20px}
+.dark .brandmark{color:#6f695f}
+.k{font:600 17px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin:0 0 28px;display:flex;gap:14px;align-items:center}
+.k:before{content:"";width:36px;height:2px;background:currentColor}
+.dark .k.y{color:var(--hl)}
+h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0;letter-spacing:-.012em}
+h2{font-size:92px;line-height:.98}
+h3{font-size:44px;line-height:1.1}
+p{margin:0}
+.lede{font-size:30px;line-height:1.42;color:var(--ink-2);max-width:30em}
+.dark .lede{color:#d4cec2}
+.muted{color:var(--muted)}.dark .muted{color:var(--dark-muted)}
+.small{font-size:19px;line-height:1.45}
+.red{color:var(--red)}
+.mark{background:var(--hl);color:#141210;padding:0 .08em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.row{display:grid;gap:64px;align-items:center;flex:1}
+.r2{grid-template-columns:1fr 1fr}
+.r55{grid-template-columns:1.05fr .95fr}
+.r46{grid-template-columns:.8fr 1.2fr}
+.row>*{min-width:0}
+.tech{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.tech b{font:600 16px/1 var(--mono);padding:9px 11px;border-radius:5px;background:rgb(255 225 74 / 10%);color:var(--hl);border:1px solid rgb(255 225 74 / 25%)}
+.s:not(.dark) .tech b{background:#fff;color:var(--ink-2);border-color:var(--rule)}
+
+/* source card */
+.src{margin:0;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 0 rgb(0 0 0 / 5%),0 24px 50px -24px rgb(40 30 10 / 45%),0 0 0 1px rgb(0 0 0 / 9%);color:#1a1916}
+.src .bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#ecebe8;border-bottom:1px solid #dcdad5}
+.src .bar .dots{display:flex;gap:6px}.src .bar .dots i{width:10px;height:10px;border-radius:50%;background:#d3d0ca}
+.src .bar .url{flex:1;min-width:0;background:#fff;border-radius:6px;padding:5px 12px;font:500 15px/1.2 var(--sans);color:#6b685f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.src .bar .url b{color:#1a1916;font-weight:600}
+.src figcaption{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #ecebe8;font-size:16px;line-height:1.3;color:#5d5850}
+.src figcaption b{color:#1a1916;font-weight:600}
+.src .ok{flex:none;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#1f6f43}
+.dark .src{box-shadow:0 30px 60px -20px rgb(0 0 0 / 75%)}
+.stack{display:grid;gap:26px}
+
+/* cover */
+/* the photo, grayscale, fade and shading are baked into cover-bg.jpg: CSS filters and masks print unevenly across PDF viewers */
+#cover{background:#000 url(assets/deck/cover-bg.jpg) 0 0/100% 100% no-repeat;color:#fff;padding:0;justify-content:center}
+#cover>img{display:none;position:absolute;top:0;right:0;height:100%;width:1000px;object-fit:cover;object-position:50% 30%;filter:grayscale(1) contrast(1.06);-webkit-mask-image:linear-gradient(90deg,transparent 0%,rgb(0 0 0 / 35%) 22%,rgb(0 0 0 / 85%) 45%,#000 62%);mask-image:linear-gradient(90deg,transparent 0%,rgb(0 0 0 / 35%) 22%,rgb(0 0 0 / 85%) 45%,#000 62%)}
+#cover .in{position:relative;z-index:2;padding:0 120px}
+#cover .place{font:600 17px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#bdb6aa}
+#cover h1{font-size:176px;line-height:.88;margin:28px 0 0}
+#cover .l1{font-size:32px;line-height:1.4;color:#ddd6ca;max-width:25em;margin:44px 0 0}
+#cover .l2{font:400 56px/1.15 var(--serif);margin:26px 0 0;max-width:20em}
+#cover .foot{display:flex;gap:60px;align-items:flex-end;margin-top:76px;padding-top:28px;border-top:1px solid rgb(255 255 255 / 18%);max-width:1100px}
+#cover .brand{display:flex;align-items:center;gap:14px;font:600 30px/1 var(--sans)}
+#cover .brand svg{width:40px;height:40px}
+#cover .tag{font-size:21px;color:#c9c2b6;margin:14px 0 0;max-width:28em}
+#cover .ev{font-size:17px;line-height:1.5;color:#a8a194;text-align:left}
+#cover .ev b{color:#fff;font-weight:600}
+.cred{position:absolute;right:24px;bottom:16px;z-index:3;font-size:14px;color:rgb(255 255 255 / 50%)}
+
+/* law vs home */
+.vs{display:grid;grid-template-columns:1fr 1fr;margin-top:44px;border-top:2px solid var(--ink);flex:1}
+.vs>div{padding:30px 54px 0 0;display:flex;flex-direction:column}
+.vs>div+div{padding:30px 0 0 54px;border-left:1px solid var(--rule)}
+.law{list-style:none;margin:18px 0 0;padding:0;font-size:24px}
+.law li{display:flex;gap:14px;align-items:center;padding:5px 0}
+.law li:before{content:"";flex:none;width:26px;height:26px;border-radius:50%;background:#1f6f43 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M5 9.4 7.8 12 13 6.5' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E") center/26px no-repeat}
+.law.no li{color:var(--muted)}
+.law.no li:before{background:var(--red) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Cpath d='M6 6l6 6M12 6l-6 6' stroke='white' stroke-width='2'/%3E%3C/svg%3E") center/26px no-repeat}
+.law.no li span{text-decoration:line-through;text-decoration-color:rgb(210 50 31 / 65%);text-decoration-thickness:2px}
+.deaths{display:flex;align-items:baseline;gap:20px;margin:26px 0 14px}
+.deaths b{font:400 128px/.85 var(--serif);letter-spacing:-.02em}
+.deaths span{font-size:21px;color:var(--muted);line-height:1.3}
+.units{display:grid;grid-template-columns:repeat(60,1fr);gap:3px;margin-bottom:26px}
+.units i{aspect-ratio:1;border-radius:1px;background:#a29b90}
+.units.hot i{background:var(--red)}
+.vs .src{margin-top:auto}
+
+/* OT */
+.ot{display:grid;gap:26px}
+.ot .r{display:grid;grid-template-columns:220px 1fr 150px;gap:22px;align-items:center}
+.ot .r span{font-size:23px;color:var(--dark-muted)}
+.ot .r b{font:400 52px/1 var(--serif);text-align:right}
+.ot .r .u{display:flex;flex-wrap:wrap;gap:5px}
+.ot .r .u i{width:18px;height:18px;border-radius:2px;background:#5b5650}
+.ot .r.it span{color:#fff;font-weight:600}.ot .r.it .u i{background:var(--hl)}.ot .r.it b{color:var(--hl)}
+.ratio{font:400 64px/1.04 var(--serif)}
+
+/* CDC */
+.quote{font:400 44px/1.15 var(--serif);max-width:20em;margin-top:56px;padding-top:40px;border-top:1px solid var(--line)}
+.quote:before{content:"«";color:var(--red)}.quote:after{content:"»";color:var(--red)}
+
+/* three figures */
+.fig3{display:grid;grid-template-columns:repeat(3,1fr);gap:64px;margin-top:110px;border-top:2px solid var(--ink);padding-top:40px}
+.fig3 b{display:block;font:400 250px/.85 var(--serif);letter-spacing:-.03em}
+.fig3 sup{font-size:.4em;vertical-align:1em}
+.fig3 p{font-size:31px;line-height:1.38;margin-top:26px;color:var(--ink-2)}
+.fig3 small{display:block;margin-top:18px;font-size:17px;color:var(--muted)}
+
+/* detection */
+.det{display:grid;grid-template-columns:1.25fr 1.08fr 1.5fr;gap:16px;align-items:start;margin-top:44px}
+.det .shot{border-radius:8px}
+.det .hd{position:absolute;left:0;right:0;top:0;display:flex;justify-content:space-between;padding:11px 14px;font:500 15px/1 var(--mono);color:#fff;background:rgb(14 13 12 / 72%);z-index:3}
+.bb{position:absolute;border:3px solid var(--c);border-radius:3px;box-shadow:0 0 0 1px rgb(0 0 0 / 35%);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.bb.dash{border-style:dashed;background:transparent}
+.bb span{position:absolute;left:-3px;bottom:100%;margin-bottom:3px;white-space:nowrap;background:var(--c);color:var(--tc,#fff);font:700 14px/1 var(--mono);letter-spacing:.04em;padding:6px 8px;border-radius:3px 3px 3px 0}
+.bb.below span{bottom:auto;top:100%;margin:3px 0 0;border-radius:0 3px 3px 3px}
+.bb.right span{left:auto;right:-3px;border-radius:3px 3px 0 3px}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.qa div{background:var(--dark-2);border:1px solid var(--line);border-radius:8px;padding:14px 18px;font:500 18px/1.45 var(--mono);color:#cfc8bb}
+.qa em{display:block;font-style:normal;color:#7f786d;font-size:15px;margin-bottom:4px}
+.qa .y{color:#ff7a66;font-weight:700}.qa .n{color:#bdb6aa;font-weight:700}
+
+/* overview */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;margin-top:56px}
+.step{background:var(--dark-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.step .th{height:210px;background:#000 50%/cover}
+.step .tx{padding:20px 20px 24px}
+.step .n{font:500 15px/1 var(--mono);color:var(--hl);letter-spacing:.08em}
+.step h4{margin:12px 0 8px;font:600 25px/1.15 var(--sans);color:#fff}
+.step p{font-size:18px;line-height:1.42;color:#bdb6aa}
+.step .who{display:block;margin-top:12px;font:600 14px/1.2 var(--mono);color:#8f887c;text-transform:uppercase;letter-spacing:.06em}
+.step.hu{border-color:#c4473a}
+.step.hu .who{color:#ff7a66}
+
+/* image frames */
+.shot{position:relative;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 0 0 1px var(--line),0 40px 80px -30px rgb(0 0 0 / 85%)}
+.shot img{width:100%;height:auto}
+.cap{margin-top:14px;font-size:17px;line-height:1.4;color:var(--dark-muted)}
+.s:not(.dark) .cap{color:var(--muted)}
+.lab{position:absolute;left:14px;top:12px;font:600 14px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#fff;background:rgb(0 0 0 / 60%);padding:7px 9px;border-radius:4px}
+.strip{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.strip img{aspect-ratio:3/4;object-fit:cover;border-radius:5px;box-shadow:0 0 0 1px rgb(255 255 255 / 25%)}
+.arrow{font:400 40px/1 var(--serif);color:var(--hl);text-align:center;margin:14px 0}
+ol.pts{margin:30px 0 0;padding-left:28px;font-size:24px;line-height:1.6;color:#cfc8bb}
+ol.pts b{color:#fff;font-weight:600}
+
+/* gemma */
+.gm{display:grid;grid-template-columns:1fr 190px 1fr;gap:28px;align-items:center;margin-top:40px}
+.box{background:var(--dark-2);border:1px solid var(--line);border-radius:10px;padding:18px 22px}
+.box em{display:block;font:600 14px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8f887c;font-style:normal;margin-bottom:8px}
+.box span{font-size:21px;color:#e6e0d4;line-height:1.4}
+.col{display:grid;gap:14px}
+.core{text-align:center;font:600 22px/1.3 var(--sans);color:#fff}
+.core img{width:150px;margin:0 auto 16px;filter:drop-shadow(0 0 28px rgb(66 133 244 / 35%))}
+.core small{display:block;font-size:16px;font-weight:400;color:var(--dark-muted);margin-top:4px}
+
+/* decisions */
+.dec{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:34px}
+.dec div{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--dark-2)}
+.dec b{display:block;font:600 22px/1.2 var(--sans);color:#fff;margin-bottom:6px}
+.dec span{font-size:18px;line-height:1.4;color:#bdb6aa}
+.dec .ok b{color:#57d18b}.dec .ed b{color:var(--hl)}.dec .no b{color:#ff6a55}.dec .df b{color:#cfc8bb}
+
+/* AMD */
+.amd{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:52px}
+.node{background:var(--dark-2);border:1px solid var(--line);border-radius:10px;padding:22px 22px 24px}
+.node .n{font:500 15px/1 var(--mono);color:var(--dark-muted);letter-spacing:.06em}
+.node h4{margin:14px 0 8px;font:600 26px/1.2 var(--sans);color:#fff}
+.node p{font-size:19px;line-height:1.4;color:#bdb6aa}
+.node code{display:inline-block;margin-top:14px;font:500 16px/1.3 var(--mono);color:var(--hl)}
+.node.gpu{border-color:#c4473a}
+.gpu-bar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:14px;background:linear-gradient(90deg,#b8392d,#d2321f);color:#fff;border-radius:10px;padding:20px 26px}
+.gpu-bar b{font:700 26px/1.2 var(--sans)}
+.gpu-bar span{font:500 18px/1.3 var(--mono);opacity:.92}
+.ext{grid-column:1/-1;font-size:18px;color:var(--dark-muted);line-height:1.5}
+.live{display:grid;grid-template-columns:auto 1.4fr 1fr 1fr;gap:40px;align-items:center;margin-top:40px;border:1px solid var(--hl);border-radius:12px;padding:26px 32px;background:rgb(255 225 74 / 6%)}
+.live .tag{display:flex;align-items:center;gap:12px;font:700 17px/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--hl)}
+.live .tag i{width:14px;height:14px;border-radius:50%;background:#57d18b;box-shadow:0 0 0 5px rgb(87 209 139 / 20%)}
+.live b{display:block;font:400 56px/1 var(--serif);color:#fff}
+.live span{display:block;margin-top:8px;font-size:19px;line-height:1.35;color:var(--dark-muted)}
+
+/* who */
+.who3{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:64px}
+.card{background:#fff;border:1px solid var(--rule);border-radius:14px;padding:30px 30px 34px;box-shadow:0 24px 50px -30px rgb(40 30 10 / 35%)}
+.card .t{font:700 15px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+.card h4{font:400 54px/1.05 var(--serif);margin:16px 0 18px}
+.card p{font-size:25px;line-height:1.45;color:var(--ink-2)}
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;margin-top:64px;border-top:2px solid var(--ink);padding-top:32px}
+.why b{display:block;font:600 27px/1.25 var(--sans);margin-bottom:10px}
+.why p{font-size:23px;line-height:1.45;color:var(--ink-2)}
+
+.links{display:flex;gap:64px;margin-top:30px;font:500 23px/1.3 var(--mono);color:var(--ink-2)}
+.links b{font-family:var(--sans);font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:6px}
+
+/* close */
+#close{background:var(--dark);color:#fff;justify-content:center}
+#close .links{color:#bdb6aa;margin-top:48px}
+#close p.big{font:400 108px/1.02 var(--serif);max-width:12em}
+
+/* sources */
+.srcs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-top:40px;align-items:start}
+.srcs>div{min-width:0}
+.srcs .who{font-size:15px;line-height:1.35;color:var(--muted);margin:10px 2px 0;overflow-wrap:anywhere}
+.srcs .who b{color:var(--ink);font-weight:600}
+.srcs .src figcaption{font-size:13px;padding:7px 10px}.srcs .src .bar .url{font-size:12.5px}
+
+/* innovazione */
+.inn{display:grid;grid-template-columns:repeat(2,1fr);gap:26px;margin-top:60px}
+.inn div{background:#fff;border:1px solid var(--rule);border-radius:14px;padding:34px 36px 38px;box-shadow:0 24px 50px -30px rgb(40 30 10 / 35%)}
+.inn b{display:block;font:600 32px/1.2 var(--sans);margin-bottom:14px}
+.inn b i{font:400 34px/1 var(--serif);font-style:normal;color:var(--red);margin-right:12px}
+.inn p{font-size:25px;line-height:1.45;color:var(--ink-2)}
+.state{display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;margin-top:auto;border:1px solid var(--rule);border-radius:12px;padding:20px 28px;background:rgb(255 255 255 / 55%)}
+.state .tag{font:700 15px/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:10px}
+.state .tag i{width:12px;height:12px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgb(47 154 92 / 18%)}
+.state p{font-size:22px;line-height:1.45;color:var(--ink-2)}
+
+/* mercato */
+.mk{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-top:44px}
+.mk .num{border-top:2px solid var(--ink);padding-top:18px}
+.mk .num b{display:block;font:400 92px/.9 var(--serif);letter-spacing:-.02em}
+.mk .num p{font-size:22px;line-height:1.4;color:var(--ink-2);margin-top:12px}
+.mk .num small{display:block;margin-top:8px;font-size:15px;color:var(--muted)}
+.canvas{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.canvas div{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:24px 28px 28px}
+.canvas em{display:block;font:700 14px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--red);font-style:normal;margin-bottom:10px}
+.canvas p{font-size:23px;line-height:1.45;color:var(--ink-2)}
+.canvas .hyp{border-style:dashed;border-color:#b9ae98}
+.canvas .hyp em:after{content:" · ipotesi da validare";color:var(--muted);letter-spacing:.04em}
+
+/* roadmap */
+.rm{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:60px;position:relative}
+.rm:before{content:"";position:absolute;left:0;right:0;top:15px;height:2px;background:var(--line)}
+.rm>div{position:relative;padding:48px 28px 0 0}
+.rm>div:before{content:"";position:absolute;left:0;top:6px;width:20px;height:20px;border-radius:50%;background:var(--dark);border:3px solid var(--hl)}
+.rm>div.now:before{background:var(--hl)}
+.rm .when{font:500 16px/1 var(--mono);color:var(--hl);letter-spacing:.08em;text-transform:uppercase}
+.rm h4{margin:18px 0 18px;font:600 34px/1.2 var(--sans);color:#fff}
+.rm ul{margin:0;padding-left:24px;font-size:24px;line-height:1.5;color:#bdb6aa}
+.rm li{margin-bottom:10px}
+.scale{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin-top:auto;border-top:1px solid var(--line);padding-top:28px}
+.scale b{display:block;font:600 27px/1.25 var(--sans);color:#fff;margin-bottom:8px}
+.scale p{font-size:23px;line-height:1.45;color:#bdb6aa}
+
+/* team */
+.team{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:56px;align-items:start}
+.person{display:grid;grid-template-columns:200px 1fr;gap:40px;align-items:center;background:#fff;border:1px solid var(--rule);border-radius:16px;padding:40px 44px;box-shadow:0 24px 50px -30px rgb(40 30 10 / 35%)}
+.person img{width:200px;height:200px;border-radius:50%;object-fit:cover}
+.person dl{display:grid;grid-template-columns:auto 1fr;gap:10px 18px;margin:0;font-size:24px;line-height:1.35}
+.person dt{font:700 14px/1.9 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.person dd{margin:0;color:var(--ink-2)}
+.sign{display:flex;gap:56px;margin-top:56px}
+.sign div{display:flex;align-items:center;gap:18px;font:600 26px/1.25 var(--sans)}
+.sign img{width:84px;height:84px;border-radius:50%;object-fit:cover}
+.sign small{display:block;font:400 19px/1.3 var(--sans);color:var(--muted)}
+.person h4{font:400 48px/1.05 var(--serif);margin:0}
+.person .role{font:700 15px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin:12px 0 16px}
+.together{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:auto;border-top:2px solid var(--ink);padding-top:26px}
+.together b{display:block;font:600 27px/1.25 var(--sans);margin-bottom:8px}
+.together p{font-size:24px;line-height:1.45;color:var(--ink-2)}
+</style>
+</head>
+<body>
+
+<!-- 1 · COPERTINA -->
+<section class="s" id="cover">
+  <img src="assets/photos/maria.jpg" alt="">
+  <div class="in">
+    <div class="place">Roma · Ottobre 2026</div>
+    <h1>Venerdì,<br>Maria torna a casa.</h1>
+    <p class="l1">Ha 84 anni. Di notte è caduta nel corridoio e si è rotta il femore. Tornerà a casa con il deambulatore.</p>
+    <p class="l2"><span class="mark">Nessuno ha mai visto la casa in cui sta tornando.</span></p>
+    <div class="foot">
+      <div>
+        <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
+        <p class="tag">Valutazione dei rischi di caduta in casa a partire dalle foto del telefono, rivista da un professionista prima della dimissione.</p>
+      </div>
+      <div class="ev"><b>Digital health · AI</b><br>Team di progetto · Roma</div>
+    </div>
+  </div>
+  <span class="cred">Foto: Pedro Miguel Aires / Unsplash · Maria è una paziente immaginaria; ogni numero in queste slide è reale e ha una fonte</span>
+</section>
+
+<!-- 2 · LAVORO vs CASA -->
+<section class="s" id="legge">
+  <p class="k">Il problema</p>
+  <h2>Al lavoro la sicurezza è obbligatoria. <span class="red">A casa no.</span></h2>
+  <div class="vs">
+    <div>
+      <h3>Al lavoro · D.Lgs. 81/2008</h3>
+      <ul class="law"><li>Valutazione dei rischi obbligatoria</li><li>Un responsabile della sicurezza</li><li>Ispezioni e sanzioni</li></ul>
+      <div class="deaths"><b>1.189</b><span>morti<br>nel 2025</span></div>
+      <div class="units" data-n="119"></div>
+      <figure class="src" data-src="inail"></figure>
+    </div>
+    <div>
+      <h3>A casa · nessuna regola</h3>
+      <ul class="law no"><li><span>Valutazione dei rischi</span></li><li><span>Responsabile della sicurezza</span></li><li><span>Ispezioni</span></li></ul>
+      <div class="deaths"><b class="red">~6.000</b><span>morti<br>ogni anno · ogni quadrato = 10</span></div>
+      <div class="units hot" data-n="600"></div>
+      <figure class="src" data-src="iss-6000"></figure>
+    </div>
+  </div>
+  <span class="pn">02</span>
+</section>
+
+<!-- 3 · DOVE SI CADE, COSA FUNZIONA -->
+<section class="s" id="gap">
+  <p class="k">Dove si cade, e cosa funziona</p>
+  <h2>Si cade in casa. <span class="red">Una visita a domicilio lo previene.</span></h2>
+  <div class="fig3">
+    <div><b>54<sup>%</sup></b><p>delle cadute degli over 65 avviene <span class="mark">in casa</span>.</p><small>ISS · PASSI d'Argento 2023–2024</small></div>
+    <div><b>11<sup>%</sup></b><p>ha ricevuto da un medico consigli su come evitarle.</p><small>ISS · PASSI d'Argento 2023–2024</small></div>
+    <div><b class="red">−38<sup>%</sup></b><p>di cadute quando un terapista occupazionale ispeziona la casa e i rischi vengono rimossi, negli anziani ad alto rischio.</p><small>Revisione Cochrane 2023 · 22 studi, 8.463 persone</small></div>
+  </div>
+  <span class="pn">03</span>
+</section>
+
+<!-- 4 · COLLO DI BOTTIGLIA -->
+<section class="s dark" id="vuoto">
+  <div class="row r2">
+    <div>
+      <p class="k">Il collo di bottiglia</p>
+      <h2>In Italia quell'esperto manca.</h2>
+      <div class="ot" style="margin-top:60px">
+        <div class="r"><span>Germania</span><div class="u" data-n="60"></div><b>60.000</b></div>
+        <div class="r"><span>Regno Unito</span><div class="u" data-n="40"></div><b>40.000</b></div>
+        <div class="r it"><span>Italia</span><div class="u" data-n="3"></div><b>3.000</b></div>
+      </div>
+      <p class="small muted" style="margin-top:16px">Terapisti occupazionali. Ogni quadrato = 1.000. Fonte: FNO TSRM e PSTRP, 2024.</p>
+    </div>
+    <div>
+      <p class="ratio">1 terapista ogni <span class="mark">~5.000</span> persone over 65.</p>
+      <p class="quote">Se una valutazione di terapia occupazionale non è disponibile, rivedi i possibili rischi in casa con il paziente e la famiglia.</p>
+      <p class="lede" style="margin-top:24px">CDC STEADI, a ogni dimissione. <b style="color:#fff">Step Wise lo rende possibile, con l'occhio di un esperto.</b></p>
+    </div>
+  </div>
+  <span class="pn">04</span>
+</section>
+
+<!-- 5 · LA SOLUZIONE -->
+<section class="s dark" id="how">
+  <p class="k y">La soluzione</p>
+  <h2>Dalle foto del telefono a un piano che la famiglia può seguire.</h2>
+  <p class="lede" style="margin-top:24px">Tre modelli di AI fanno l'ispezione, la parte lenta. L'ultima parola è del professionista.</p>
+  <div class="steps">
+    <div class="step"><div class="th" style="background-image:url(assets/photos/casa/collega.jpg);background-position:52% 40%"></div><div class="tx"><div class="n">01</div><h4>Foto</h4><p>Un familiare fotografa la casa con il telefono. L'infermiere aggiunge il profilo del paziente.</p><span class="who">Famiglia · infermiere</span></div></div>
+    <div class="step"><div class="th" style="background-image:url(assets/photos/casa/soggiorno.jpg);background-position:50% 60%"></div><div class="tx"><div class="n">02</div><h4>Rilevamento</h4><p>Jev risponde a domande semplici: c'è un tappeto, un cavo, una vasca? Ognuna con il suo riquadro.</p><span class="who">TypeSafe Jev</span></div></div>
+    <div class="step"><div class="th" style="background-image:url(assets/photos/casa/splat.jpg)"></div><div class="tx"><div class="n">03</div><h4>Stanza in 3D</h4><p>VGGT trasforma le foto in una stanza che il professionista può esplorare.</p><span class="who">VGGT-1B</span></div></div>
+    <div class="step"><div class="th" style="background:#141312 url(assets/logos/gemma.png) center/40% no-repeat"></div><div class="tx"><div class="n">04</div><h4>Ragionamento</h4><p>Gemma ordina i rischi e spiega perché contano per questo paziente.</p><span class="who">Gemma 4 31B</span></div></div>
+    <div class="step hu"><div class="th" style="background-image:url(assets/deck/app-review.png);background-position:100% 0"></div><div class="tx"><div class="n">05</div><h4>Revisione</h4><p>L'infermiere di dimissione conferma, modifica, esclude o rimanda ogni rischio.</p><span class="who">Professionista</span></div></div>
+    <div class="step hu"><div class="th" style="background-image:url(assets/deck/app-release.png);background-position:20% 0"></div><div class="tx"><div class="n">06</div><h4>Piano per la famiglia</h4><p>Le azioni approvate, in ordine di priorità e in parole semplici, sul telefono della famiglia.</p><span class="who">Famiglia</span></div></div>
+  </div>
+  <div class="brandmark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
+  <span class="pn">05</span>
+</section>
+
+<!-- 6 · FOTO + 3D -->
+<section class="s dark" id="recon">
+  <div class="row r46">
+    <div>
+      <p class="k y">01 Foto · 03 Ricostruzione 3D</p>
+      <h2 style="font-size:80px">Dalle foto alla stanza.</h2>
+      <p class="lede" style="margin-top:28px;font-size:26px">VGGT è un transformer che guarda tutte le foto insieme. In un solo passaggio capisce da dove è stata scattata ognuna, quanto è lontano ogni pixel e dove si trova nello spazio.</p>
+      <ol class="pts">
+        <li><b>Pose delle camere</b>: da dove è stata scattata ogni foto</li>
+        <li><b>Profondità</b>: la distanza di ogni pixel</li>
+        <li><b>Punti 3D</b>: la stanza, con ogni rischio al suo posto</li>
+      </ol>
+      <div class="tech"><b>VGGT-1B · Meta, CVPR 2025</b><b>Gaussian splatting · gsplat</b><b>PyTorch</b></div>
+    </div>
+    <div>
+      <div class="strip"><img src="assets/photos/casa/scatto-1.jpg" alt=""><img src="assets/photos/casa/scatto-2.jpg" alt=""><img src="assets/photos/casa/scatto-3.jpg" alt=""><img src="assets/photos/casa/scatto-4.jpg" alt=""><img src="assets/photos/casa/scatto-5.jpg" alt=""><img src="assets/photos/casa/scatto-6.jpg" alt=""><img src="assets/photos/casa/scatto-7.jpg" alt=""><img src="assets/photos/casa/scatto-8.jpg" alt=""></div>
+      <div class="arrow">↓ 39 foto dal telefono</div>
+      <div class="shot"><img src="assets/photos/casa/splat.jpg" alt="Ricostruzione con Gaussian splatting della cucina e del soggiorno"><span class="lab">output reale del prototipo</span></div>
+      <p class="cap">Output reale: 39 foto di una casa vera, pose delle camere da VGGT-1B, 757.792 gaussiane addestrate con gsplat. Le fotografie restano la prova; la vista 3D serve a orientarsi. Scala non ancora calibrata.</p>
+    </div>
+  </div>
+  <span class="pn">06</span>
+</section>
+
+<!-- 7 · RILEVAMENTO -->
+<section class="s dark" id="ai">
+  <div class="row r2" style="flex:none;align-items:end">
+    <div><p class="k y">02 Rilevamento</p><h2 style="font-size:84px">Ogni rischio, con la sua prova.</h2></div>
+    <p class="lede" style="font-size:25px">Jev risponde a domande semplici sulle aree della <b>Westmead Home Safety Assessment</b>. Un riquadro conta solo se la presenza è confermata; quello che una foto non può mostrare resta “da verificare di persona”.</p>
+  </div>
+  <div class="det">
+    <div class="shot" data-box="sogg"><div class="hd"><span>IMG_7579 · soggiorno</span><span>3 trovati</span></div><img src="assets/photos/casa/soggiorno.jpg" alt="Soggiorno con tavolo, sedia pieghevole, cavo a terra e tappeto davanti alla cucina"></div>
+    <div class="shot" data-box="borse"><div class="hd"><span>IMG_7614 · divano</span><span>1 trovato</span></div><img src="assets/photos/casa/borse.jpg" alt="Zaini e borse a terra accanto al divano"></div>
+    <div class="shot" data-box="bagno"><div class="hd"><span>bagno · foto di esempio</span><span>3 trovati</span></div><img src="assets/photos/bagno.jpg" alt="Bagno con vasca e WC senza maniglioni"></div>
+  </div>
+  <div class="qa">
+    <div><em>domanda</em>C'è un cavo sul pavimento?<br>→ <span class="y">sì</span> · riquadro [0.01, 0.72, 0.31, 0.88]</div>
+    <div><em>domanda</em>C'è un maniglione accanto alla vasca?<br>→ <span class="y">no</span> · zona senza appoggio</div>
+    <div><em>domanda</em>Il pavimento è scivoloso?<br>→ <span class="n">non si può dire</span> · verificare di persona</div>
+  </div>
+  <p class="cap">Soggiorno e divano: foto reali della casa usata nella demo. Bagno: Point3D Commercial Imaging Ltd. / Unsplash. I riquadri sono illustrativi.</p>
+  <span class="pn">07</span>
+</section>
+
+<!-- 8 · RAGIONAMENTO -->
+<section class="s dark" id="gemma">
+  <div class="row r2" style="flex:none;align-items:end">
+    <div><p class="k y">04 Ragionamento</p><h2 style="font-size:84px">Perché conta, per Maria.</h2></div>
+    <p class="lede" style="font-size:25px">Gemma legge le prove e il profilo confermato, ordina i rischi per urgenza e spiega perché. Ogni affermazione deve rimandare a una foto e a una linea guida.</p>
+  </div>
+  <div class="gm" style="flex:1;grid-template-columns:1fr 260px 1fr;gap:40px">
+    <div class="col">
+      <div class="box"><em>profilo confermato</em><span>Deambulatore · frattura di femore · vive da sola · si alza di notte</span></div>
+      <div class="box"><em>prove</em><span>I rischi trovati nelle foto, ognuno con il suo riquadro</span></div>
+      <div class="box"><em>linee guida</em><span>CDC STEADI</span></div>
+    </div>
+    <div class="core"><img src="assets/logos/gemma.png" alt="Logo Gemma">Gemma 4 31B<small>Google DeepMind<br>modello aperto, installabile in locale</small></div>
+    <div class="col">
+      <div class="box"><em>priorità</em><span>Urgente, prima del rientro · oppure entro qualche settimana</span></div>
+      <div class="box"><em>perché, per questa paziente</em><span>“Le ruote del deambulatore si incastrano nel bordo del tappeto, sul suo percorso di ogni giorno.”</span></div>
+      <div class="box"><em>cosa fare</em><span>Un'azione in parole semplici, collegata alla sua foto e alla fonte</span></div>
+    </div>
+  </div>
+  <span class="pn">08</span>
+</section>
+
+<!-- 9 · REVISIONE -->
+<section class="s dark" id="review">
+  <div class="row r46" style="grid-template-columns:.72fr 1.28fr">
+    <div>
+      <p class="k y">05 Revisione</p>
+      <h2 style="font-size:84px">Decide il professionista.</h2>
+      <p class="lede" style="margin-top:26px;font-size:25px">L'infermiere di dimissione vede ogni rischio con la sua foto, il suo posto nella stanza e il motivo. Minuti, non una visita a domicilio.</p>
+      <div class="dec">
+        <div class="ok"><b>Conferma</b><span>entra nel piano per la famiglia</span></div>
+        <div class="ed"><b>Modifica</b><span>cambia l'azione o il testo</span></div>
+        <div class="no"><b>Escludi</b><span>non arriva mai alla famiglia</span></div>
+        <div class="df"><b>Verifica di persona</b><span>rimandato alla prima visita a domicilio</span></div>
+      </div>
+      <p class="lede" style="margin-top:30px;font-size:25px"><span class="mark">Niente arriva alla famiglia senza la sua firma.</span></p>
+      <div class="tech"><b>Next.js · three.js</b><b>revisioni versionate</b><b>rilascio bloccato se una decisione cambia</b></div>
+    </div>
+    <div>
+      <div class="shot"><img src="assets/deck/app-review.png" alt="Schermata reale del prototipo: revisione guidata del tappeto nella stanza ricostruita"></div>
+      <p class="cap">Schermata reale del prototipo (interfaccia in inglese): revisione guidata nella stanza ricostruita da 39 foto. In questo caso demo entrambi i rischi sono stati trovati da esecuzioni reali di TypeSafe Jev, registrate nel codice sorgente.</p>
+    </div>
+  </div>
+  <span class="pn">09</span>
+</section>
+
+<!-- 10 · PIANO PER LA FAMIGLIA -->
+<section class="s dark" id="plan">
+  <div class="row r46" style="grid-template-columns:.72fr 1.28fr">
+    <div>
+      <p class="k y">06 Piano per la famiglia</p>
+      <h2 style="font-size:84px">La famiglia sa cosa fare.</h2>
+      <p class="lede" style="margin-top:26px;font-size:25px">La figlia di Maria riceve il piano approvato sul telefono: azioni in ordine di priorità, in parole semplici, ognuna con la sua foto. Prima che Maria torni a casa, non dopo la prossima caduta.</p>
+      <ol class="pts" style="font-size:22px">
+        <li><b>Solo i rischi confermati</b> entrano nel piano</li>
+        <li><b>Quello che le foto non mostrano</b> è elencato per la visita a domicilio</li>
+        <li><b>Link privato</b>: scade dopo 7 giorni, si può revocare</li>
+        <li><b>Stesso documento</b> come pagina web e PDF, con impronta digitale</li>
+      </ol>
+      <div class="tech"><b>Jinja2 · WeasyPrint</b><b>HTML + PDF</b></div>
+    </div>
+    <div>
+      <div class="shot"><img src="assets/deck/app-release.png" alt="Schermata reale del prototipo: il piano di sicurezza generato e la finestra di rilascio"></div>
+      <p class="cap">Schermata reale del prototipo: il piano di sicurezza generato, rilasciato alla famiglia con un link privato.</p>
+    </div>
+  </div>
+  <span class="pn">10</span>
+</section>
+
+<!-- 11 · VALORE INNOVATIVO -->
+<section class="s" id="innovazione">
+  <p class="k">Il valore innovativo</p>
+  <h2>Una visita a domicilio che parte <span class="red">dal telefono di un familiare.</span></h2>
+  <div class="inn">
+    <div><b><i>01</i>Bastano le foto di un telefono</b><p>Nessuno scanner, nessun sensore da installare. Chi vive con il paziente fotografa le stanze; la ricostruzione 3D e il rilevamento dei rischi partono da lì.</p></div>
+    <div><b><i>02</i>Su misura per il paziente</b><p>Lo stesso tappeto è un rischio diverso per chi usa un deambulatore o si alza di notte. Le priorità seguono il profilo funzionale confermato dal professionista.</p></div>
+    <div><b><i>03</i>Il professionista decide, l'AI prepara</b><p>Ogni rischio arriva con la sua prova. Quello che le foto non possono dire resta “da verificare di persona”, invece di essere inventato.</p></div>
+    <div><b><i>04</i>Privacy dal progetto</b><p>Pensato per girare dentro la rete dell'ospedale. Foto ripulite dai metadati GPS, invio a servizi esterni solo con consenso, link alla famiglia che scade e si può revocare.</p></div>
+  </div>
+  <div class="state"><div class="tag"><i></i>Oggi</div><p>Prototipo funzionante dall'inizio alla fine: caricamento delle foto, ricostruzione 3D, revisione, report. Demo pubblica con una casa reale ricostruita da 39 foto. Non è un dispositivo medico e non ha ancora una validazione clinica.</p></div>
+  <span class="pn">11</span>
+</section>
+
+<!-- 12 · PER CHI È -->
+<section class="s" id="who">
+  <p class="k">Per chi è</p>
+  <h2>Costruito intorno alla dimissione, non intorno all'AI.</h2>
+  <div class="who3">
+    <div class="card"><div class="t">Lo usa</div><h4>L'infermiere di dimissione</h4><p>Rivede una casa in pochi minuti, dal reparto, prima che il paziente esca. Decide cosa arriva alla famiglia.</p></div>
+    <div class="card"><div class="t">Ne beneficia</div><h4>Il paziente e la famiglia</h4><p>Un piano chiaro prima del rientro. Un familiare scatta le foto; lo stesso familiare riceve le azioni.</p></div>
+    <div class="card"><div class="t">Lo adotta</div><h4>Ospedali, ASL e servizi del territorio</h4><p>Il percorso di dimissione guadagna la verifica della casa che le linee guida raccomandano, su server che controllano loro.</p></div>
+  </div>
+  <div class="why">
+    <div><b>Copre un vuoto reale</b><p>Con un terapista occupazionale ogni ~5.000 over 65, l'alternativa vera a una visita a domicilio è nessuna verifica.</p></div>
+    <div><b>La distanza non conta</b><p>Le foto arrivano dal paese, la revisione si fa dall'ospedale. Serve di più proprio dove una visita a domicilio è più difficile da organizzare.</p></div>
+    <div><b>Usa bene l'esperto che c'è</b><p>“Verifica di persona” manda alla visita a domicilio solo quello che le foto non risolvono.</p></div>
+  </div>
+  <span class="pn">12</span>
+</section>
+
+<!-- 13 · MERCATO E MODELLO -->
+<section class="s" id="mercato">
+  <p class="k">Dal concept al delivery</p>
+  <h2 style="font-size:80px">Un problema grande, <span class="red">un primo cliente preciso.</span></h2>
+  <div class="mk">
+    <div class="num"><b>14,8 mln</b><p>persone over 65 in Italia, il 25,1% della popolazione.</p><small>ISTAT, 1° gennaio 2026</small></div>
+    <div class="num"><b>~100.000</b><p>fratture di femore ogni anno in Italia.</p><small>Osservatorio Fratture da Fragilità, 2021</small></div>
+    <div class="num"><b class="red">&gt; 800 mln €</b><p>l'anno di costi sanitari per le fratture da fragilità, più ~600 mln € di riabilitazione.</p><small>Osservatorio Fratture da Fragilità, 2021</small></div>
+  </div>
+  <div class="canvas">
+    <div><em>Proposta di valore</em><p>Una verifica della casa, rivista da un professionista, per ogni paziente fragile dimesso. Oggi la maggior parte non ne riceve nessuna.</p></div>
+    <div><em>Target iniziale</em><p>Reparti che dimettono anziani dopo una caduta o una frattura (ortopedia, geriatria, riabilitazione) e i servizi domiciliari che li seguono.</p></div>
+    <div><em>Alternative oggi</em><p>Visita in presenza (pochi esperti, tempi lunghi), checklist cartacee (raramente compilate), dispositivi anti-caduta (intervengono dopo la caduta).</p></div>
+    <div class="hyp"><em>Chi paga</em><p>Ospedali e ASL; cooperative di assistenza domiciliare; in seguito assicurazioni per la non autosufficienza.</p></div>
+    <div class="hyp"><em>Modello di ricavo</em><p>Licenza annuale per struttura, installata sui server della struttura, oppure prezzo per valutazione per i servizi domiciliari.</p></div>
+    <div class="hyp"><em>Come lo verifichiamo</em><p>Interviste con infermieri di dimissione e terapisti occupazionali, poi un pilota con una struttura.</p></div>
+  </div>
+  <span class="pn">13</span>
+</section>
+
+<!-- 14 · ROADMAP -->
+<section class="s dark" id="roadmap">
+  <p class="k y">Prospettive di sviluppo</p>
+  <h2 style="font-size:80px">Dal prototipo al percorso di dimissione.</h2>
+  <div class="rm">
+    <div class="now"><div class="when">Oggi</div><h4>Prototipo funzionante</h4><ul><li>Pipeline completa, dalle foto al report</li><li>Demo pubblica e video</li><li>Codice aperto</li></ul></div>
+    <div><div class="when">Prossimi 6 mesi</div><h4>Validazione</h4><ul><li>Interviste con infermieri e terapisti occupazionali</li><li>Misura dell'accuratezza su case allestite</li><li>Tempo di revisione rispetto a una visita</li><li>Interfaccia in italiano</li></ul></div>
+    <div><div class="when">6–12 mesi</div><h4>Pilota</h4><ul><li>Un partner clinico: ospedale, ASL o cooperativa</li><li>Valutazione d'impatto privacy (DPIA)</li><li>Analisi regolatoria (MDR)</li><li>Costituzione della startup</li></ul></div>
+    <div><div class="when">12–24 mesi</div><h4>Adozione</h4><ul><li>Installazione sui server della struttura</li><li>Integrazione nel percorso di dimissione</li><li>Estensione all'assistenza domiciliare</li></ul></div>
+  </div>
+  <div class="scale">
+    <div><b>Scalabile</b><p>Una sola pipeline per qualsiasi casa: servono un telefono e una connessione, non personale in più sul territorio.</p></div>
+    <div><b>Replicabile</b><p>La checklist dei rischi e le regole di priorità si adattano a nuovi percorsi: dimissione, assistenza domiciliare, adattamento della casa.</p></div>
+  </div>
+  <span class="pn">14</span>
+</section>
+
+<!-- 15 · TEAM -->
+<section class="s" id="team">
+  <p class="k">Il team</p>
+  <h2>Due ingegneri AI, a Roma.</h2>
+  <div class="team">
+    <div class="person"><img src="assets/team/davide.jpg" alt="Davide Benedetti Valentini"><div><h4>Davide Benedetti Valentini</h4><div class="role">Co-founder · AI Engineer</div><dl><dt>Studi</dt><dd>Università degli Studi Roma Tre</dd><dt>Lavoro</dt><dd>AI Engineer, Leonardo</dd><dt>Cosa fa</dt><dd>Sistemi AI con LLM e agenti</dd></dl></div></div>
+    <div class="person"><img src="assets/team/jacopo.jpg" alt="Jacopo Dardini"><div><h4>Jacopo Dardini</h4><div class="role">Co-founder · AI Research Engineer</div><dl><dt>Studi</dt><dd>Università di Bologna</dd><dt>Lavoro</dt><dd>AI Research Engineer, Leonardo</dd><dt>Cosa fa</dt><dd>Ricerca su AI Safety e Security</dd></dl></div></div>
+  </div>
+  <div class="together">
+    <div><b>Insieme</b><p>Hanno costruito il prototipo dall'inizio alla fine: ricostruzione 3D, pipeline AI, app di revisione e report per la famiglia.</p></div>
+    <div><b>Chi cerchiamo</b><p>Un advisor clinico (terapista occupazionale o geriatra) e una struttura sanitaria con cui fare il primo pilota.</p></div>
+  </div>
+  <span class="pn">15</span>
+</section>
+
+<!-- 16 · CHIUSURA -->
+<section class="s" id="close">
+  <p class="big">Venerdì, Maria torna a casa.</p>
+  <p class="big" style="margin-top:24px"><span class="mark">Questa volta qualcuno ha guardato il corridoio.</span></p>
+  <div style="display:flex;align-items:center;gap:14px;margin-top:84px;font:600 30px/1 var(--sans)"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3.5 10.5 12 4l8.5 6.5V20h-17z"/><circle cx="12" cy="14" r="2.2" fill="currentColor" stroke="none"/></svg>Step Wise</div>
+  <div class="sign"><div><img src="assets/team/davide.jpg" alt=""><span>Davide Benedetti Valentini<small>Co-founder · AI Engineer</small></span></div><div><img src="assets/team/jacopo.jpg" alt=""><span>Jacopo Dardini<small>Co-founder · AI Research Engineer</small></span></div></div>
+</section>
+
+<!-- 17 · FONTI -->
+<section class="s" id="fonti">
+  <p class="k">Fonti</p>
+  <h2 style="font-size:64px">Ogni numero viene da un'istituzione pubblica.</h2>
+  <div class="srcs" id="srcs"></div>
+  <p class="small muted" style="margin-top:auto">Slide 13: ISTAT tramite QuiFinanza (apr. 2026), quifinanza.it/attualita/crisi-demografica-italia-istat-2026/964644/ · Osservatorio Fratture da Fragilità tramite HealthDesk (set. 2021), healthdesk.it/scenari/fratture-femore-unepidemia-silenziosa</p>
+  <span class="pn">17</span>
+</section>
+
+<script>
+const SRC = {
+  'inail': { url: 'https://www.inail.it/content/dam/inail-hub-site/documenti/2026/09/relazione-annuale-inail-2025-nota-stampa-infortuni-mp.pdf', host: 'inail.it', org: 'INAIL', title: 'Relazione annuale 2025', who: 'ente pubblico vigilato dal Ministero del Lavoro.' },
+  'iss-6000': { url: 'https://www.epicentro.iss.it/cong_leb/balducci', host: 'epicentro.iss.it', org: 'Istituto Superiore di Sanità', title: 'Morti per incidenti domestici', who: 'organo tecnico-scientifico del Servizio Sanitario Nazionale.' },
+  'iss-casa': { url: 'https://www.iss.it/en/-/almeno-una-caduta-nell-ultimo-anno-per-un-anziano-su-cinque-la-casa-e-il-luogo-dove-si-verificano-di-piu', host: 'iss.it', org: 'Istituto Superiore di Sanità', title: 'PASSI d\'Argento 2023–2024', who: 'sorveglianza nazionale sugli over 65.' },
+  'iss-consiglio': { url: 'https://www.iss.it/en/-/almeno-una-caduta-nell-ultimo-anno-per-un-anziano-su-cinque-la-casa-e-il-luogo-dove-si-verificano-di-piu', host: 'iss.it', org: 'Istituto Superiore di Sanità', title: 'PASSI d\'Argento 2023–2024', who: 'sorveglianza nazionale sugli over 65.' },
+  'cochrane': { url: 'https://www.cochrane.org/evidence/CD013258_reducing-fall-hazards-within-environment', host: 'cochrane.org', org: 'Cochrane', title: 'Revisione sistematica CD013258, 2023', who: 'riferimento internazionale per la medicina basata sulle prove.' },
+  'fno': { url: 'https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/', host: 'tsrm-pstrp.org', org: 'FNO TSRM e PSTRP', title: 'Terapisti occupazionali in Italia, 2024', who: 'Federazione degli ordini professionali, vigilata dal Ministero della Salute.' },
+  'fno-europa': { url: 'https://www.tsrm-pstrp.org/index.php/la-giornata-nazionale-del-terapista-occupazionale-2024/', host: 'tsrm-pstrp.org', org: 'FNO TSRM e PSTRP', title: 'Terapisti occupazionali in Europa, 2024', who: 'Federazione degli ordini professionali, vigilata dal Ministero della Salute.' },
+  'cdc': { url: 'https://www.cdc.gov/steadi/pdf/steadi-inpatient-guide-508.pdf', host: 'cdc.gov', org: 'CDC', title: 'STEADI, cadute dopo la dimissione, p. 10', who: 'agenzia federale USA per la salute pubblica.' },
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const card = id => {
+  const s = SRC[id], path = s.url.replace(/^https?:\/\/(www\.)?/, '').slice(s.host.length);
+  return `<div class="bar"><span class="dots"><i></i><i></i><i></i></span><span class="url"><b>${esc(s.host)}</b>${esc(path)}</span></div><img src="assets/sources/${id}.png" alt="Pagina originale di ${esc(s.org)} con la frase citata evidenziata"><figcaption><span><b>${esc(s.org)}</b> · ${esc(s.title)}</span><span class="ok">Fonte originale</span></figcaption>`;
+};
+document.querySelectorAll('figure[data-src]').forEach(f => f.innerHTML = card(f.dataset.src));
+document.getElementById('srcs').innerHTML = Object.keys(SRC).map(id => `<div><figure class="src">${card(id)}</figure><p class="who"><b>${esc(SRC[id].org)}</b>: ${esc(SRC[id].who)}<br>${esc(SRC[id].url)}</p></div>`).join('');
+const RED = '#ff3b26', AMB = '#ffb21f';
+const BOX = {
+  sogg: [
+    { x: 75.5, y: 44, w: 15, h: 13.5, c: RED, t: 'TAPPETO', right: 1 },
+    { x: .5, y: 72, w: 30, h: 16, c: RED, t: 'CAVO A TERRA', below: 1 },
+    { x: 7, y: 31.5, w: 20, h: 39, c: AMB, tc: '#111', t: 'SEDIA PIEGHEVOLE' },
+  ],
+  borse: [{ x: 1, y: 27, w: 71, h: 72, c: RED, t: 'BORSE A TERRA' }],
+  bagno: [
+    { x: 34, y: 40, w: 36, h: 26, c: RED, t: 'NESSUN MANIGLIONE', dash: 1 },
+    { x: 24.5, y: 73, w: 55.5, h: 25, c: AMB, tc: '#111', t: 'BORDO VASCA DA SCAVALCARE', right: 1 },
+    { x: .5, y: 69, w: 24, h: 30.5, c: AMB, tc: '#111', t: 'WC SENZA APPOGGI' },
+  ],
+};
+document.querySelectorAll('[data-box]').forEach(el => BOX[el.dataset.box].forEach(b => {
+  const d = document.createElement('div');
+  d.className = 'bb' + (b.dash ? ' dash' : '') + (b.below ? ' below' : '') + (b.right ? ' right' : '');
+  d.style.cssText = `left:${b.x}%;top:${b.y}%;width:${b.w}%;height:${b.h}%;--c:${b.c};--tc:${b.tc || '#fff'}`;
+  d.innerHTML = `<span>${b.t}</span>`; el.appendChild(d);
+}));
+document.querySelectorAll('.units,.ot .u').forEach(u => u.innerHTML = '<i></i>'.repeat(+u.dataset.n));
+</script>
+</body>
+</html>
