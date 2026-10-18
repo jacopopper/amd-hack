@@ -17,6 +17,9 @@ SITE = Path(__file__).resolve().parent
 PITCH = SITE.parent / "pitch"
 DIST = SITE / "dist"
 
+# Public address of the site, used for absolute links in social previews and language alternates.
+SITE_URL = "https://jacopopper-step-wise-website.static.hf.space/"
+
 # (code, output dir relative to dist). The first language is the default, served at the root.
 LANGS = [("it", ""), ("en", "en/")]
 
@@ -48,8 +51,9 @@ def build() -> None:
     for code, out in LANGS:
         strings = tomllib.loads((SITE / "i18n" / f"{code}.toml").read_text(encoding="utf-8"))
         base = "../" * out.count("/")
-        langs = [{"code": c, "href": base + o or "./"} for c, o in LANGS]
-        html = template.render(t=strings, lang=code, base=base, langs=langs, team=TEAM)
+        # Link to index.html explicitly: Hugging Face static Spaces redirect bare directory paths away from the Space.
+        langs = [{"code": c, "href": base + o + "index.html", "url": SITE_URL + (o + "index.html" if o else "")} for c, o in LANGS]
+        html = template.render(t=strings, lang=code, base=base, langs=langs, team=TEAM, site_url=SITE_URL, page_url=SITE_URL + (out + "index.html" if out else ""))
         target = DIST / out / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(html, encoding="utf-8")
