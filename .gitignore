@@ -47,3 +47,6 @@ test-results/
 # Local authoring notes and duplicate exports that never ship
 /docs/room-cover-prompt.txt
 /pitch/step-wise-pitch.pdf
+
+# Generated website (built by site/build.py)
+site/dist/

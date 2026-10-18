@@ -1,0 +1,264 @@
+# Testi italiani per site/index.html.j2. I valori possono contenere HTML inline.
+
+[meta]
+title = "Step Wise — Venerdì, Maria torna a casa"
+description = "Valutazione dei rischi di caduta in casa a partire dalle foto del telefono, rivista da un professionista prima della dimissione."
+locale = "it_IT"
+
+[nav]
+problem = "Il problema"
+how = "Come funziona"
+prototype = "Prototipo"
+privacy = "Privacy"
+team = "Team"
+
+[cover]
+img_alt = "Ritratto in bianco e nero di una donna anziana che guarda in basso"
+place = "Italia · Ottobre 2026"
+title = "Venerdì,<br>Maria torna a casa."
+l1 = "Ha 84 anni. Di notte è caduta nel corridoio e si è rotta il femore. Tornerà a casa con il deambulatore."
+l2 = "Nessuno ha mai visto la casa in cui sta tornando."
+tag = "Valutazione dei rischi di caduta in casa a partire dalle foto del telefono, rivista da un professionista prima della dimissione."
+cred = "Foto: Pedro Miguel Aires / Unsplash · Maria è un personaggio immaginario"
+
+[law]
+k = "Il problema"
+h2 = 'Al lavoro la sicurezza è obbligatoria. <span class="red">A casa no.</span>'
+work_h = "Al lavoro · D.Lgs. 81/2008"
+work_items = ["Valutazione dei rischi obbligatoria", "Un responsabile della sicurezza", "Ispezioni e sanzioni"]
+work_n = "1.189"
+work_unit = "morti<br>nel 2025"
+home_h = "A casa · nessuna regola"
+home_items = ["Valutazione dei rischi", "Responsabile della sicurezza", "Ispezioni"]
+home_n = "~6.000"
+home_unit = "morti<br>ogni anno"
+
+[home]
+k = "Chi cade, e dove"
+h3 = 'delle cadute degli over 65 avviene <span class="hl" style="transition-delay:.9s">in casa</span>.'
+advice = "ha ricevuto da un medico consigli su come evitarle."
+
+[cure]
+k = "La prevenzione funziona"
+h3 = '''di cadute quando un esperto ispeziona la casa e i rischi vengono rimossi, negli anziani ad alto rischio: <span class="hl" style="transition-delay:1s">come chi è appena stato dimesso dall'ospedale</span>.'''
+lede = "Quell'esperto è il terapista occupazionale."
+note = "Revisione sistematica Cochrane 2023: 22 studi, 8.463 persone, evidenza di certezza alta."
+
+[gap]
+k = "Il collo di bottiglia"
+h2 = "In Italia quell'esperto manca."
+de = "Germania"
+de_n = "60.000"
+uk = "Regno Unito"
+uk_n = "40.000"
+it = "Italia"
+it_n = "3.000"
+legend = "Terapisti occupazionali. Ogni quadrato = 1.000."
+ratio = '1 terapista ogni <span class="hl" style="transition-delay:1.7s">~5.000</span> persone over 65.'
+
+[cdc]
+k = "La regola che manca"
+quote = "Se una valutazione di terapia occupazionale non è disponibile, rivedi i possibili rischi in casa con il paziente e la famiglia."
+lede = "Il CDC lo raccomanda a ogni dimissione. <b>Step Wise lo rende possibile, con l'occhio di un esperto.</b>"
+
+[p1]
+n = "01 / 06 · FOTO"
+h2 = "Jacopo, il nipote, fotografa la casa."
+lede = "Con il telefono, stanza per stanza: foto sovrapposte da più punti di vista. L'infermiere aggiunge il profilo di Maria: deambulatore, protesi d'anca, si alza di notte."
+tech = ["Pillow · NumPy", "orientamento EXIF", "nitidezza e duplicati"]
+photos = "foto"
+whole = "· tutta la zona giorno"
+
+[p2]
+n = "02 / 06 · RILEVAMENTO"
+h2 = "Ogni rischio, con la sua prova."
+lede = 'Jev risponde a domande semplici sulle aree della <b>Westmead Home Safety Assessment</b>, lo strumento indicato dalle World Falls Guidelines. Un riquadro conta solo se la presenza è confermata; quello che la foto non può mostrare resta "da verificare di persona".'
+tech = ["Jev 1.14 · API TypeSafe", "presenza + riquadro"]
+sogg = "IMG_7579 · soggiorno"
+borse = "IMG_7614 · divano"
+bagno = "bagno · foto di esempio"
+found1 = "1 trovato"
+found3 = "3 trovati"
+sogg_alt = "Soggiorno con tavolo, sedia pieghevole, cavo a terra e tappeto davanti alla cucina"
+borse_alt = "Zaini e borse a terra accanto al divano"
+bagno_alt = "Bagno con vasca e WC senza maniglioni"
+question = "domanda"
+qa = [
+  'C’è un cavo sul pavimento?<br>→ <span class="y">sì</span> · riquadro [0.01, 0.72, 0.31, 0.88]',
+  'C’è un maniglione accanto alla vasca?<br>→ <span class="y">no</span> · zona senza appoggio',
+  'Il pavimento è scivoloso?<br>→ <span class="n">non si può dire</span> · verificare di persona',
+]
+cap = "Soggiorno e divano: foto reali della casa usata nella demo. Bagno: Point3D Commercial Imaging Ltd. / Unsplash. I riquadri sono illustrativi."
+
+[p3]
+n = "03 / 06 · RICOSTRUZIONE 3D"
+h2 = "Dalle foto alla stanza."
+lede = "VGGT è un transformer che guarda tutte le foto insieme. In un solo passaggio capisce da dove è stata scattata ognuna, quanto è lontano ogni pixel e dove si trova nello spazio."
+points = [
+  '<b style="color:#fff">Pose delle camere</b>: da dove è stata scattata ogni foto e dove guarda',
+  '<b style="color:#fff">Profondità</b>: la distanza di ogni pixel',
+  '<b style="color:#fff">Punti 3D</b>: la stanza, con ogni rischio al suo posto',
+]
+tech = ["VGGT-1B · Meta, CVPR 2025", "Gaussian splatting · gsplat", "PyTorch"]
+real = "output reale del prototipo"
+splat_alt = "Ricostruzione con Gaussian splatting della stessa stanza"
+splat = "render della stanza"
+cap = "Output reale del prototipo: 39 foto dal telefono, pose delle camere stimate da VGGT, 757.792 gaussiane. Qui sono mostrati circa 150.000 punti. Scala non ancora calibrata."
+
+[p4]
+n = "04 / 06 · RAGIONAMENTO"
+h2 = "Perché conta, per Maria."
+lede = "Gemma legge le prove e il profilo di Maria, ordina i rischi per urgenza e spiega perché. Ogni frase rimanda a una foto e a una fonte."
+inputs = [
+  ["profilo confermato", "Deambulatore · protesi d'anca · vive da sola · si alza di notte"],
+  ["prove", "I rischi trovati nelle foto, ognuno con il suo riquadro"],
+  ["linee guida", "CDC STEADI"],
+]
+core = "Google DeepMind · modello aperto"
+
+[[p4.results]]
+t = "Urgente"
+b = "Tappeto non fissato in cucina"
+p = "Maria usa il deambulatore: le ruote si incastrano nei bordi. Ed è proprio davanti ai fornelli, dove passa ogni giorno."
+small = "Prova: foto della cucina · Fonte: CDC STEADI"
+
+[[p4.results]]
+t = "Importante"
+b = "Nessun maniglione vicino alla vasca"
+p = "Con la protesi d'anca deve scavalcare il bordo senza niente a cui tenersi."
+small = "Prova: foto del bagno · Fonte: CDC STEADI"
+
+[p5]
+n = "05 / 06 · REVISIONE"
+h2 = "Decide il professionista."
+lede = "L'infermiere di dimissione vede ogni rischio con la sua foto, il suo posto nella stanza e il motivo. Conferma, modifica, esclude o lo lascia alla visita a domicilio. Minuti, non una visita."
+hl = "Niente arriva alla famiglia senza la sua firma."
+tech = ["Next.js · three.js", "revisioni versionate", "rilascio bloccato se una decisione cambia"]
+alt = "Schermata reale del prototipo: revisione guidata del tappeto nella stanza ricostruita in 3D"
+cap = "Schermata reale del prototipo (interfaccia in inglese). Entrambi i rischi di questa stanza sono stati trovati da esecuzioni reali di TypeSafe Jev, registrate nel codice sorgente."
+
+[p6]
+n = "06 / 06 · PIANO PER LA FAMIGLIA"
+h2 = "La famiglia sa cosa fare."
+lede = "La figlia di Maria riceve il piano approvato sul telefono: azioni in ordine di priorità, in parole semplici, ognuna con la sua foto. Prima che Maria torni a casa, non dopo la prossima caduta."
+tech = ["HTML → PDF · WeasyPrint", "link privato · scade dopo 7 giorni"]
+pdf_alt = "Prima pagina del report PDF reale generato dal prototipo"
+phone_alt = "Lo stesso piano aperto dal link per la famiglia su un telefono"
+
+[proto]
+k = "Il prototipo"
+h2 = "Tutto questo, in un'unica applicazione."
+scene = "Registrazione dello schermo dell'app: foto della casa → scena 3D con i rischi → revisione dell'infermiere → piano per la famiglia."
+cap = "Registrazione dello schermo, senza audio, del prototipo funzionante su una casa reale. Interfaccia in inglese."
+
+[priv]
+k = "Privacy"
+h2 = "Pensato per restare dentro l'ospedale."
+lede = "Le foto di una casa e i dati clinici non possono finire su un cloud qualsiasi. Step Wise è progettato per girare su un solo server della struttura: la ricostruzione 3D e il modello che ragiona sul paziente stanno sulla stessa macchina."
+bar = "Un server nella struttura"
+bar_sub = "ricostruzione e modello sulla stessa GPU · un caso alla volta"
+ext = "02 · Rilevamento: Jev, servizio esterno, riceve solo le foto preparate, senza dati del paziente e solo con il consenso · 05–06 · Revisione e report: Next.js, three.js, WeasyPrint"
+metrics = [
+  ["Consenso", "prima di ogni invio a un servizio esterno"],
+  ["Niente GPS", "posizione e dati della fotocamera rimossi da ogni foto"],
+  ["7 giorni", "durata del link per la famiglia, che si può revocare"],
+  ["Versioni", "ogni decisione del professionista resta registrata"],
+]
+status_k = "Oggi"
+status = "Prototipo di ricerca. Gemma gira su un endpoint ospitato e la ricostruzione su una GPU locale; l'installazione dentro l'ospedale è l'obiettivo."
+
+[[priv.nodes]]
+n = "01 · FOTO"
+h = "Foto + profilo"
+p = "Orientamento, rimozione dei metadati, controlli di qualità."
+code = "FastAPI · Pillow · NumPy"
+
+[[priv.nodes]]
+n = "03 · RICOSTRUZIONE"
+h = "VGGT-1B"
+p = "Pose, profondità e punti 3D."
+code = "PyTorch"
+
+[[priv.nodes]]
+n = "04 · RAGIONAMENTO"
+h = "Gemma 4 31B"
+p = "Controlli, priorità, piano."
+code = "vLLM"
+
+[close]
+l1 = "Venerdì, Maria torna a casa."
+l2 = "Questa volta qualcuno ha guardato il corridoio."
+
+[team]
+k = "Il team"
+h2 = "Due ingegneri AI, a Roma."
+roles = ["Co-founder · AI Engineer", "Co-founder · AI Research Engineer"]
+studied = "Studi"
+works = "Lavoro"
+does = "Cosa fa"
+universities = ["Università degli Studi Roma Tre", "Università di Bologna"]
+jobs = ["AI Engineer, Leonardo", "AI Research Engineer, Leonardo"]
+focus = ["Sistemi AI con LLM e agenti", "Ricerca su AI Safety e Security"]
+together_k = "Insieme"
+together = "Hanno costruito il prototipo dall'inizio alla fine: ricostruzione 3D, pipeline AI, app di revisione e report per la famiglia."
+looking_k = "Chi cerchiamo"
+looking = "Un advisor clinico (terapista occupazionale o geriatra) e una struttura sanitaria con cui fare il primo pilota."
+
+[sources]
+k = "Fonti"
+
+[footer]
+what = "Valutazione dei rischi di caduta in casa a partire dalle foto del telefono, rivista da un professionista prima della dimissione."
+warn = "Prototipo di ricerca. Non è un dispositivo medico e non ha validazione clinica. Maria è una paziente immaginaria."
+credits = "Foto: Pedro Miguel Aires / Unsplash; Point3D Commercial Imaging Ltd. / Unsplash; foto della casa del team"
+
+[js]
+steps = ["Foto", "Rilevamento", "Ricostruzione 3D", "Ragionamento", "Revisione", "Piano"]
+src_alt = "Pagina originale con la frase citata evidenziata:"
+src_ok = "Fonte originale"
+video_loading = "CARICAMENTO VIDEO"
+vg_cams = "camere"
+vg_in = "arrivano le foto"
+vg_poses = "pose delle camere · profondità"
+vg_done = "stanza ricostruita"
+
+[js.boxes]
+rug = "TAPPETO"
+cable = "CAVO A TERRA"
+chair = "SEDIA PIEGHEVOLE"
+bags = "BORSE A TERRA"
+grab = "NESSUN MANIGLIONE"
+tub = "BORDO VASCA DA SCAVALCARE"
+toilet = "WC SENZA APPOGGI"
+
+[js.sources.inail]
+title = "Relazione annuale 2025"
+who = "ente pubblico vigilato dal Ministero del Lavoro."
+
+[js.sources.iss-6000]
+title = "Morti per incidenti domestici"
+who = "organo tecnico-scientifico del Servizio Sanitario Nazionale."
+
+[js.sources.iss-casa]
+title = "PASSI d'Argento 2023–2024"
+who = "sorveglianza nazionale sugli over 65."
+
+[js.sources.iss-consiglio]
+title = "PASSI d'Argento 2023–2024"
+who = "sorveglianza nazionale sugli over 65."
+
+[js.sources.cochrane]
+title = "Revisione sistematica CD013258, 2023"
+who = "riferimento internazionale per la medicina basata sulle prove."
+
+[js.sources.fno]
+title = "Terapisti occupazionali in Italia, 2024"
+who = "Federazione degli ordini professionali, vigilata dal Ministero della Salute."
+
+[js.sources.fno-europa]
+title = "Terapisti occupazionali in Europa, 2024"
+who = "Federazione degli ordini professionali, vigilata dal Ministero della Salute."
+
+[js.sources.cdc]
+title = "STEADI, cadute dopo la dimissione, p. 10"
+who = "agenzia federale USA per la salute pubblica."

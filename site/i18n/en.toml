@@ -1,0 +1,264 @@
+# English strings for site/index.html.j2. Values may contain inline HTML.
+
+[meta]
+title = "Step Wise — On Friday, Maria goes home"
+description = "Home fall-hazard assessment from phone photos, reviewed by a professional before hospital discharge."
+locale = "en_GB"
+
+[nav]
+problem = "The problem"
+how = "How it works"
+prototype = "Prototype"
+privacy = "Privacy"
+team = "Team"
+
+[cover]
+img_alt = "Black and white portrait of an older woman looking down"
+place = "Italy · October 2026"
+title = "On Friday,<br>Maria goes home."
+l1 = "She is 84. She fell in her hallway at night and broke her hip. She will go home with a walker."
+l2 = "No one has ever seen the home she is going back to."
+tag = "Home fall-hazard assessment from phone photos, reviewed by a professional before discharge."
+cred = "Photo: Pedro Miguel Aires / Unsplash · Maria is a fictional character"
+
+[law]
+k = "The problem"
+h2 = 'At work, safety is mandatory. <span class="red">At home, it is not.</span>'
+work_h = "At work · Legislative Decree 81/2008"
+work_items = ["Mandatory risk assessment", "A designated safety officer", "Inspections and penalties"]
+work_n = "1,189"
+work_unit = "deaths<br>in 2025"
+home_h = "At home · no rules"
+home_items = ["Risk assessment", "Safety officer", "Inspections"]
+home_n = "~6,000"
+home_unit = "deaths<br>every year"
+
+[home]
+k = "Who falls, and where"
+h3 = 'of falls among people over 65 happen <span class="hl" style="transition-delay:.9s">at home</span>.'
+advice = "were advised by a doctor on how to avoid them."
+
+[cure]
+k = "Prevention works"
+h3 = 'falls when an expert inspects the home and hazards are removed, in high-risk older adults: <span class="hl" style="transition-delay:1s">like someone just discharged from hospital</span>.'
+lede = "That expert is the occupational therapist."
+note = "Cochrane systematic review 2023: 22 studies, 8,463 people, high-certainty evidence."
+
+[gap]
+k = "The bottleneck"
+h2 = "In Italy, that expert is missing."
+de = "Germany"
+de_n = "60,000"
+uk = "United Kingdom"
+uk_n = "40,000"
+it = "Italy"
+it_n = "3,000"
+legend = "Occupational therapists. Each square = 1,000."
+ratio = '1 therapist for every <span class="hl" style="transition-delay:1.7s">~5,000</span> people over 65.'
+
+[cdc]
+k = "The missing rule"
+quote = "If an occupational therapy assessment is not available, review potential home hazards with the patient and family."
+lede = "The CDC recommends it at every discharge. <b>Step Wise makes it possible, with an expert eye.</b>"
+
+[p1]
+n = "01 / 06 · CAPTURE"
+h2 = "Jacopo, her grandson, photographs the home."
+lede = "With his phone, room by room: overlapping photos from several viewpoints. The nurse adds Maria's profile: walker, hip replacement, gets up at night."
+tech = ["Pillow · NumPy", "EXIF orientation", "sharpness and duplicates"]
+photos = "photos"
+whole = "· the whole living area"
+
+[p2]
+n = "02 / 06 · DETECTION"
+h2 = "Every hazard, with its evidence."
+lede = 'Jev answers atomic questions on the areas of the <b>Westmead Home Safety Assessment</b>, the tool named by the World Falls Guidelines. A box counts only when presence is confirmed; what the photo cannot show stays "to check in person".'
+tech = ["Jev 1.14 · TypeSafe API", "presence + box"]
+sogg = "IMG_7579 · living room"
+borse = "IMG_7614 · sofa"
+bagno = "bathroom · sample photo"
+found1 = "1 found"
+found3 = "3 found"
+sogg_alt = "Living room with a table, a folding chair, a cable on the floor and a mat in front of the kitchen"
+borse_alt = "Backpacks and bags on the floor next to the sofa"
+bagno_alt = "Bathroom with a bathtub and a toilet without grab bars"
+question = "question"
+qa = [
+  'Is there a cable on the floor?<br>→ <span class="y">yes</span> · box [0.01, 0.72, 0.31, 0.88]',
+  'Is there a grab bar next to the bathtub?<br>→ <span class="y">no</span> · area without support',
+  'Is the floor slippery?<br>→ <span class="n">cannot tell</span> · check in person',
+]
+cap = "Living room and sofa: real photos of the home used in the demo. Bathroom: Point3D Commercial Imaging Ltd. / Unsplash. Boxes are illustrative."
+
+[p3]
+n = "03 / 06 · 3D RECONSTRUCTION"
+h2 = "From flat photos to a room."
+lede = "VGGT is a transformer that looks at all the photos at once. In a single pass it works out where each one was taken from, how far away every pixel is, and where it sits in space."
+points = [
+  '<b style="color:#fff">Camera poses</b>: where each photo was taken and where it points',
+  '<b style="color:#fff">Depth</b>: the distance of every pixel',
+  '<b style="color:#fff">3D points</b>: the room, with each hazard in its place',
+]
+tech = ["VGGT-1B · Meta, CVPR 2025", "Gaussian splatting · gsplat", "PyTorch"]
+real = "real prototype output"
+splat_alt = "Gaussian-splat render of the same room"
+splat = "room render"
+cap = "Real prototype output: 39 phone photos, camera poses estimated by VGGT, 757,792 Gaussians. Shown here: about 150,000 points. Scale not yet calibrated."
+
+[p4]
+n = "04 / 06 · REASONING"
+h2 = "Why it matters, for Maria."
+lede = "Gemma reads the evidence and Maria's profile, ranks the hazards by urgency and explains why. Every sentence points to a photo and a source."
+inputs = [
+  ["confirmed profile", "Walker · hip replacement · lives alone · gets up at night"],
+  ["evidence", "The hazards found in the photos, each with its box"],
+  ["guidelines", "CDC STEADI"],
+]
+core = "Google DeepMind · open model"
+
+[[p4.results]]
+t = "Urgent"
+b = "Loose rug in the kitchen"
+p = "Maria uses a walker: the wheels catch on the edges. And it lies right in front of the stove, where she walks every day."
+small = "Evidence: kitchen photo · Source: CDC STEADI"
+
+[[p4.results]]
+t = "Important"
+b = "No grab bar by the bathtub"
+p = "With her hip replacement she has to step over the edge with nothing to hold on to."
+small = "Evidence: bathroom photo · Source: CDC STEADI"
+
+[p5]
+n = "05 / 06 · REVIEW"
+h2 = "The professional decides."
+lede = "The discharge nurse sees each hazard with its photo, its place in the room and the reason. Confirm, edit, exclude or leave it for the home visit. Minutes, not a visit."
+hl = "Nothing reaches the family without her sign-off."
+tech = ["Next.js · three.js", "versioned reviews", "release blocked if a decision changes"]
+alt = "Real prototype screen: guided review of the rug in the 3D-reconstructed room"
+cap = "Real prototype screen. Both hazards in this room were flagged by live TypeSafe Jev runs recorded with the source."
+
+[p6]
+n = "06 / 06 · FAMILY PLAN"
+h2 = "The family knows what to do."
+lede = "Maria's daughter gets the approved plan on her phone: actions in order of priority, in plain language, each with its photo. Before Maria comes home, not after the next fall."
+tech = ["HTML → PDF · WeasyPrint", "private link · expires in 7 days"]
+pdf_alt = "First page of the real PDF report generated by the prototype"
+phone_alt = "The same plan opened from the family link on a phone"
+
+[proto]
+k = "The prototype"
+h2 = "All of this, in a single application."
+scene = "Screen recording of the app: home photos → 3D scene with the hazards → nurse review → plan for the family."
+cap = "Silent screen recording of the working prototype on a real home."
+
+[priv]
+k = "Privacy"
+h2 = "Built to stay inside the hospital."
+lede = "Photos of a home and clinical data cannot go to just any cloud. Step Wise is designed to run on a single server at the care facility: the 3D reconstruction and the model that reasons about the patient share the same machine."
+bar = "One server at the facility"
+bar_sub = "reconstruction and model on the same GPU · one case at a time"
+ext = "02 · Detection: Jev, an external service, receives only prepared photos with no patient data, and only with consent · 05–06 · Review and report: Next.js, three.js, WeasyPrint"
+metrics = [
+  ["Consent", "before anything is sent to an external service"],
+  ["No GPS", "location and camera metadata stripped from every photo"],
+  ["7 days", "lifetime of the family link, which can be revoked"],
+  ["Versioned", "every decision by the professional is recorded"],
+]
+status_k = "Today"
+status = "Research prototype. Gemma runs on a hosted endpoint and the reconstruction on a local GPU; running inside the hospital is the goal."
+
+[[priv.nodes]]
+n = "01 · CAPTURE"
+h = "Photos + profile"
+p = "Upright orientation, metadata stripping, quality checks."
+code = "FastAPI · Pillow · NumPy"
+
+[[priv.nodes]]
+n = "03 · RECONSTRUCTION"
+h = "VGGT-1B"
+p = "Poses, depth and 3D points."
+code = "PyTorch"
+
+[[priv.nodes]]
+n = "04 · REASONING"
+h = "Gemma 4 31B"
+p = "Checks, priorities, plan."
+code = "vLLM"
+
+[close]
+l1 = "On Friday, Maria goes home."
+l2 = "This time, someone looked at the hallway."
+
+[team]
+k = "The team"
+h2 = "Two AI engineers, in Rome."
+roles = ["Co-founder · AI Engineer", "Co-founder · AI Research Engineer"]
+studied = "Studied"
+works = "Works"
+does = "Focus"
+universities = ["Roma Tre University", "University of Bologna"]
+jobs = ["AI Engineer, Leonardo", "AI Research Engineer, Leonardo"]
+focus = ["AI systems with LLMs and agents", "Research on AI safety and security"]
+together_k = "Together"
+together = "They built the prototype end to end: 3D reconstruction, AI pipeline, review app and family report."
+looking_k = "Who we are looking for"
+looking = "A clinical advisor (occupational therapist or geriatrician) and a care facility to run a first pilot with."
+
+[sources]
+k = "Sources"
+
+[footer]
+what = "Home fall-hazard assessment from phone photos, reviewed by a professional before discharge."
+warn = "Research prototype. It is not a medical device and has no clinical validation. Maria is a fictional patient."
+credits = "Photos: Pedro Miguel Aires / Unsplash; Point3D Commercial Imaging Ltd. / Unsplash; home photos by the team"
+
+[js]
+steps = ["Photos", "Detection", "3D reconstruction", "Reasoning", "Review", "Plan"]
+src_alt = "Original page with the quoted sentence highlighted:"
+src_ok = "Original source"
+video_loading = "LOADING VIDEO"
+vg_cams = "cameras"
+vg_in = "photos coming in"
+vg_poses = "camera poses · depth"
+vg_done = "room reconstructed"
+
+[js.boxes]
+rug = "RUG"
+cable = "FLOOR CABLE"
+chair = "FOLDING CHAIR"
+bags = "BAGS ON THE FLOOR"
+grab = "NO GRAB BAR"
+tub = "BATHTUB EDGE TO STEP OVER"
+toilet = "TOILET WITHOUT SUPPORT"
+
+[js.sources.inail]
+title = "Annual report 2025"
+who = "public body overseen by the Italian Ministry of Labour."
+
+[js.sources.iss-6000]
+title = "Deaths from home accidents"
+who = "technical and scientific body of the Italian National Health Service."
+
+[js.sources.iss-casa]
+title = "PASSI d'Argento 2023–2024"
+who = "national surveillance of people over 65."
+
+[js.sources.iss-consiglio]
+title = "PASSI d'Argento 2023–2024"
+who = "national surveillance of people over 65."
+
+[js.sources.cochrane]
+title = "Systematic review CD013258, 2023"
+who = "international reference for evidence-based medicine."
+
+[js.sources.fno]
+title = "Occupational therapists in Italy, 2024"
+who = "Federation of professional orders, overseen by the Italian Ministry of Health."
+
+[js.sources.fno-europa]
+title = "Occupational therapists in Europe, 2024"
+who = "Federation of professional orders, overseen by the Italian Ministry of Health."
+
+[js.sources.cdc]
+title = "STEADI, falls after discharge, p. 10"
+who = "US federal public health agency."
