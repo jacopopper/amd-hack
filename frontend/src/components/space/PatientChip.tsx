@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ChevronDown, Loader2, Trash2 } from "lucide-react";
 import type { Profile } from "@/lib/types";
+import { DEMO } from "@/lib/api";
+
+const HomeLink = DEMO ? "a" : Link;
 
 const rows: [keyof Profile, string][] = [
   ["mobility_aid", "Aid"],
@@ -34,9 +37,9 @@ export default function PatientChip({ name, profile, onDelete, children }: { nam
   return (
     <div className="glass w-80 overflow-hidden rounded-2xl">
       <div className="flex items-center gap-1 p-1.5">
-        <Link href="/" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white" title="All patients">
+        <HomeLink href="/" className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white/70 hover:bg-white/10 hover:text-white" title="All patients">
           <ArrowLeft className="h-4 w-4" />
-        </Link>
+        </HomeLink>
         <button onClick={() => setOpen((o) => !o)} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl px-2 py-1 text-left hover:bg-white/5">
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[15px] font-semibold">{name}</span>

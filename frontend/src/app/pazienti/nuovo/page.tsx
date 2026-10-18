@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
-import { api, json } from "@/lib/api";
+import { api, json, DEMO } from "@/lib/api";
 import type { Profile } from "@/lib/types";
 import Brand from "@/components/Brand";
+
+const HomeLink = DEMO ? "a" : Link;
 
 const field = "mt-1.5 w-full rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-[15px] text-white outline-none ring-1 ring-white/10 transition placeholder:text-white/30 focus:bg-white/10 focus:ring-white/30";
 
@@ -61,6 +63,8 @@ export default function NewPatientPage() {
       setBusy(false);
     }
   }
+
+  if (DEMO) return <main className="grid h-full place-content-center gap-4 bg-[#0a0b0d] p-8 text-white"><p>Read-only demo: explore the reconstructed home.</p><HomeLink href="/" className="underline">Back to demo</HomeLink></main>;
 
   return (
     <div className="min-h-full bg-[#0a0b0d] text-white">

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Camera, FileText, Images, Loader2, Map as MapIcon, Ruler } from "lucide-react";
-import { api, json } from "@/lib/api";
+import { api, json, DEMO } from "@/lib/api";
 import { byPriority, effective, sceneOf } from "@/lib/hazards";
 import type { Anchor, Assessment, Findings, Health, Modes, PhotoLimits, Report, Scene } from "@/lib/types";
 import type { Tool, ViewMode } from "@/components/space/SpaceViewer";
@@ -21,6 +21,7 @@ import PreparePanel from "@/components/PreparePanel";
 import ReleaseDialog from "@/components/ReleaseDialog";
 
 const SpaceViewer = dynamic(() => import("@/components/space/SpaceViewer"), { ssr: false });
+const HomeLink = DEMO ? "a" : Link;
 const ACTIVE = ["queued", "processing", "report_drafting"];
 const PREPARING = ["draft", "failed"];
 type View = ViewMode | "photos";
@@ -61,7 +62,7 @@ export default function PatientSpace({ id }: { id: string }) {
   const [releasing, setReleasing] = useState(false);
   const [modes, setModes] = useState<Modes | null>(null);
   const [photoLimits, setPhotoLimits] = useState<PhotoLimits | null>(null);
-  const [demo, setDemo] = useState(false);
+  const [demo, setDemo] = useState(DEMO);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -191,9 +192,9 @@ export default function PatientSpace({ id }: { id: string }) {
         {error ? (
           <div className="text-center">
             <p>{error}</p>
-            <Link href="/" className="mt-4 inline-block rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black">
-              Torna ai pazienti
-            </Link>
+            <HomeLink href="/" className="mt-4 inline-block rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-black">
+              Back to patients
+            </HomeLink>
           </div>
         ) : (
           "Opening the home…"
@@ -206,7 +207,7 @@ export default function PatientSpace({ id }: { id: string }) {
     return (
       <div className="relative grid h-full place-items-center overflow-hidden bg-[radial-gradient(ellipse_at_50%_30%,#23272d_0%,#0e1013_55%,#0a0b0d_100%)] p-4 pt-20 text-white">
         <div className="absolute left-4 top-4 z-10">
-          <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={deleteAssessment} />
+          <PatientChip name={assessment.inputs.label} profile={assessment.inputs.profile} onDelete={DEMO ? undefined : deleteAssessment} />
         </div>
         <div className="flex h-full max-h-[860px] w-full items-start justify-center">
           <PreparePanel assessment={assessment} scenes={scenes} modes={modes} limits={photoLimits} reload={load} />
@@ -290,7 +291,7 @@ export default function PatientSpace({ id }: { id: string }) {
               <Camera className="h-4 w-4" /> Photos
             </button>
           )}
-          {reportCurrent ? (
+          {reportCurrent && !DEMO ? (
             <button onClick={() => setReleasing(true)} className={`flex h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-medium text-black ${next === "release" ? "pulse-cta" : ""}`}>
               <FileText className="h-4 w-4" /> {released ? "Report released" : "Review and release"}
             </button>
@@ -320,7 +321,7 @@ export default function PatientSpace({ id }: { id: string }) {
             patientName={patientName}
             index={ordered.findIndex((h) => h.id === hazard.id)}
             total={ordered.length}
-            disabled={busy || released}
+            disabled={DEMO || busy || released}
             placing={tool === "place"}
             pickedAnchor={pickedAnchor}
             onPrev={() => step(-1)}
@@ -382,7 +383,8 @@ export default function PatientSpace({ id }: { id: string }) {
       {scene?.provenance === "fixture" && view !== "photos" && !busy && (
         <span className="pointer-events-none absolute left-4 top-[84px] z-0 rounded-full bg-[var(--important)]/15 px-3 py-1 text-xs text-[var(--important)]">Synthetic geometry · not reconstructed from photos</span>
       )}
-      {touring && hazard && <span className="pointer-events-none absolute left-1/2 top-[76px] z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">Guided review · answer to move to the next one</span>}
+      {touring && hazard && <span className="pointer-events-none absolute left-1/2 top-[76px] z-10 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white/70 backdrop-blur">{DEMO ? "Explore findings with the arrows" : "Guided review · answer to move to the next one"}</span>}
+      {DEMO && <span className="pointer-events-none absolute left-4 top-[84px] z-10 rounded-full bg-black/70 px-3 py-1 text-xs text-white/80">Read-only demo · Jev-flagged findings</span>}
       {error && <p className="glass absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl px-4 py-2 text-sm text-[var(--urgent)]">{error}</p>}
 
       {editingPhotos && (
@@ -401,7 +403,7 @@ export default function PatientSpace({ id }: { id: string }) {
           hazards={hazards}
           unassessed={unassessed}
           followUps={findings.follow_up_requests}
-          canDraft={decided === hazards.length && !released && !busy}
+          canDraft={!DEMO && decided === hazards.length && !released && !busy}
           drafting={drafting}
           onDraft={async () => {
             await draftReport();

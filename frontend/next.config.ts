@@ -7,6 +7,7 @@ const production = process.env.NODE_ENV === "production";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
+  ...(process.env.NEXT_PUBLIC_STATIC_DEMO === "true" ? { trailingSlash: true, distDir: ".next-demo" } : {}),
   ...(production
     ? { output: "export" }
     : {
